@@ -1,0 +1,6 @@
+__pycache__
+pyocp_lrs.egg-info
+pyocp_lrs/__pycache__
+docs/_build
+docs/_static
+docs/_templates
