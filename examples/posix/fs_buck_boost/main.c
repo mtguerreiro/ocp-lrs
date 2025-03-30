@@ -1,29 +1,40 @@
-
-#ifndef OCP_IF_THREAD_H_
-#define OCP_IF_THREAD_H_
-
 //=============================================================================
 /*-------------------------------- Includes ---------------------------------*/
 //=============================================================================
-#include "stdint.h"
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
 
-//============================================================================
+#include "ocp/ocpIf.h"
+
+#include "controller/controllerIf.h"
+
+#include "fsbuckboost.h"
+
+#include "target/posix/threads/ocpIfThread.h"
+#include "target/posix/threads/ocpOpilThread.h"
+//=============================================================================
 
 //=============================================================================
-/*------------------------------- Definitions -------------------------------*/
-//=============================================================================
-#ifndef OCP_IF_THREAD_SERVER_PORT
-#define OCP_IF_THREAD_SERVER_PORT   8080
-#endif
-
-//=============================================================================
-
-//=============================================================================
-/*-------------------------------- Functions --------------------------------*/
+/*---------------------------------- Main -----------------------------------*/
 //=============================================================================
 //-----------------------------------------------------------------------------
-void *ocpIfThread(void *ptr);
+int main(void){
+
+    pthread_t ocpIfThreadHandle, ocpOpilThreadHandle;
+
+    ocpIfInitialize();
+    controllerIfInit();
+
+    fsbuckboostInit((void *)0);
+
+    pthread_create( &ocpIfThreadHandle, NULL, ocpIfThread, NULL );
+    pthread_create( &ocpOpilThreadHandle, NULL, ocpOpilThread, NULL );
+
+    pthread_join( ocpIfThreadHandle, NULL );
+
+    exit(0);
+}
 //-----------------------------------------------------------------------------
 //=============================================================================
-
-#endif /* OCP_IF_THREAD_H_ */
