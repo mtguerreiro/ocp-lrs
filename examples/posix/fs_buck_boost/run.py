@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 plt.ion()
 
 import time
+import os, subprocess, platform
 
-import os
 import plecsutil as pu
 import plecs.model
 
@@ -17,18 +17,11 @@ plecs_file = 'plecs/lrs_fs_buck_boost'
 plecs_file_path = os.path.abspath(os.getcwd())
 
 # Controller interface
+port = 8080
+host = 'localhost'
+settings = {'host':host, 'port':port}
 
-port_hw = 8080
-host_hw = '131.246.75.251'
-settings_hw = {'host':host_hw, 'port':port_hw}
-
-port_sim = 8080
-host_sim = 'localhost'
-settings_sim = {'host':host_sim, 'port':port_sim}
-
-bb_sim = pyocp_lrs.fsbuckboost.iface.Interface('ethernet', settings_sim, cs_id=0, tr_id=0)
-bb_hw = pyocp_lrs.fsbuckboost.iface.Interface('ethernet', settings_hw, cs_id=0, tr_id=0)
-
+fsbb = pyocp_lrs.fsbuckboost.iface.Interface('ethernet', settings, cs_id=0, tr_id=0)
 
 # --- Functions ---
 def config_sim(model_params):
@@ -41,16 +34,29 @@ def config_sim(model_params):
     pm.gen_m_file(sim_params=model_params)
 
 
-def run(settings, save=False):        
+def make():
 
-    run_params = dmu.load_json('run_params')
+    build_path = os.path.abspath(os.getcwd()) + '/build'
+
+    if not os.path.exists(build_path):
+        os.makedirs(build_path)
     
-    # Sets the sim
-    if settings['host'] == 'localhost':
-        model_params = run_params['fsbb']['model_params']
-        config_sim(model_params)
-        input('Simulation configured. Press any key to continue...')
-        
-    data = pyocp_lrs.fsbuckboost.exp_boost.run_ref_step(settings, run_params, save=save)
+    plat = platform.system()
+    
+    if plat == 'Linux':
+        make_cmd = ['cmake', '..']
+        run_cmd = r'/app_fsbb'
+    elif plat == 'Windows':
+        make_cmd = ['cmake', '..', '-G', 'MinGW Makefiles']
+        run_cmd = r'app_fsbb.exe'
+    else:
+        raise ValueError('Platform not supported for code generation.')
 
-    return data
+    subprocess.run(make_cmd, cwd=build_path, check=True)
+    subprocess.run(['make'], cwd=build_path, check=True)
+
+    subprocess.Popen([build_path + run_cmd], cwd=build_path)    
+
+
+config_sim({})
+make()
