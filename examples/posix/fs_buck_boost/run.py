@@ -1,5 +1,6 @@
 import pyocp_lrs
-import pyocp.data_mng_util as dmu
+import pyocp_lrs.fsbuckboost.boost_tb as btb
+import pyocp
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -57,6 +58,6 @@ def make():
 
     subprocess.Popen([build_path + run_cmd], cwd=build_path)    
 
-
-config_sim({})
+run_params = pyocp.data_mng_util.load_json('run_params')
+config_sim(run_params['fsbb']['model_params'])
 make()

@@ -1,6 +1,6 @@
 def params():
 
-    V_in = 20
+    V_in = 8
 
     Rs = 50e-3
     Ls = 100e-9

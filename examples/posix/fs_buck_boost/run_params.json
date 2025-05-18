@@ -30,7 +30,7 @@
             "vo_ofs": -0.007491753902286291
         },
         "model_params": {
-            "V_in": 9,
+            "V_in": 8,
 
             "Rs": 0.05,
             "Ls": 1e-07,
@@ -44,17 +44,12 @@
 
             "C_out": 0.0001,
             "R_C_out": 0.025,
-            "V_out_ini": "V_in",
+            "V_out_ini": 0,
 
             "R_load": 10,
 
             "f_pwm": 100000.0,
-            "R_ds": 0.025,
-
-            "fc_cpl": 10000.0,
-            "v_thres": 10,
-            "C_cpl": 1e-06,
-            "V_ini_cpl": "V_in"
+            "R_ds": 0.025
         }
     }
 }
