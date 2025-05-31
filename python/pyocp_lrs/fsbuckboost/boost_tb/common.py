@@ -32,7 +32,7 @@ def init(fsbb, params):
     v_ref = params['exp_params']['v_ref']
     v_ref_step_up = params['exp_params']['v_ref_step_up']
     trig_level = (v_ref + v_ref_step_up) / 2
-    fsbb.trace.set_trig_level(10)
+    fsbb.trace.set_trig_level(trig_level)
     fsbb.trace.set_trig_signal(8)
 
     fsbb.trace.set_mode(1)

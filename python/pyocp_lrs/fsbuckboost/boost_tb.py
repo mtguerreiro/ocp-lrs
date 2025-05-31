@@ -88,13 +88,10 @@ def ramp_duty_down(fsbb):
 
 def wait_for_trigger(fsbb):
 
-    status, mode = fsbb.trace.get_mode()
-    if status != 0: return
-    if mode == 0: return
-    
     while True:
         time.sleep(1)
         status, trig_state = fsbb.trace.get_trig_state()
+        print(f'Trigger state: {trig_state}\n')
         if trig_state == 4: break
 
 
@@ -135,7 +132,7 @@ def run_ref_step(settings, run_params, save=False):
     fsbb.trace.set_n_pre_trig_samples(100)
     fsbb.trace.set_size(1000)
     
-    fsbb.trace.set_trig_level(10)
+    fsbb.trace.set_trig_level(13)
     fsbb.trace.set_trig_signal(8)
 
     fsbb.trace.set_mode(1)
@@ -149,27 +146,28 @@ def run_ref_step(settings, run_params, save=False):
     init_relays(fsbb)
 
     ramp_duty_up(fsbb, ramp_params)
-    time.sleep(0.1)
+    time.sleep(1)
 
     fsbb.set_ref(exp_params['v_ref'])
     fsbb.boost_energy.enable()
-    time.sleep(0.2)
+    time.sleep(5)
 
     fsbb.set_ref(exp_params['v_ref_step_up'])
-    fsbb.boost_energy.enable()
-    time.sleep(0.2)
+    #fsbb.boost_energy.enable()
+    time.sleep(5)
     
-    while True:
-        time.sleep(1)
-        status, trig_state = fsbb.trace.get_trig_state()
-        if trig_state == 4: break
+    wait_for_trigger()
+##    while True:
+##        time.sleep(1)
+##        status, trig_state = fsbb.trace.get_trig_state()
+##        if trig_state == 4: break
 
     fsbb.set_ref(exp_params['v_ref'])
     fsbb.boost_energy.enable()
-    time.sleep(0.2)
+    time.sleep(5)
     
     ramp_duty_down(fsbb)
-    time.sleep(0.1)
+    time.sleep(1)
     
     fsbb.idle.enable()
     fsbb.disable()

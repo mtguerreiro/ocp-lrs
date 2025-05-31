@@ -20,13 +20,13 @@ def run_ref_step(fsbb, run_params, save=False):
     common.init_relays(fsbb)
 
     common.ramp_duty_up(fsbb, ramp_params)
-    time.sleep(0.1)
+    time.sleep(1)
 
     fsbb.boost_energy.enable()
-    time.sleep(0.2)
+    time.sleep(1)
 
     fsbb.set_ref(exp_params['v_ref_step_up'])
-    time.sleep(0.2)
+    time.sleep(1)
     
     while True:
         time.sleep(1)
@@ -34,10 +34,10 @@ def run_ref_step(fsbb, run_params, save=False):
         if trig_state == 4: break
 
     fsbb.set_ref(exp_params['v_ref'])
-    time.sleep(0.2)
+    time.sleep(1)
     
-    ramp_duty_down(fsbb)
-    time.sleep(0.1)
+    common.ramp_duty_down(fsbb)
+    time.sleep(1)
     
     fsbb.idle.enable()
     fsbb.disable()
