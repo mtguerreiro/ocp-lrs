@@ -9,8 +9,27 @@ target_sources(fs_buck_boost
     fsbuckboostControlRamp.c
     fsbuckboostControlBuckSfb.c
     fsbuckboostControlBoostEnergy.c
+    fsbuckboostControlBoostEnergyMpc.c
 
     fsbuckboostHwIf.c
+)
+
+target_sources(fs_buck_boost
+    PRIVATE
+    cdmpc/dmpc.c
+    cdmpc/dmpc_matrices.c
+    cdmpc/mvops.c
+    cdmpc/qp.c
+    cdmpc/osqp/auxil.c
+    cdmpc/osqp/error.c
+    cdmpc/osqp/lin_alg.c
+    cdmpc/osqp/osqp.c
+    cdmpc/osqp/proj.c
+    cdmpc/osqp/qdldl.c
+    cdmpc/osqp/qdldl_interface.c
+    cdmpc/osqp/scaling.c
+    cdmpc/osqp/util.c
+    cdmpc/osqp/workspace.c
 )
 
 if( CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Windows" )

@@ -53,7 +53,7 @@ Plecs {
   ScriptsDialogGeometry ""
   ScriptsDialogSplitterPos "0"
   Schematic {
-    Location      [2438, 191; 3287, 579]
+    Location      [1071, 191; 1920, 579]
     ZoomFactor    1.14436
     SliderPosition [0, 0]
     ShowBrowser   off
@@ -259,8 +259,8 @@ Plecs {
             Direction     right
           }
           Schematic {
-            Location      [1920, 28; 2880, 1036]
-            ZoomFactor    0.667277
+            Location      [1920, 28; 3840, 1036]
+            ZoomFactor    1.14437
             SliderPosition [0, 0]
             ShowBrowser   off
             BrowserWidth  100
@@ -478,7 +478,7 @@ Plecs {
               LabelPosition south
               Parameter {
                 Variable      "Tag"
-                Value         "ii"
+                Value         "ii_m"
                 Show          off
               }
               Parameter {
@@ -497,7 +497,7 @@ Plecs {
               LabelPosition south
               Parameter {
                 Variable      "Tag"
-                Value         "io"
+                Value         "io_m"
                 Show          off
               }
               Parameter {
@@ -516,7 +516,7 @@ Plecs {
               LabelPosition south
               Parameter {
                 Variable      "Tag"
-                Value         "il"
+                Value         "il_m"
                 Show          off
               }
               Parameter {
@@ -2344,6 +2344,315 @@ Plecs {
                 Show          off
               }
             }
+            Component {
+              Type          Sum
+              Name          "Sum"
+              Show          off
+              Position      [1140, 385]
+              Direction     up
+              Flipped       off
+              LabelPosition south
+              Parameter {
+                Variable      "IconShape"
+                Value         "2"
+                Show          off
+              }
+              Parameter {
+                Variable      "Inputs"
+                Value         "|++"
+                Show          off
+              }
+              Parameter {
+                Variable      "DataType"
+                Value         "11"
+                Show          off
+              }
+              Parameter {
+                Variable      "DataTypeOverflowMode"
+                Value         "1"
+                Show          off
+              }
+            }
+            Component {
+              Type          Reference
+              SrcComponent  "Components/Control/Sources/White Noise"
+              Name          "White Noise"
+              Show          on
+              Position      [1085, 425]
+              Direction     up
+              Flipped       off
+              LabelPosition south
+              Frame         [-15, -15; 15, 15]
+              Parameter {
+                Variable      "mu"
+                Value         "0"
+                Show          off
+              }
+              Parameter {
+                Variable      "sigma"
+                Value         "0.04"
+                Show          off
+              }
+              Parameter {
+                Variable      "seed"
+                Value         "302942"
+                Show          off
+              }
+              Parameter {
+                Variable      "Ts"
+                Value         "1 / f_pwm"
+                Show          off
+              }
+              Terminal {
+                Type          Output
+                Position      [19, 0]
+                Direction     right
+              }
+            }
+            Component {
+              Type          Goto
+              Name          "Goto21"
+              Show          off
+              Position      [1190, 385]
+              Direction     right
+              Flipped       off
+              LabelPosition south
+              Parameter {
+                Variable      "Tag"
+                Value         "ii_m"
+                Show          off
+              }
+              Parameter {
+                Variable      "Visibility"
+                Value         "2"
+                Show          off
+              }
+            }
+            Component {
+              Type          From
+              Name          "From42"
+              Show          off
+              Position      [1085, 385]
+              Direction     right
+              Flipped       off
+              LabelPosition south
+              Parameter {
+                Variable      "Tag"
+                Value         "ii"
+                Show          off
+              }
+              Parameter {
+                Variable      "Visibility"
+                Value         "2"
+                Show          off
+              }
+            }
+            Component {
+              Type          Sum
+              Name          "Sum1"
+              Show          off
+              Position      [1140, 480]
+              Direction     up
+              Flipped       off
+              LabelPosition south
+              Parameter {
+                Variable      "IconShape"
+                Value         "2"
+                Show          off
+              }
+              Parameter {
+                Variable      "Inputs"
+                Value         "|++"
+                Show          off
+              }
+              Parameter {
+                Variable      "DataType"
+                Value         "11"
+                Show          off
+              }
+              Parameter {
+                Variable      "DataTypeOverflowMode"
+                Value         "1"
+                Show          off
+              }
+            }
+            Component {
+              Type          Reference
+              SrcComponent  "Components/Control/Sources/White Noise"
+              Name          "White Noise1"
+              Show          on
+              Position      [1085, 520]
+              Direction     up
+              Flipped       off
+              LabelPosition south
+              Frame         [-15, -15; 15, 15]
+              Parameter {
+                Variable      "mu"
+                Value         "0"
+                Show          off
+              }
+              Parameter {
+                Variable      "sigma"
+                Value         "0.04"
+                Show          off
+              }
+              Parameter {
+                Variable      "seed"
+                Value         "302942"
+                Show          off
+              }
+              Parameter {
+                Variable      "Ts"
+                Value         "1 / f_pwm"
+                Show          off
+              }
+              Terminal {
+                Type          Output
+                Position      [19, 0]
+                Direction     right
+              }
+            }
+            Component {
+              Type          Goto
+              Name          "Goto22"
+              Show          off
+              Position      [1190, 480]
+              Direction     right
+              Flipped       off
+              LabelPosition south
+              Parameter {
+                Variable      "Tag"
+                Value         "il_m"
+                Show          off
+              }
+              Parameter {
+                Variable      "Visibility"
+                Value         "2"
+                Show          off
+              }
+            }
+            Component {
+              Type          From
+              Name          "From43"
+              Show          off
+              Position      [1085, 480]
+              Direction     right
+              Flipped       off
+              LabelPosition south
+              Parameter {
+                Variable      "Tag"
+                Value         "il"
+                Show          off
+              }
+              Parameter {
+                Variable      "Visibility"
+                Value         "2"
+                Show          off
+              }
+            }
+            Component {
+              Type          Sum
+              Name          "Sum2"
+              Show          off
+              Position      [1355, 480]
+              Direction     up
+              Flipped       off
+              LabelPosition south
+              Parameter {
+                Variable      "IconShape"
+                Value         "2"
+                Show          off
+              }
+              Parameter {
+                Variable      "Inputs"
+                Value         "|++"
+                Show          off
+              }
+              Parameter {
+                Variable      "DataType"
+                Value         "11"
+                Show          off
+              }
+              Parameter {
+                Variable      "DataTypeOverflowMode"
+                Value         "1"
+                Show          off
+              }
+            }
+            Component {
+              Type          Reference
+              SrcComponent  "Components/Control/Sources/White Noise"
+              Name          "White Noise2"
+              Show          on
+              Position      [1300, 520]
+              Direction     up
+              Flipped       off
+              LabelPosition south
+              Frame         [-15, -15; 15, 15]
+              Parameter {
+                Variable      "mu"
+                Value         "0"
+                Show          off
+              }
+              Parameter {
+                Variable      "sigma"
+                Value         "0.04"
+                Show          off
+              }
+              Parameter {
+                Variable      "seed"
+                Value         "302942"
+                Show          off
+              }
+              Parameter {
+                Variable      "Ts"
+                Value         "1 / f_pwm"
+                Show          off
+              }
+              Terminal {
+                Type          Output
+                Position      [19, 0]
+                Direction     right
+              }
+            }
+            Component {
+              Type          Goto
+              Name          "Goto23"
+              Show          off
+              Position      [1405, 480]
+              Direction     right
+              Flipped       off
+              LabelPosition south
+              Parameter {
+                Variable      "Tag"
+                Value         "io_m"
+                Show          off
+              }
+              Parameter {
+                Variable      "Visibility"
+                Value         "2"
+                Show          off
+              }
+            }
+            Component {
+              Type          From
+              Name          "From44"
+              Show          off
+              Position      [1300, 480]
+              Direction     right
+              Flipped       off
+              LabelPosition south
+              Parameter {
+                Variable      "Tag"
+                Value         "io"
+                Show          off
+              }
+              Parameter {
+                Variable      "Visibility"
+                Value         "2"
+                Show          off
+              }
+            }
             Connection {
               Type          Signal
               SrcComponent  "Demux1"
@@ -3067,6 +3376,72 @@ Plecs {
               SrcTerminal   2
               DstComponent  "PWM"
               DstTerminal   2
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "Sum"
+              SrcTerminal   1
+              DstComponent  "Goto21"
+              DstTerminal   1
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "From42"
+              SrcTerminal   1
+              DstComponent  "Sum"
+              DstTerminal   2
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "White Noise"
+              SrcTerminal   1
+              Points        [1140, 425]
+              DstComponent  "Sum"
+              DstTerminal   3
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "Sum1"
+              SrcTerminal   1
+              DstComponent  "Goto22"
+              DstTerminal   1
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "From43"
+              SrcTerminal   1
+              DstComponent  "Sum1"
+              DstTerminal   2
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "White Noise1"
+              SrcTerminal   1
+              Points        [1140, 520]
+              DstComponent  "Sum1"
+              DstTerminal   3
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "Sum2"
+              SrcTerminal   1
+              DstComponent  "Goto23"
+              DstTerminal   1
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "From44"
+              SrcTerminal   1
+              DstComponent  "Sum2"
+              DstTerminal   2
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "White Noise2"
+              SrcTerminal   1
+              Points        [1355, 520]
+              DstComponent  "Sum2"
+              DstTerminal   3
             }
           }
         }

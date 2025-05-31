@@ -149,7 +149,7 @@ def run_ref_step(settings, run_params, save=False):
     time.sleep(1)
 
     fsbb.set_ref(exp_params['v_ref'])
-    fsbb.boost_energy.enable()
+    fsbb.boost_energy_mpc.enable()
     time.sleep(5)
 
     fsbb.set_ref(exp_params['v_ref_step_up'])
@@ -163,7 +163,7 @@ def run_ref_step(settings, run_params, save=False):
 ##        if trig_state == 4: break
 
     fsbb.set_ref(exp_params['v_ref'])
-    fsbb.boost_energy.enable()
+    fsbb.boost_energy_mpc.enable()
     time.sleep(5)
     
     ramp_duty_down(fsbb)

@@ -5,7 +5,7 @@ import numpy as np
 import pyocp
 from . import common
 
-def run_ref_step(fsbb, run_params, save=False):
+def run_ref_step(fsbb, run_params, save=False, ctl='energy'):
 
     common.init(fsbb, run_params)
 
@@ -22,7 +22,10 @@ def run_ref_step(fsbb, run_params, save=False):
     common.ramp_duty_up(fsbb, ramp_params)
     time.sleep(1)
 
-    fsbb.boost_energy.enable()
+    if ctl == 'energy':
+        fsbb.boost_energy.enable()
+    else:
+        fsbb.boost_energy_mpc.enable()
     time.sleep(1)
 
     fsbb.set_ref(exp_params['v_ref_step_up'])
