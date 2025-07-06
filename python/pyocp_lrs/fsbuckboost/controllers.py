@@ -9,6 +9,7 @@ import struct
 import numpy as np
 import scipy.signal
 import control
+import pyctl
 
 from dataclasses import dataclass
 
@@ -123,42 +124,11 @@ class _CPL(pyocp.controller.ControllerTemplate):
         L = self._model_params.L
         Co = self._model_params.Co
 
-        A = np.array([
-            [0,         -1 / L],
-            [1 / Co,    -1 / R / Co]
-            ])
-
-        B = np.array([
-            [V_in / L],
-            [0]
-            ])
-
-        C = np.array([0, 1])
-
-        # Augmented model (integrator)
-        Aa = np.zeros((3,3))
-        Aa[:2, :2] = A
-        Aa[2, :2] = -C
-
-        Ba = np.zeros((3,1))
-        Ba[:2, 0] = B[:, 0]
-
-        # Poles
-        zeta = -np.log(os/100) / np.sqrt( np.pi**2 + (np.log(os/100))**2 )
-        wn = 4 / ts / zeta
-
-        p1 = -zeta * wn + 1j * wn * np.sqrt(1 - zeta**2)
-        p2 = p1.conj()
-        p3 = 5 * p1.real
-        p = [p1, p2, p3]
-
-        # Controller design
-        K = scipy.signal.place_poles(Aa, Ba, p).gain_matrix[0]
-
-        ki = K[0]
-        kv = K[1]
-        k_ev = K[2]
-
+        ki, kv, k_ev = pyctl.design.pe.buck.sfb(
+            V_in, R, L, Co,
+            ts, os, alpha=5
+        )
+        
         return {'ki':ki, 'kv':kv, 'k_ev':k_ev, 'dt':dt}
 
 
@@ -216,41 +186,10 @@ class _BuckSFB(pyocp.controller.ControllerTemplate):
         L = self._model_params.L
         Co = self._model_params.Co
         
-        A = np.array([
-            [0,         -1 / L],
-            [1 / Co,    -1 / R / Co]
-            ])
-        
-        B = np.array([
-            [V_in / L],
-            [0]
-            ])
-
-        C = np.array([0, 1])
-
-        # Augmented model (integrator)
-        Aa = np.zeros((3,3))
-        Aa[:2, :2] = A
-        Aa[2, :2] = -C
-
-        Ba = np.zeros((3,1))
-        Ba[:2, 0] = B[:, 0]
-
-        # Poles
-        zeta = -np.log(os/100) / np.sqrt( np.pi**2 + (np.log(os/100))**2 )
-        wn = 4 / ts / zeta
-
-        p1 = -zeta * wn + 1j * wn * np.sqrt(1 - zeta**2)
-        p2 = p1.conj()
-        p3 = 5 * p1.real
-        p = [p1, p2, p3]
-        
-        # Controller design
-        K = scipy.signal.place_poles(Aa, Ba, p).gain_matrix[0]
-        
-        ki = K[0]
-        kv = K[1]
-        k_ev = K[2]
+        ki, kv, k_ev = pyctl.design.pe.buck.sfb(
+            V_in, R, L, Co,
+            ts, os, alpha=5
+        )
         
         return {'ki':ki, 'kv':kv, 'k_ev':k_ev, 'dt':dt}
     
@@ -315,50 +254,11 @@ class _BoostEnergy(pyocp.controller.ControllerTemplate):
         return self.set_params(params)
 
 
-    def _get_gains(self, ts, os=5, method='approx', alpha=5.0, dt=1.0):
+    def _get_gains(self, ts, os=5, alpha=5.0, dt=1.0):
 
-        # Poles
-        if method == 'approx':
-            zeta = -np.log(os/100) / np.sqrt(np.pi**2 + (np.log(os/100))**2)
-            wn = 4/ts/zeta
+        k1, k2, k3 = pyctl.design.pe.boost.energy(ts, os, alpha=alpha)
 
-            p1 = -zeta * wn + wn * np.sqrt(zeta**2 - 1, dtype=complex)
-            p2 = np.conj(p1)
-            p3 = alpha * p1.real
-
-            poles = [p1, p2, p3]
-
-        elif method == 'bessel':
-            p1 = (-3.9668 + 3.7845j) / ts
-            p2 = np.conj(p1)
-            p3 = -5.0093 / ts
-
-        elif method == 'itae':
-            p1 = (-4.35 + 8.918j) / ts
-            p2 = np.conj(p1)
-            p3 = -5.913 / ts
-
-        else:
-            print('Unknown method')
-            return 0
-            
-        poles = [p1, p2, p3]
-        #print('Pole placement.\nMethod: {:}'.format(method))
-        #print('Poles: {:}'.format(poles))
-        
-        # Augmented model        
-        A = np.array([[ 0.0, 1.0, 0.0],
-                      [ 0.0, 0.0, 0.0],
-                      [-1.0, 0.0, 0.0]])
-
-        B = np.array([[0.0], [1.0], [0.0]])
-
-        # Gains
-        K = scipy.signal.place_poles(A, B, poles).gain_matrix.reshape(-1)
-
-        gains = {'k1':K[0], 'k2':K[1], 'k3':K[2], 'dt':dt}
-
-        #print('Gains: {:}'.format(gains))
+        gains = {'k1':k1, 'k2':k2, 'k3':k3, 'dt':dt}
 
         return gains
 
@@ -403,49 +303,10 @@ class _BoostEnergyMpc(pyocp.controller.ControllerTemplate):
         return self.set_params(params)
 
 
-    def _get_gains(self, ts, os=5, method='approx', alpha=5.0, dt=1.0):
+    def _get_gains(self, ts, os=5, alpha=5.0, dt=1.0):
 
-        # Poles
-        if method == 'approx':
-            zeta = -np.log(os/100) / np.sqrt(np.pi**2 + (np.log(os/100))**2)
-            wn = 4/ts/zeta
+        k1, k2, k3 = pyctl.design.pe.boost.energy(ts, os, alpha=alpha)
 
-            p1 = -zeta * wn + wn * np.sqrt(zeta**2 - 1, dtype=complex)
-            p2 = np.conj(p1)
-            p3 = alpha * p1.real
-
-            poles = [p1, p2, p3]
-
-        elif method == 'bessel':
-            p1 = (-3.9668 + 3.7845j) / ts
-            p2 = np.conj(p1)
-            p3 = -5.0093 / ts
-
-        elif method == 'itae':
-            p1 = (-4.35 + 8.918j) / ts
-            p2 = np.conj(p1)
-            p3 = -5.913 / ts
-
-        else:
-            print('Unknown method')
-            return 0
-            
-        poles = [p1, p2, p3]
-        #print('Pole placement.\nMethod: {:}'.format(method))
-        #print('Poles: {:}'.format(poles))
-        
-        # Augmented model        
-        A = np.array([[ 0.0, 1.0, 0.0],
-                      [ 0.0, 0.0, 0.0],
-                      [-1.0, 0.0, 0.0]])
-
-        B = np.array([[0.0], [1.0], [0.0]])
-
-        # Gains
-        K = scipy.signal.place_poles(A, B, poles).gain_matrix.reshape(-1)
-
-        gains = {'k1':K[0], 'k2':K[1], 'k3':K[2], 'dt':dt}
-
-        #print('Gains: {:}'.format(gains))
+        gains = {'k1':k1, 'k2':k2, 'k3':k3, 'dt':dt}
 
         return gains
