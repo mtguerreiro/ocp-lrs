@@ -60,7 +60,10 @@ int32_t fsbuckboostControlCplRun(void *meas, int32_t nmeas,
     v = m->v_out;
     v_ref = r->v_out;
 
-    if( (v > v_max) || (v < v_min) ) return -1;
+    if( (m->v_in > v_max) || (m->v_in < v_min) ){
+        o->u = 0.0f;
+        return -1;
+    }
 
     ev = v_ref - v;
     e = e + (dt / 2.0f) * ( ev + ev_1 );

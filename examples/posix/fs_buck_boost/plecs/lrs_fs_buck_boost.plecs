@@ -64,7 +64,7 @@ Plecs {
 "t"
       Name          "LRS four-switch\nbuck/boost"
       Show          on
-      Position      [290, 170]
+      Position      [345, 170]
       Direction     up
       Flipped       off
       LabelPosition none
@@ -194,7 +194,7 @@ Plecs {
       Type          Resistor
       Name          "R1"
       Show          on
-      Position      [470, 160]
+      Position      [525, 160]
       Direction     up
       Flipped       off
       LabelPosition east
@@ -208,7 +208,7 @@ Plecs {
       Type          VoltageSource
       Name          "V"
       Show          on
-      Position      [155, 160]
+      Position      [210, 160]
       Direction     down
       Flipped       on
       LabelPosition east
@@ -248,7 +248,7 @@ Plecs {
       SrcComponent  "LRS models/Controllers/DLL\\ncontroller"
       Name          "DLL\ncontroller"
       Show          on
-      Position      [290, 290]
+      Position      [345, 290]
       Direction     down
       Flipped       on
       LabelPosition none
@@ -274,11 +274,60 @@ Plecs {
         Direction     left
       }
     }
+    Component {
+      Type          Sum
+      Name          "Sum"
+      Show          off
+      Position      [150, 160]
+      Direction     up
+      Flipped       off
+      LabelPosition south
+      Parameter {
+        Variable      "IconShape"
+        Value         "2"
+        Show          off
+      }
+      Parameter {
+        Variable      "Inputs"
+        Value         "|++"
+        Show          off
+      }
+      Parameter {
+        Variable      "DataType"
+        Value         "11"
+        Show          off
+      }
+      Parameter {
+        Variable      "DataTypeOverflowMode"
+        Value         "1"
+        Show          off
+      }
+    }
+    Component {
+      Type          Constant
+      Name          "Constant1"
+      Show          on
+      Position      [90, 210]
+      Direction     right
+      Flipped       off
+      LabelPosition south
+      Frame         [-10, -10; 10, 10]
+      Parameter {
+        Variable      "Value"
+        Value         "0"
+        Show          off
+      }
+      Parameter {
+        Variable      "DataType"
+        Value         "10"
+        Show          off
+      }
+    }
     Connection {
       Type          Wire
       SrcComponent  "R1"
       SrcTerminal   1
-      Points        [470, 130]
+      Points        [525, 130]
       DstComponent  "LRS four-switch\nbuck/boost"
       DstTerminal   5
     }
@@ -286,7 +335,7 @@ Plecs {
       Type          Wire
       SrcComponent  "R1"
       SrcTerminal   2
-      Points        [470, 190]
+      Points        [525, 190]
       DstComponent  "LRS four-switch\nbuck/boost"
       DstTerminal   6
     }
@@ -294,7 +343,7 @@ Plecs {
       Type          Wire
       SrcComponent  "V"
       SrcTerminal   1
-      Points        [155, 130]
+      Points        [210, 130]
       DstComponent  "LRS four-switch\nbuck/boost"
       DstTerminal   3
     }
@@ -302,22 +351,15 @@ Plecs {
       Type          Wire
       SrcComponent  "V"
       SrcTerminal   2
-      Points        [155, 190]
+      Points        [210, 190]
       DstComponent  "LRS four-switch\nbuck/boost"
       DstTerminal   4
     }
     Connection {
       Type          Signal
-      SrcComponent  "Constant"
-      SrcTerminal   1
-      DstComponent  "V"
-      DstTerminal   3
-    }
-    Connection {
-      Type          Signal
       SrcComponent  "LRS four-switch\nbuck/boost"
       SrcTerminal   2
-      Points        [400, 210; 400, 290]
+      Points        [455, 210; 455, 290]
       DstComponent  "DLL\ncontroller"
       DstTerminal   2
     }
@@ -325,9 +367,31 @@ Plecs {
       Type          Signal
       SrcComponent  "DLL\ncontroller"
       SrcTerminal   1
-      Points        [190, 290; 190, 210]
+      Points        [245, 290; 245, 210]
       DstComponent  "LRS four-switch\nbuck/boost"
       DstTerminal   1
+    }
+    Connection {
+      Type          Signal
+      SrcComponent  "Sum"
+      SrcTerminal   1
+      DstComponent  "V"
+      DstTerminal   3
+    }
+    Connection {
+      Type          Signal
+      SrcComponent  "Constant"
+      SrcTerminal   1
+      DstComponent  "Sum"
+      DstTerminal   2
+    }
+    Connection {
+      Type          Signal
+      SrcComponent  "Constant1"
+      SrcTerminal   1
+      Points        [150, 210]
+      DstComponent  "Sum"
+      DstTerminal   3
     }
   }
 }

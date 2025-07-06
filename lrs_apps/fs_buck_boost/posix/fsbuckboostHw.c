@@ -308,6 +308,7 @@ void fsbuckboostHwShutDown(void){
     fsbuckboostHwSetPwmOutputEnable(0);
     fsbuckboostHwSetLoadSwitch(0);
     fsbuckboostHwSetOutputRelay(0);
+    fsbuckboostHwSetInputRelay(0);
 }
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostHwOpilUpdateMeasurements(void *meas, int32_t size){

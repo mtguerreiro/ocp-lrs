@@ -1,4 +1,4 @@
-V_in = 8;
+V_in = 30;
 Rs = 0.05;
 Ls = 1e-07;
 L = 1.5e-05;
@@ -12,7 +12,7 @@ R_C_out = 0.025;
 V_out_ini = 0;
 f_pwm = 100000.0;
 R_ds = 0.025;
-R_load = 10;
+R_load = 4;
 ii_std = 0.07;
 il_std = 0.07;
 io_std = 0.07;

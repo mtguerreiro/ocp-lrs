@@ -15,8 +15,8 @@ from dataclasses import dataclass
 
 @dataclass
 class ModelParams:
-    v_in : float = 10
-    R : float = 22
+    v_in : float = 30
+    R : float = 4
     L : float = 15e-6
     Co : float = 100e-6
 
