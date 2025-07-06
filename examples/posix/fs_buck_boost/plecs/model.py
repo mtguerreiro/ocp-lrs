@@ -22,6 +22,10 @@ def params():
     f_pwm = 100e3
     R_ds = 25e-3
 
+    ii_std = 0.07
+    il_std = 0.07
+    io_std = 0.07
+
     _params = {}
 
     _params['V_in'] = V_in
@@ -45,5 +49,9 @@ def params():
     _params['R_ds'] = R_ds
 
     _params['R_load'] = R_load
+
+    _params['ii_std'] = ii_std
+    _params['il_std'] = il_std
+    _params['io_std'] = io_std
     
     return _params

@@ -54,7 +54,7 @@ Plecs {
   ScriptsDialogSplitterPos "0"
   Schematic {
     Location      [962, 28; 1920, 986]
-    ZoomFactor    1.30957
+    ZoomFactor    1.14436
     SliderPosition [0, 0]
     ShowBrowser   off
     BrowserWidth  100
@@ -132,6 +132,21 @@ Plecs {
       Parameter {
         Variable      "R_ds"
         Value         "R_ds"
+        Show          off
+      }
+      Parameter {
+        Variable      "ii_std"
+        Value         "ii_std"
+        Show          off
+      }
+      Parameter {
+        Variable      "il_std"
+        Value         "il_std"
+        Show          off
+      }
+      Parameter {
+        Variable      "io_std"
+        Value         "io_std"
         Show          off
       }
       Terminal {
@@ -310,7 +325,7 @@ Plecs {
       Type          Signal
       SrcComponent  "DLL\ncontroller"
       SrcTerminal   1
-      Points        [190, 290]
+      Points        [190, 290; 190, 210]
       DstComponent  "LRS four-switch\nbuck/boost"
       DstTerminal   1
     }

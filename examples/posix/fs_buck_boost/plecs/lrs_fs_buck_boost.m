@@ -13,3 +13,6 @@ V_out_ini = 0;
 f_pwm = 100000.0;
 R_ds = 0.025;
 R_load = 10;
+ii_std = 0.07;
+il_std = 0.07;
+io_std = 0.07;

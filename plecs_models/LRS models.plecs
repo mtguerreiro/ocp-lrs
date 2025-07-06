@@ -75,7 +75,7 @@ Plecs {
       MaskIconOpaque off
       MaskIconRotates on
       Schematic {
-        Location      [1246, 190; 1920, 544]
+        Location      [2799, 242; 3473, 596]
         ZoomFactor    1.30957
         SliderPosition [0, 0]
         ShowBrowser   off
@@ -218,6 +218,33 @@ Plecs {
             Tunable       off
             TabName       ""
           }
+          Parameter {
+            Variable      "ii_std"
+            Prompt        "Input current sensor standard dev."
+            Type          FreeText
+            Value         "ii_std"
+            Show          off
+            Tunable       off
+            TabName       ""
+          }
+          Parameter {
+            Variable      "il_std"
+            Prompt        "Inductor current sensor standard dev."
+            Type          FreeText
+            Value         "il_std"
+            Show          off
+            Tunable       off
+            TabName       ""
+          }
+          Parameter {
+            Variable      "io_std"
+            Prompt        "Output current sensor standard dev."
+            Type          FreeText
+            Value         "io_std"
+            Show          off
+            Tunable       off
+            TabName       ""
+          }
           Terminal {
             Type          Input
             Position      [-85, 40]
@@ -259,7 +286,7 @@ Plecs {
             Direction     right
           }
           Schematic {
-            Location      [1920, 28; 3840, 1036]
+            Location      [0, 28; 1920, 986]
             ZoomFactor    1.14437
             SliderPosition [0, 0]
             ShowBrowser   off
@@ -2390,7 +2417,7 @@ Plecs {
               }
               Parameter {
                 Variable      "sigma"
-                Value         "0.04"
+                Value         "ii_std"
                 Show          off
               }
               Parameter {
@@ -2493,12 +2520,12 @@ Plecs {
               }
               Parameter {
                 Variable      "sigma"
-                Value         "0.04"
+                Value         "il_std"
                 Show          off
               }
               Parameter {
                 Variable      "seed"
-                Value         "302942"
+                Value         "74390"
                 Show          off
               }
               Parameter {
@@ -2596,12 +2623,12 @@ Plecs {
               }
               Parameter {
                 Variable      "sigma"
-                Value         "0.04"
+                Value         "io_std"
                 Show          off
               }
               Parameter {
                 Variable      "seed"
-                Value         "302942"
+                Value         "816"
                 Show          off
               }
               Parameter {

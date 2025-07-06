@@ -7,6 +7,7 @@ target_sources(fs_buck_boost
     fsbuckboostController.c
     fsbuckboostControlIdle.c
     fsbuckboostControlRamp.c
+    fsbuckboostControlCpl.c
     fsbuckboostControlBuckSfb.c
     fsbuckboostControlBoostEnergy.c
     fsbuckboostControlBoostEnergyMpc.c
