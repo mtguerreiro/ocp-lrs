@@ -44,18 +44,19 @@ def make():
         os.makedirs(build_path)
     
     plat = platform.system()
-    
+
+    make_cmd = ['cmake', '..', '-G', 'Ninja']
+    build_cmd = 'ninja'
+
     if plat == 'Linux':
-        make_cmd = ['cmake', '..']
         run_cmd = r'/app_fsbb'
     elif plat == 'Windows':
-        make_cmd = ['cmake', '..', '-G', 'MinGW Makefiles']
         run_cmd = r'app_fsbb.exe'
     else:
         raise ValueError('Platform not supported for code generation.')
 
     subprocess.run(make_cmd, cwd=build_path, check=True)
-    subprocess.run(['make'], cwd=build_path, check=True)
+    subprocess.run([build_cmd], cwd=build_path, check=True)
 
     subprocess.Popen([build_path + run_cmd], cwd=build_path)    
 
