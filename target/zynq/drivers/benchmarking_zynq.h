@@ -12,8 +12,7 @@
 
 #define BENCHMARKING
 
-#define TICKS_PER_SEC (XPAR_CPU_CORTEXA9_0_CPU_CLK_FREQ_HZ/2)
-
+#define TICKS_PER_SEC (XPAR_CPU_CORE_CLOCK_FREQ_HZ/2)
 
 uint32_t GetTicks();
 int32_t  InitBenchmarking();

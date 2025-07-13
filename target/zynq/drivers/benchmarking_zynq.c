@@ -12,8 +12,8 @@ int32_t InitBenchmarking()
 	int error = -1;
 
 	// config
-	pcfg_scu_timer = XScuTimer_LookupConfig(XPAR_PS7_SCUTIMER_0_DEVICE_ID);
-	error = XScuTimer_CfgInitialize(&scu_timer, pcfg_scu_timer, XPAR_PS7_SCUTIMER_0_BASEADDR);
+	pcfg_scu_timer = XScuTimer_LookupConfig(XPAR_SCUTIMER_DEVICE_ID);
+	error = XScuTimer_CfgInitialize(&scu_timer, pcfg_scu_timer, XPAR_XSCUTIMER_0_BASEADDR);
 
 	if(error)
 	{

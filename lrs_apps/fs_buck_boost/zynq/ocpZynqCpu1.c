@@ -19,7 +19,6 @@
 
 /* Application */
 #include "fsbuckboost.h"
-//#include "cuk.h"
 //=============================================================================
 
 //=============================================================================
@@ -79,7 +78,6 @@ static int32_t ocpZynqCpu1InitializeIpc(void *intcInst){
 static int32_t ocpZynqCpu1InitializeHw(void *intcInst){
 
     fsbuckboostInit(intcInst);
-    //cukInit(intcInst);
 
     return 0;
 }

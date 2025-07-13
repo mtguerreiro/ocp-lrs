@@ -3,7 +3,6 @@
  *
  */
 
-//#ifdef SOC_CPU0
 //=============================================================================
 /*-------------------------------- Includes ---------------------------------*/
 //=============================================================================
@@ -86,50 +85,11 @@ static int32_t ocpZynqCpu0InitializeIpc(void *intcInst){
 //-----------------------------------------------------------------------------
 static int32_t ocpZynqCpu0InitializeTraces(void){
 
-//	ocpTraceConfig_t config;
-//
-//	config.mem = trace1Buffer;
-//	config.size = OCP_CONFIG_TRACE1_SIZE;
-//	config.data = (void **)trace1Data;
-//	config.names = trace1Names;
-//
-//	ocpTraceInitialize(OCP_TRACE_1, &config, "Trace 1");
-//
 	return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t ocpZynqCpu0InitializeControlSystem(void){
 
-//	ocpCSConfig_t config;
-//
-//	/* Initializes controller lib */
-//	controllerInitialize();
-//
-//	/* Initializes control sys lib */
-//	config.fgetInputs = plecsGetInputs;
-//	config.fprocInputs = plecsProcInputs;
-//
-//	config.frun = controllerRun;
-//
-//	config.fprocOutputs = plecsProcOutputs;
-//	config.fapplyOutputs = plecsApplyOutputs;
-//
-//	config.fonEntry = 0;
-//	config.fonExit = 0;
-//	config.fhwInterface = 0;
-//	config.fcontrollerInterface = controllerInterface;
-//
-//	config.binputs = sys1InBuffer;
-//	config.bprocInputs = sys1ProcInBuffer;
-//
-//	config.boutputs = sys1OutBuffer;
-//	config.bprocOutputs = sys1ProcOutBuffer;
-//
-//	config.fenable = 0;
-//	config.fdisable = 0;
-//
-//	ocpCSInitialize(OCP_CS_1, &config, "Converter control");
-//
 	return 0;
 }
 //-----------------------------------------------------------------------------
@@ -141,4 +101,3 @@ static int32_t ocpZynqCpu0InitializeInterface(void){
 }
 //-----------------------------------------------------------------------------
 //=============================================================================
-//#endif /* SOC_CPU0 */

@@ -10,7 +10,7 @@
 //=============================================================================
 #include "sysinit.h"
 
-#include "hardware/zynq/ocpZynqCpu0.h"
+#include "ocpZynqCpu0.h"
 
 /* Kernel */
 #include "FreeRTOS.h"

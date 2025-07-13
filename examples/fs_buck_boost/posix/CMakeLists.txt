@@ -10,6 +10,9 @@ set(OPIL_PATH "../../../../opil")
 set(OPIL_TARGET_IP "127.0.0.1" CACHE STRING "IP of the OPiL target")
 set(OPIL_TARGET_PORT 8090 CACHE STRING "Port opened by the OPiL target")
 
+set(OCP_CONFIG_DIR "${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/")
+set(STYPES_DIR "${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/")
+
 project(app_fsbb)
 
 set(CMAKE_C_STANDARD 11)
@@ -24,7 +27,7 @@ add_compile_options(
 
 set(PLECS_BUILD_DIR "${CMAKE_SOURCE_DIR}/plecs/build/")
 add_custom_target(build_plecs ALL
-    COMMAND make -f ${OPIL_PATH}/sw/plecs/make_opil_plecs.mk BUILD_DIR=${PLECS_BUILD_DIR} OPIL=${OPIL_PATH} HOST_COMM_SOCK_SERVER_IP="${OPIL_TARGET_IP}" HOST_COMM_SOCK_SERVER_PORT=${OPIL_TARGET_PORT} STYPES_DIR=${PROJECT_SOURCE_DIR}/
+    COMMAND make -f ${OPIL_PATH}/sw/plecs/make_opil_plecs.mk BUILD_DIR=${PLECS_BUILD_DIR} OPIL=${OPIL_PATH} HOST_COMM_SOCK_SERVER_IP="${OPIL_TARGET_IP}" HOST_COMM_SOCK_SERVER_PORT=${OPIL_TARGET_PORT} STYPES_DIR=${STYPES_DIR}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Building OPiL/PLECS DLL using external Makefile"
 )
@@ -35,13 +38,30 @@ target_compile_definitions(
     PRIVATE
     TARGET_COMM_SOCK_SERVER_PORT=${OPIL_TARGET_PORT}
 )
+target_include_directories(
+    opil
+    PRIVATE
+    ${STYPES_DIR}
+)
 
 add_subdirectory(${OCP_LRS_PATH} "${PROJECT_BINARY_DIR}/ocp-lrs")
 add_subdirectory(${OCP_PATH} "${PROJECT_BINARY_DIR}/ocp")
+target_include_directories(
+    ocp
+    PRIVATE
+    ${OCP_CONFIG_DIR}
+)
+
+target_include_directories(
+    ocp_lrs_posix_threads
+    PRIVATE
+    ${OCP_CONFIG_DIR}
+)
 
 add_executable(app_fsbb main.c)
 
-target_link_libraries(app_fsbb
+target_link_libraries(
+    app_fsbb
     PRIVATE
     opil
     ocp
@@ -49,7 +69,9 @@ target_link_libraries(app_fsbb
     fs_buck_boost
 )
 
-target_include_directories(app_fsbb
+target_include_directories(
+    app_fsbb
     PRIVATE
     "${OCP_LRS_PATH}/"
+    #"${OCP_LRS_PATH}/lrs_apps/fs_buck_boost"
 )
