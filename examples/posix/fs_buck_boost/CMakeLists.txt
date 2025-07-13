@@ -53,4 +53,3 @@ target_include_directories(app_fsbb
     PRIVATE
     "${OCP_LRS_PATH}/"
 )
-
