@@ -72,11 +72,6 @@ typedef struct{
 #define FS_BUCK_BOOST_CONFIG_I_LIM      22.5f
 #define FS_BUCK_BOOST_CONFIG_V_LIM      50.0f
 
-#ifdef SOC_CPU1
-#define FS_BUCK_BOOST_CONFIG_TRACE_ADDR             ZYNQ_CONFIG_MEM_TRACE_ADR
-#define FS_BUCK_BOOST_CONFIG_TRACE_SIZE             ZYNQ_CONFIG_MEM_TRACE_SIZE_MAX
-#endif
-
 #define FS_BUCK_BOOST_CONFIG_TRACE_0_NAME_LEN       500
 #define FS_BUCK_BOOST_CONFIG_TRACE_0_MAX_SIGNALS    40
 
@@ -86,6 +81,12 @@ typedef struct{
 
 #define FS_BUCK_BOOST_CONFIG_CS_ID                  OCP_CS_1
 #define FS_BUCK_BOOST_CONFIG_TRACE_ID               OCP_TRACE_1
+
+#ifdef OCP_LRS_ZYNQ_BUILD_CPU1
+#include "zynqConfig.h"
+#define FS_BUCK_BOOST_CONFIG_TRACE_ADDR             ZYNQ_CONFIG_MEM_TRACE_ADR
+#define FS_BUCK_BOOST_CONFIG_TRACE_SIZE             ZYNQ_CONFIG_MEM_TRACE_SIZE_MAX
+#endif
 //=============================================================================
 
 #endif /* FS_BUCK_BOOST_CONFIG_H_ */
