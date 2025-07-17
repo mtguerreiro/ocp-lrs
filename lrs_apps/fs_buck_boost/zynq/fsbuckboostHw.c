@@ -1,5 +1,4 @@
 
-#ifdef SOC_CPU1
 //=============================================================================
 /*-------------------------------- Includes ---------------------------------*/
 //=============================================================================
@@ -22,14 +21,14 @@
 #define FS_BUCK_BOOST_HW_CONFIG_ADC_SPI_FREQ_HZ      ((uint32_t)16666666)
 #define FS_BUCK_BOOST_HW_CONFIG_PWM_FREQ_HZ          ((uint32_t) 100000 )
 #define FS_BUCK_BOOST_HW_CONFIG_PWM_DEAD_TIME_NS     ((float) 100e-9 )
-#define FS_BUCK_BOOST_HW_CONFIG_PWM_BASE             XPAR_AXI_PWM_BUCKBOOST_0_S00_AXI_BASEADDR//XPAR_AXI_PWM_1_S00_AXI_BASEADDR
-#define FS_BUCK_BOOST_HW_CONFIG_ADC_BASE             XPAR_ADC_PSCTL_0_S00_AXI_BASEADDR//XPAR_ADC_PSCTL_1_S00_AXI_BASEADDR
+#define FS_BUCK_BOOST_HW_CONFIG_PWM_BASE             XPAR_AXI_PWM_0_BASEADDR//XPAR_AXI_PWM_BUCKBOOST_0_S00_AXI_BASEADDR//XPAR_AXI_PWM_1_S00_AXI_BASEADDR
+#define FS_BUCK_BOOST_HW_CONFIG_ADC_BASE             XPAR_ADC_PSCTL_0_BASEADDR//XPAR_ADC_PSCTL_0_S00_AXI_BASEADDR//XPAR_ADC_PSCTL_1_S00_AXI_BASEADDR
 
 #define FS_BUCK_BOOST_HW_CONFIG_IRQ_PL_CPU1          ZYNQ_CONFIG_IRQ_PL_TO_CPU1
 #define FS_BUCK_BOOST_HW_CONFIG_IRQ_PL_CPU1_PRIO     ZYNQ_CONFIG_IRQ_PL_TO_CPU1_PRIO
 #define FS_BUCK_BOOST_HW_CONFIG_ADC_BUFFER           ( ZYNQ_CONFIG_MEM_PL_TO_CPU1_ADR )
 
-#define FS_BUCK_BOOST_HW_CONFIG_GPIO_ID              XPAR_AXI_GPIO_0_DEVICE_ID
+//#define FS_BUCK_BOOST_HW_CONFIG_GPIO_ID              XPAR_AXI_GPIO_0_DEVICE_ID
 #define FS_BUCK_BOOST_HW_CONFIG_GPIO_CHANNEL         1
 #define FS_BUCK_BOOST_HW_CONFIG_GPIO_MASK            0b11
 
@@ -494,9 +493,9 @@ static void fsbuckboostHwInitializeGpio(void){
     XGpio_Config *cfg_ptr = 0;
 
     /* Initializes GPIOs */
-    cfg_ptr = XGpio_LookupConfig(FS_BUCK_BOOST_HW_CONFIG_GPIO_ID);
-    XGpio_CfgInitialize(&hwControl.gpio, cfg_ptr, cfg_ptr->BaseAddress);
-    XGpio_SetDataDirection(&hwControl.gpio, FS_BUCK_BOOST_HW_CONFIG_GPIO_CHANNEL, 0);
+    //cfg_ptr = XGpio_LookupConfig(FS_BUCK_BOOST_HW_CONFIG_GPIO_ID);
+    //XGpio_CfgInitialize(&hwControl.gpio, cfg_ptr, cfg_ptr->BaseAddress);
+    //XGpio_SetDataDirection(&hwControl.gpio, FS_BUCK_BOOST_HW_CONFIG_GPIO_CHANNEL, 0);
 
     fsbuckboostHwSetInputRelay(0);
     fsbuckboostHwSetOutputRelay(0);
@@ -525,4 +524,3 @@ static void fsbuckboostHwInitializeMeasGains(void){
 }
 //-----------------------------------------------------------------------------
 //=============================================================================
-#endif /* SOC_CPU1 */

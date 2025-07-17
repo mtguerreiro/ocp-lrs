@@ -24,7 +24,7 @@
 #include "xgpio.h"
 #include "xil_types.h"
 
-#include "hardware/zynq/ocpZynqCpu1.h"
+#include "ocpZynqCpu1.h"
 
 #include "zynqConfig.h"
 //=============================================================================

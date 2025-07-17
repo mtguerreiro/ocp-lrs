@@ -12,7 +12,7 @@
 
 /* Zynq-specific stuff */
 #include "zynqConfig.h"
-#include "hardware/zynq/ipcServerZynq.h"
+#include "ipcServerZynq.h"
 
 /* Open controller project */
 #include "ocp/ocpIf.h"

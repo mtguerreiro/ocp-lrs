@@ -1,6 +1,4 @@
 
-
-#ifdef SOC_CPU1
 //=============================================================================
 /*-------------------------------- Includes ---------------------------------*/
 //=============================================================================
@@ -8,10 +6,10 @@
 
 /* Open controller project */
 #include "ocpConfig.h"
-#include "ocpTrace.h"
-#include "ocpCS.h"
-#include "ocpIf.h"
-#include "ocpOpil.h"
+#include "ocp/ocpTrace.h"
+#include "ocp/ocpCS.h"
+#include "ocp/ocpIf.h"
+#include "ocp/ocpOpil.h"
 
 /* Controller lib */
 #include "controller/controller.h"
@@ -199,5 +197,3 @@ void fsbuckboostAdcIrq(void *callbackRef){
 }
 //-----------------------------------------------------------------------------
 //=============================================================================
-
-#endif /* SOC_CPU1 */

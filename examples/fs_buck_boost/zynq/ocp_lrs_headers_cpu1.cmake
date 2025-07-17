@@ -1,8 +1,11 @@
 
+list(APPEND USER_COMPILE_DEFINITIONS
+    SOC_CPU1
+)
+
 list(APPEND USER_INCLUDE_DIRECTORIES
-    "${OCP_LRS_PATH}/target/zynq/cpu0"
-    "${OCP_LRS_PATH}/target/zynq/cpu0/tasks"
-    )
+    "${OCP_LRS_PATH}/target/zynq/cpu1"
+)
 
 list(APPEND USER_INCLUDE_DIRECTORIES
     "${OCP_LRS_PATH}/target/zynq/drivers"

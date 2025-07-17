@@ -125,11 +125,11 @@ set(USER_LINKER_SCRIPT "${CMAKE_SOURCE_DIR}/lscript.ld")
 set(USER_LINK_OTHER_FLAGS
 )
 
-include(${OCP_LRS_PATH}/examples/fs_buck_boost/zynq/ocp_sources.cmake)
-include(${OCP_LRS_PATH}/examples/fs_buck_boost/zynq/ocp_headers.cmake)
+include(${OCP_LRS_PATH}/target/zynq/ocp_sources.cmake)
+include(${OCP_LRS_PATH}/target/zynq/ocp_headers.cmake)
 
-include(${OCP_LRS_PATH}/examples/fs_buck_boost/zynq/ocp_lrs_sources.cmake)
-include(${OCP_LRS_PATH}/examples/fs_buck_boost/zynq/ocp_lrs_headers.cmake)
+include(${OCP_LRS_PATH}/examples/fs_buck_boost/zynq/ocp_lrs_sources_cpu0.cmake)
+include(${OCP_LRS_PATH}/examples/fs_buck_boost/zynq/ocp_lrs_headers_cpu0.cmake)
 
 # -----------------------------------------
 
@@ -163,4 +163,3 @@ set(USER_LINK_OPTIONS
     " ${USER_LINKER_OMIT_ALL_SYMBOL_INFO}"
     " ${USER_LINK_OTHER_FLAGS}"
 )
-
