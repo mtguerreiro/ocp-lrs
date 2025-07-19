@@ -88,7 +88,7 @@ set(USER_COMPILE_ANSI )
 
 # Add any compiler options that are not covered by the above variables, they will be added as extra compiler options
 # To enable profiling -pg [ for gprof ]  or -p [ for prof information ]
-set(USER_COMPILE_OTHER_FLAGS -Wno-unused-parameter)
+set(USER_COMPILE_OTHER_FLAGS )
 
 # -----------------------------------------
 
@@ -132,6 +132,7 @@ set(USER_LINK_OTHER_FLAGS
 include(${OCP_LRS_PATH}/target/zynq/ocp_sources.cmake)
 include(${OCP_LRS_PATH}/target/zynq/ocp_headers.cmake)
 
+include(${OCP_LRS_PATH}/examples/fs_buck_boost/zynq/ocp_lrs_defs_cpu1.cmake)
 include(${OCP_LRS_PATH}/examples/fs_buck_boost/zynq/ocp_lrs_sources_cpu1.cmake)
 include(${OCP_LRS_PATH}/examples/fs_buck_boost/zynq/ocp_lrs_headers_cpu1.cmake)
 

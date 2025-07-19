@@ -23,14 +23,12 @@
 #include "uiface.h"
 
 /* LRS SoC defs */
-//#include "soc_defs.h"
 #include "zynqConfig.h"
 //=============================================================================
 
 //=============================================================================
 /*--------------------------------- Defines ---------------------------------*/
 //=============================================================================
-//#define BLINK_XIL_LED_ID 		XPAR_AXI_GPIO_RGB_LED_DEVICE_ID
 #define BLINK_XIL_LED_CHANNEL 	1
 #define BLINK_XIL_LED_MASK 		0b111
 #define BLINK_XIL_LED_ADDRESS   XPAR_AXI_GPIO_RGB_LED_BASEADDR
@@ -87,12 +85,9 @@ void blink(void *param){
 //-----------------------------------------------------------------------------
 static void blinkInitialize(void){
 
-    XGpio_Config *cfg;
-
 	/* Initializes PYNQ's (RGB) LEDs */
-	//XGpio_CfgInitialize(&xblinkControl.rgbled, cfg, BLINK_XIL_LED_ADDRESS);
-	//XGpio_SetDataDirection(&xblinkControl.rgbled, BLINK_XIL_LED_CHANNEL, 0);
     XGpio_Initialize(&xblinkControl.rgbled, BLINK_XIL_LED_ADDRESS);
+    XGpio_SetDataDirection(&xblinkControl.rgbled, BLINK_XIL_LED_CHANNEL, 0);
 
 	/* Sets default blinking period */
 	xblinkControl.period = BLINK_CONFIG_DEFAULT_PERIOD_MS / portTICK_PERIOD_MS;

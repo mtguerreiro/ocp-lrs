@@ -34,7 +34,6 @@
 //=============================================================================
 #define SYNC_FLAG  		(*(volatile unsigned long *)(ZYNQ_CONFIG_CPU0_CPU1_SYNC_FLAG_ADR))
 
-//#define MAIN_LED_ID         XPAR_AXI_GPIO_RGB_LED_DEVICE_ID
 #define MAIN_LED_ADDRESS    XPAR_AXI_GPIO_RGB_LED_BASEADDR
 #define MAIN_LED_CHANNEL    1
 #define MAIN_LED_MASK       0b111
@@ -99,7 +98,6 @@ int main(){
 static int mainSysInit(void){
 
 	int Status;
-	XGpio_Config *cfg_ptr = 0;
 
     //Disable cache on OCM
 	Xil_SetTlbAttributes(0xFFFF0000,0x14de2);           // S=b1 TEX=b100 AP=b11, Domain=b1111, C=b0, B=b0
@@ -116,8 +114,7 @@ static int mainSysInit(void){
 	ocpZynqCpu1Initialize(&IntcInstancePtr);
 
 	/* Initializes PYNQ's (RGB) LEDs */
-    cfg_ptr = XGpio_LookupConfig(MAIN_LED_ADDRESS);
-	XGpio_CfgInitialize(&led, cfg_ptr, cfg_ptr->BaseAddress);
+	XGpio_Initialize(&led, MAIN_LED_ADDRESS);
 	XGpio_SetDataDirection(&led, MAIN_LED_CHANNEL, 0);
 
 	SYNC_FLAG = 0;

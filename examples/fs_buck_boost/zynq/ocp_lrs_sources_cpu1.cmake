@@ -1,3 +1,4 @@
+set(USER_LINKER_SCRIPT "${OCP_LRS_PATH}/target/zynq/cpu1/lscript.ld")
 
 list(APPEND USER_COMPILE_SOURCES
     "${OCP_LRS_PATH}/target/zynq/cpu1/main.c"

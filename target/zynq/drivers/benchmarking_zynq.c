@@ -12,7 +12,7 @@ int32_t InitBenchmarking()
 	int error = -1;
 
 	// config
-	pcfg_scu_timer = XScuTimer_LookupConfig(XPAR_SCUTIMER_DEVICE_ID);
+	pcfg_scu_timer = XScuTimer_LookupConfig(XPAR_XSCUTIMER_0_BASEADDR);
 	error = XScuTimer_CfgInitialize(&scu_timer, pcfg_scu_timer, XPAR_XSCUTIMER_0_BASEADDR);
 
 	if(error)
