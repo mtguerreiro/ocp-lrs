@@ -7,7 +7,7 @@
 //=============================================================================
 
 /* Trace configurations */
-#define OCP_TRACE_CONFIG_TRACE_NAME_MAX_LEN		20
+#define OCP_TRACE_CONFIG_TRACE_NAME_MAX_LEN		30
 
 #ifndef OCP_CONFIG_MASTER_CORE
 typedef enum{
@@ -21,7 +21,7 @@ typedef enum{
 #endif
 
 /* Controller configurations */
-#define OCP_CS_CONFIG_CS_NAME_MAX_LEN		20
+#define OCP_CS_CONFIG_CS_NAME_MAX_LEN		30
 
 #ifndef OCP_CONFIG_MASTER_CORE
 typedef enum{
