@@ -122,28 +122,28 @@ int32_t fsbuckboostControlBoostEnergyMpcRun(void *meas, int32_t nmeas,
     }
 
     /* Delay compensation */
-    y_1 = y + params.dt * y_dot + params.alpha * params.dt * params.dt / 2.0f * v_1;
-    y_dot_1 = y_dot + params.alpha * params.dt * v_1;
+    y = y + params.dt * y_dot + params.alpha * params.dt * params.dt / 2.0f * v_1;
+    y_dot = y_dot + params.alpha * params.dt * v_1;
 
     /* Determine bounds for dv */
     dv_min_v = m->v_in / params.L * (m->v_in - m->v_dc_out) / params.alpha - v_1;
     dv_max_v = m->v_in * m->v_in / params.L / params.alpha - v_1;
 
-    dv_min_z2 = (-params.il_lim * m->v_in - m->v_dc_out * io_filt - 2.0f * y_dot_1 + y_dot) / (params.alpha * params.dt);
-    dv_max_z2 = ( params.il_lim * m->v_in - m->v_dc_out * io_filt - 2.0f * y_dot_1 + y_dot) / (params.alpha * params.dt);
+    dv_min_z2 = (-params.il_lim * m->v_in - m->v_dc_out * io_filt - 2.0f * y_dot + y_dot_1) / (params.alpha * params.dt);
+    dv_max_z2 = ( params.il_lim * m->v_in - m->v_dc_out * io_filt - 2.0f * y_dot + y_dot_1) / (params.alpha * params.dt);
 
     dv_min = dv_min_v > dv_min_z2 ? dv_min_v : dv_min_z2;
     dv_max = dv_max_v < dv_max_z2 ? dv_max_v : dv_max_z2;
 
     /* Optimization */
-    dv = - params.Ky * (y_1 - yr) - params.K_dz_1 * (y_1 - y) - params.K_dz_2 * (y_dot_1 - y_dot);
+    dv = - params.Ky * (y - yr) - params.K_dz_1 * (y - y_1) - params.K_dz_2 * (y_dot - y_dot_1);
     if( dv > dv_max ) dv = dv_max;
     else if( dv < dv_min ) dv = dv_min;
     v = v_1 + dv;
 
     /* Saves variables */
-    //y_1 = y;
-    //y_dot_1 = y_dot;
+    y_1 = y;
+    y_dot_1 = y_dot;
     v_1 = v;
 
     /* Feedback linearization */
@@ -180,8 +180,6 @@ int32_t fsbuckboostControlBoostEnergyMpcFirstEntry(void *meas, int32_t nmeas,
     void *refs, int32_t nrefs,
     void *outputs, int32_t nmaxoutputs){
 
-    printf("\nEntering MPC controller\n");
-    fflush(stdout);
     return 0;
 }
 //-----------------------------------------------------------------------------
