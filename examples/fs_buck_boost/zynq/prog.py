@@ -14,7 +14,7 @@ cpu1_name = 'cpu1'
 cpu1_app_name = f'{cpu1_name}_app'
 
 # --- Binaries ---
-fpga_bs = f'{ws_path}/{platform_name}/hw/pynq_lrssoc_bd_wrapper.bit'
+fpga_bs = f'{ws_path}/{platform_name}/hw/pynq_lrssoc.bit'
 fsbl = f'{ws_path}/{platform_name}/zynq_fsbl/build/fsbl.elf'
 cpu0_elf = f'{ws_path}/{cpu0_app_name}/build/{cpu0_app_name}.elf'
 cpu1_elf = f'{ws_path}/{cpu1_app_name}/build/{cpu1_app_name}.elf'

@@ -7,12 +7,12 @@ import zipfile
 # --- Input ---
 ws_path = './build'
 
-hw_file_name = 'pynq_lrssoc_bd_wrapper'
-hw_file_path = '/home/marco/xilinx/vitis/lrssoc/hw'
-hw_file = f'{hw_file_path}/{hw_file_name}.xsa'
-
 ocp_lrs = '/home/marco/projects/ocp-lrs'
 lrs_app = 'fs_buck_boost'
+
+hw_file_name = 'pynq_lrssoc'
+hw_file_path = '/home/marco/projects/ocp-lrs/lrs_apps/fs_buck_boost/zynq'
+hw_file = f'{hw_file_path}/{hw_file_name}.xsa'
 
 # --- LRSSOC app ---
 platform_name = 'lrssoc'
