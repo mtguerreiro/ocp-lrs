@@ -26,7 +26,7 @@ int32_t fsbuckboostControlBoostEnergyMpcRun(void *meas, int32_t nmeas,
     void *refs, int32_t nrefs,
     void *outputs, int32_t nmaxoutputs);
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControlBoostEnergyMpcSetParams(void *params, uint32_t size);
+int32_t fsbuckboostControlBoostEnergyMpcSetParams(void *buffer, uint32_t size);
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostControlBoostEnergyMpcGetParams(void *buffer, uint32_t size);
 //-----------------------------------------------------------------------------

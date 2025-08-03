@@ -25,6 +25,7 @@ def run_ref_step(fsbb, run_params, save=False, ctl='energy'):
     if ctl == 'energy':
         fsbb.boost_energy.enable()
     else:
+        print('enabling mpc controller')
         fsbb.boost_energy_mpc.enable()
     time.sleep(1)
 

@@ -269,8 +269,9 @@ class _BoostEnergyMpc(pyocp.controller.ControllerTemplate):
         super().__init__(ctl_id, ctl_if)
 
         self.keys = (
-            'k1', 'k2', 'k3', 'dt',
-            'C', 'L', 'alpha', 'filt_en',
+            'C', 'L', 'ts', 'il_lim', 'alpha',
+            'Ky', 'K_dz_1', 'K_dz_2',
+            'filt_coef', 'filt_en',
             'kd'
             )
         self._model_params = ModelParams
@@ -296,17 +297,31 @@ class _BoostEnergyMpc(pyocp.controller.ControllerTemplate):
         return params_bin
     
 
-    def set_gains(self, ts=2e-3, os=5, dt=1/100e3):
+    def set_gains(self, rw=1e-5, l_pred=12, alpha=1e6, dt=1/100e3):
 
-        params = self._get_gains(ts, os=os, dt=dt)
+        params = self._get_gains(rw=rw, l_pred=l_pred, alpha=alpha, dt=dt)
         
         return self.set_params(params)
 
 
-    def _get_gains(self, ts, os=5, alpha=5.0, dt=1.0):
+    def _get_gains(self, rw=1e-5, l_pred=12, alpha=1e6, dt=1.0):
 
-        k1, k2, k3 = pyctl.design.pe.boost.energy(ts, os, alpha=alpha)
+        Am = np.array([[0.0, 1.0],
+                       [0.0, 0.0]])
 
-        gains = {'k1':k1, 'k2':k2, 'k3':k3, 'dt':dt}
+        Bm = np.array([[0.0],
+                       [alpha]])
+
+        Cm = np.array([1.0, 0.0])
+        
+        Ad, Bd, Cd, _, _ = scipy.signal.cont2discrete((Am, Bm, Cm, 0), dt, method='zoh')
+
+        sys = pyctl.mpc.System(Ad, Bd, Cd, l_pred=l_pred, rw=rw)
+
+        gains = {
+            'Ky':sys.Ky[0][0],
+            'K_dz_1':sys.Kx[0][0], 'K_dz_2':sys.Kx[0][1],
+            'dt':dt, 'alpha':alpha
+        }
 
         return gains
