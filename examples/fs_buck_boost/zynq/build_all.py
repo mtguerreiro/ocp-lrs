@@ -11,7 +11,7 @@ ocp_lrs = '/home/marco/projects/ocp-lrs'
 lrs_app = 'fs_buck_boost'
 
 hw_file_name = 'pynq_lrssoc'
-hw_file_path = '/home/marco/projects/ocp-lrs/lrs_apps/fs_buck_boost/zynq'
+hw_file_path = f'{ocp_lrs}/lrs_apps/fs_buck_boost/zynq'
 hw_file = f'{hw_file_path}/{hw_file_name}.xsa'
 
 # --- LRSSOC app ---

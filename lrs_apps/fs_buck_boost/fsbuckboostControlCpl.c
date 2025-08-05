@@ -6,34 +6,34 @@
 #include "fsbuckboostConfig.h"
 
 #include "controller/controller.h"
+
+#include "string.h"
 //============================================================================
 
 //=============================================================================
 /*------------------------------- Definitions -------------------------------*/
 //=============================================================================
-
+typedef struct{
+    float ki;
+    float kv;
+    float k_ev;
+    float dt;
+    float v_min;
+    float v_max;
+}ctlparams_t;
 
 //=============================================================================
 
 //=============================================================================
 /*--------------------------------- Globals ---------------------------------*/
 //=============================================================================
-static float ki = 0.02015303075313568;
-static float kv = -0.07867603003978729;
-static float k_ev = -4.631767272949219;
-static float v_min = 15.0f;
-static float v_max = 35.0f;
+static ctlparams_t params;
 
 static float e = 0.0f;
 
 static float ev = 0.0f;
 static float ev_1 = 0.0f;
 
-static float v_ref = 6.0f;
-static float dt = 1.0f / 100000.0f;
-
-static float i;
-static float v;
 static float u;
 
 //=============================================================================
@@ -56,20 +56,16 @@ int32_t fsbuckboostControlCplRun(void *meas, int32_t nmeas,
     fsbuckboostConfigControl_t *o = (fsbuckboostConfigControl_t *)outputs;
     fsbuckboostConfigReferences_t *r = (fsbuckboostConfigReferences_t *)refs;
 
-    i = m->il;
-    v = m->v_out;
-    v_ref = r->v_out;
-
-    if( (m->v_in > v_max) || (m->v_in < v_min) ){
+    if( (m->v_in > params.v_max) || (m->v_in < params.v_min) ){
         o->u = 0.0f;
         return -1;
     }
 
-    ev = v_ref - v;
-    e = e + (dt / 2.0f) * ( ev + ev_1 );
+    ev = r->v_out - m->v_dc_out;
+    e = e + (params.dt / 2.0f) * ( ev + ev_1 );
     ev_1 = ev;
 
-    u = - ki * i - kv * v - k_ev * e;
+    u = - params.ki * m->il - params.kv * m->v_dc_out - params.k_ev * e;
 
     if( u > 1.0f ) u = 1.0f;
     else if( u < 0.0f ) u = 0.0f;
@@ -79,44 +75,32 @@ int32_t fsbuckboostControlCplRun(void *meas, int32_t nmeas,
     return sizeof(fsbuckboostConfigControl_t);
 }
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControlCplSetParams(void *params, uint32_t size){
+int32_t fsbuckboostControlCplSetParams(void *buffer, uint32_t size){
 
-    float *p = (float *)params;
-
-    ki = *p++;
-    kv = *p++;
-    k_ev = *p++;
-    dt = *p++;
-    v_min = *p++;
-    v_max = *p++;
+    memcpy((void *)&params, buffer, size);
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostControlCplGetParams(void *buffer, uint32_t size){
 
-    float *p = (float *)buffer;
+    memcpy(buffer, (void *)&params, sizeof(ctlparams_t));
 
-    *p++ = ki;
-    *p++ = kv;
-    *p++ = k_ev;
-    *p++ = dt;
-    *p++ = v_min;
-    *p++ = v_max;
-
-    return 24;
+    return sizeof(ctlparams_t);
 }
 //-----------------------------------------------------------------------------
 void fsbuckboostControlCplReset(void){
 
-    e = 0.0f;
-
-    ev_1 = 0.0f;
 }
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostControlCplFirstEntry(void *meas, int32_t nmeas,
     void *refs, int32_t nrefs,
     void *outputs, int32_t nmaxoutputs){
+
+    fsbuckboostConfigMeasurements_t *m = (fsbuckboostConfigMeasurements_t *)meas;
+
+    e = 1 / params.k_ev * (-params.ki * m->il - params.kv * m->v_dc_out - m->v_dc_out / m->v_in);
+    ev_1 = 0.0f;
 
     return 0;
 }

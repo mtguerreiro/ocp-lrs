@@ -5,7 +5,7 @@ import numpy as np
 import pyocp
 from . import common
 
-def run_ref_step(fsbb, run_params, save=False, ctl='energy'):
+def run_ref_step(fsbb, run_params, save=False, ctl='cpl'):
 
     common.init(fsbb, run_params)
 
@@ -22,7 +22,7 @@ def run_ref_step(fsbb, run_params, save=False, ctl='energy'):
     common.ramp_duty_up(fsbb, ramp_params)
     time.sleep(1)
 
-    if ctl == 'sfb':
+    if ctl == 'cpl':
         fsbb.cpl.enable()
     else:
         fsbb.buck_sfb.enable()

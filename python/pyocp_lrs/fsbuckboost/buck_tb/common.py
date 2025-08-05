@@ -17,7 +17,7 @@ def init(fsbb, params):
     config_cpl_controller(
         fsbb,
         params['model_params'],
-        params['ctl_params']
+        params['cpl_params']
     )
     fsbb.buck_sfb.reset()
     fsbb.cpl.reset()
