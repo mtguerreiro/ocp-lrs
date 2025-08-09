@@ -21,8 +21,10 @@ def run_ref_step(fsbb, model_params, exp_params, plat_params, save=False, ctl='e
 
     if ctl == 'energy':
         fsbb.boost_energy.enable()
-    else:
+    elif ctl == 'energy_mpc':
         fsbb.boost_energy_mpc.enable()
+    elif ctl == 'cpl':
+        fsbb.cpl.enable()
     time.sleep(1)
 
     fsbb.set_ref(exp_params['v_ref_step_up'])

@@ -5,9 +5,7 @@ import numpy as np
 import pyocp
 import pyocp.data_mng_util as dmu
 
-from . import boost
-from . import buck
-
+from . import controllers
 
 def init(fsbb, model_params, exp_params, plat_params):
 
@@ -25,20 +23,19 @@ def init(fsbb, model_params, exp_params, plat_params):
     f_pwm = model_params['f_pwm']
 
     fsbb.hw.set_pwm_frequency(f_pwm)
-    
+        
     fsbb.set_converter_mode(mode)
     if mode == 'boost':
-        print("conf'ing boost")
         ramp_u_ref = (v_ref_ini - v_in) / v_ref_ini
-        boost.config_controllers(fsbb, model_params, plat_params)
     else:
         ramp_u_ref = v_ref_ini / v_in
-        buck.config_controllers(fsbb, model_params, plat_params)
 
     plat_params['ramp_params']['u_ref'] = ramp_u_ref
     config_ramp_controller(fsbb, plat_params['ramp_params'])
     fsbb.ramp.reset()
-    
+
+    controllers.config(fsbb, model_params, plat_params)
+
     fsbb.hw.set_meas_gains(plat_params['meas_gains'])
 
     fsbb.trace.set_n_pre_trig_samples(100)
