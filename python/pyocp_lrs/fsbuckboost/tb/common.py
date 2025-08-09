@@ -5,39 +5,47 @@ import numpy as np
 import pyocp
 import pyocp.data_mng_util as dmu
 
+from . import boost
+from . import buck
 
-def init(fsbb, params):
+
+def init(fsbb, model_params, exp_params, plat_params):
+
+    mode = plat_params['mode']
+    modes = ('buck', 'boost')
+    if mode not in modes:
+        raise ValueError(f'`mode` should be one of {modes}.')
 
     fsbb.disable()
     fsbb.idle.enable()
-    fsbb.set_ref(params['exp_params']['v_ref'])
+    fsbb.set_ref(exp_params['v_ref'])
 
-    fsbb.set_converter_mode('boost')
+    v_in = model_params['V_in']
+    v_ref_ini = exp_params['v_ref']
+    f_pwm = model_params['f_pwm']
 
-##    config_energy_controller(
-##        fsbb,
-##        params['model_params'],
-##        params['ctl_params']
-##    )
-##    fsbb.boost_energy.reset()
-
-    config_energy_mpc_controller(
-        fsbb,
-        params['model_params'],
-        params['mpc_params']
-    )
-    fsbb.boost_energy_mpc.reset()
+    fsbb.hw.set_pwm_frequency(f_pwm)
     
-    config_ramp_controller(fsbb, params['ramp_params'])
+    fsbb.set_converter_mode(mode)
+    if mode == 'boost':
+        print("conf'ing boost")
+        ramp_u_ref = (v_ref_ini - v_in) / v_ref_ini
+        boost.config_controllers(fsbb, model_params, plat_params)
+    else:
+        ramp_u_ref = v_ref_ini / v_in
+        buck.config_controllers(fsbb, model_params, plat_params)
+
+    plat_params['ramp_params']['u_ref'] = ramp_u_ref
+    config_ramp_controller(fsbb, plat_params['ramp_params'])
     fsbb.ramp.reset()
     
-    config_meas_gains(fsbb, params['meas_gains'])
+    fsbb.hw.set_meas_gains(plat_params['meas_gains'])
 
     fsbb.trace.set_n_pre_trig_samples(100)
     fsbb.trace.set_size(1000)
 
-    v_ref = params['exp_params']['v_ref']
-    v_ref_step_up = params['exp_params']['v_ref_step_up']
+    v_ref = exp_params['v_ref']
+    v_ref_step_up = exp_params['v_ref_step_up']
     trig_level = (v_ref + v_ref_step_up) / 2
     fsbb.trace.set_trig_level(trig_level)
     fsbb.trace.set_trig_signal(8)
@@ -46,58 +54,12 @@ def init(fsbb, params):
     fsbb.trace.reset()
 
 
-def config_energy_controller(fsbb, model_params, ctl_params):
-    
-    f_pwm = model_params['f_pwm']
-    fsbb.hw.set_pwm_frequency(f_pwm)
-
-    ts = ctl_params['ts']
-    os = ctl_params['os']
-    dt = 1 / f_pwm
-    fsbb.boost_energy.set_gains(ts=ts, os=os, dt=dt)
-
-    alpha = ctl_params['alpha']
-    filt_en = ctl_params['filt_en']
-    kd = ctl_params['kd']
-    fsbb.boost_energy.set_params({'alpha':alpha, 'filt_en':filt_en, 'kd':kd})
-
-
-def config_energy_mpc_controller(fsbb, model_params, ctl_params):
-    
-    f_pwm = model_params['f_pwm']
-    fsbb.hw.set_pwm_frequency(f_pwm)
-
-    C = model_params['C_out']
-    L = model_params['L']
-    dt = 1 / f_pwm
-
-    fsbb.boost_energy_mpc.set_params({'C':C, 'L':L, 'dt':dt})
-
-    il_lim = ctl_params['il_lim']
-    filt_coef = ctl_params['filt_coef']
-    filt_en = ctl_params['filt_en']
-    kd = ctl_params['kd']
-    print(f'il_lim: {il_lim}')
-    fsbb.boost_energy_mpc.set_params(
-        {'il_lim':il_lim, 'filt_coef':filt_coef, 'filt_en':filt_en, 'kd':kd}
-        )
-    
-    alpha = ctl_params['alpha']
-    rw = ctl_params['rw']
-    l_pred = ctl_params['l_pred']
-    fsbb.boost_energy_mpc.set_gains(rw=rw, l_pred=l_pred, alpha=alpha, dt=dt)    
-
-
 def config_ramp_controller(fsbb, ctl_params):
 
     fsbb.ramp.set_params({
         'u_step':ctl_params['u_step'],
         'u_ref':ctl_params['u_ref']
     })
-    
-def config_meas_gains(fsbb, meas_gains):
-
-    fsbb.hw.set_meas_gains(meas_gains)
 
 
 def init_relays(fsbb):
@@ -142,7 +104,7 @@ def disable_cs(fsbb):
     fsbb.disable()
 
 
-def ramp_duty_up(fsbb, ramp_params):
+def ramp_duty_up(fsbb):
 
     fsbb.ramp.reset()
     fsbb.ramp.enable()

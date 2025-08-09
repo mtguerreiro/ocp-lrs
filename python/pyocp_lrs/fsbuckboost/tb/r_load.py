@@ -5,12 +5,9 @@ import numpy as np
 import pyocp
 from . import common
 
-def run_ref_step(fsbb, run_params, save=False, ctl='energy'):
+def run_ref_step(fsbb, model_params, exp_params, plat_params, save=False, ctl='energy'):
 
-    common.init(fsbb, run_params)
-
-    exp_params = run_params['exp_params']
-    ramp_params = run_params['ramp_params']
+    common.init(fsbb, model_params, exp_params, plat_params)
     
     status = common.enable_cs(fsbb)
     if status != 0:
@@ -19,13 +16,12 @@ def run_ref_step(fsbb, run_params, save=False, ctl='energy'):
 
     common.init_relays(fsbb)
 
-    common.ramp_duty_up(fsbb, ramp_params)
+    common.ramp_duty_up(fsbb)
     time.sleep(1)
 
     if ctl == 'energy':
         fsbb.boost_energy.enable()
     else:
-        print('enabling mpc controller')
         fsbb.boost_energy_mpc.enable()
     time.sleep(1)
 
