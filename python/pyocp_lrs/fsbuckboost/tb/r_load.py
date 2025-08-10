@@ -30,10 +30,7 @@ def run_ref_step(fsbb, model_params, exp_params, plat_params, save=False, ctl='e
     fsbb.set_ref(exp_params['v_ref_step_up'])
     time.sleep(1)
     
-    while True:
-        time.sleep(1)
-        status, trig_state = fsbb.trace.get_trig_state()
-        if trig_state == 4: break
+    common.wait_for_trigger(fsbb)
 
     fsbb.set_ref(exp_params['v_ref'])
     time.sleep(1)

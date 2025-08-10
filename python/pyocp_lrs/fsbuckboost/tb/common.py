@@ -38,15 +38,20 @@ def init(fsbb, model_params, exp_params, plat_params):
 
     fsbb.hw.set_meas_gains(plat_params['meas_gains'])
 
-    fsbb.trace.set_n_pre_trig_samples(100)
-    fsbb.trace.set_size(1000)
-
-    v_ref = exp_params['v_ref']
-    v_ref_step_up = exp_params['v_ref_step_up']
-    trig_level = (v_ref + v_ref_step_up) / 2
-    fsbb.trace.set_trig_level(trig_level)
-    fsbb.trace.set_trig_signal(8)
-
+    if 'trigger' in plat_params:
+        fsbb.trace.set_n_pre_trig_samples(plat_params['trigger']['pretrig'])
+        fsbb.trace.set_size(plat_params['trigger']['size'])
+        fsbb.trace.set_trig_signal(plat_params['trigger']['signal'])
+        fsbb.trace.set_trig_level(plat_params['trigger']['level'])
+    else:
+        v_ref = exp_params['v_ref']
+        v_ref_step_up = exp_params['v_ref_step_up']
+        trig_level = (v_ref + v_ref_step_up) / 2
+        fsbb.trace.set_n_pre_trig_samples(200)
+        fsbb.trace.set_size(2000)
+        fsbb.trace.set_trig_level(trig_level)
+        fsbb.trace.set_trig_signal(8)
+    
     fsbb.trace.set_mode(1)
     fsbb.trace.reset()
 
@@ -122,9 +127,9 @@ def wait_for_trigger(fsbb):
     if mode == 0: return
     
     while True:
-        time.sleep(1)
         status, trig_state = fsbb.trace.get_trig_state()
         if trig_state == 4: break
+        time.sleep(1)
 
 
 def save_data(fsbb, plat, data, meta):
