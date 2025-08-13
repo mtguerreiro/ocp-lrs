@@ -27,50 +27,51 @@ def run_ref_step(
     common.init_relays(src)
     time.sleep(1)
     common.init_relays(cpl)
+
+    cpl.trace.set_mode(0)
+    cpl.trace.set_size(500000)
+
+    src.trace.set_mode(0)
+    src.trace.set_size(500000)
+
+    cpl.trace.reset()
+    src.trace.reset()
     
     common.ramp_duty_up(src)
-    time.sleep(1)
+    time.sleep(0.8)
     common.ramp_duty_up(cpl)
-    time.sleep(1)
+    time.sleep(0.8)
 
     cpl.cpl.enable()
-    time.sleep(1)
-
-##    cpl.trace.set_mode(0)
-##    cpl.trace.set_size(50000)
-##
-##    src.trace.set_mode(0)
-##    src.trace.set_size(50000)
-##
-##    cpl.trace.reset()
-##    src.trace.reset()
+    time.sleep(0.5)
 
     if src_ctl == 'energy':
         src.boost_energy.enable()
     elif src_ctl == 'energy_mpc':
         src.boost_energy_mpc.enable()
-    time.sleep(1)
+    time.sleep(0.5)
 
-    cpl.trace.reset()
-    src.trace.reset()
-    time.sleep(1)
-    
+##    cpl.trace.reset()
+##    src.trace.reset()
+##    time.sleep(1)
+##    
     cpl.set_ref(cpl_exp_params['v_ref_step_up'])
-    time.sleep(1)
+    time.sleep(0.5)
 
     src.set_ref(src_exp_params['v_ref_step_up'])
-    time.sleep(1)
+    time.sleep(0.5)
 
     src.set_ref(src_exp_params['v_ref'])
-    time.sleep(1)
+    time.sleep(0.5)
     
     cpl.set_ref(cpl_exp_params['v_ref'])
-    time.sleep(1)
+    time.sleep(0.5)
     
     common.ramp_duty_down(cpl)
-    time.sleep(1)
+    time.sleep(0.8)
     common.ramp_duty_down(src)
-
+    time.sleep(0.8)
+    
     cpl.idle.enable()
     cpl.disable()
     
