@@ -25,13 +25,10 @@
 //=============================================================================
 /*--------------------------------- Globals ---------------------------------*/
 //=============================================================================
-static stypesMeasurements_t xtMeasurements;
-static stypesSimData_t xtSimData;
 static stypesControl_t xtControl;
 static stypesControllerData_t xtControllerData;
 
 static uint8_t txbuf[256];
-static uint8_t rxbuf[256];
 //=============================================================================
 
 //=============================================================================
@@ -56,7 +53,7 @@ int32_t opilZynqCpu0UpdateMeasurements(void *meas, int32_t size){
 
     dst = &txbuf[4];
     src = (uint8_t *)meas;
-    for(k = 0; k < size; k++) *dst++ = *src++;
+    for(k = 0; k < (uint32_t) size; k++) *dst++ = *src++;
 
     status = ipcClientRequest( (void *)&txbuf, size + 4, 0, 0, OPIL_ZYNQ_CPU0_REQ_TO );
     if( status < 0 ) return status;
@@ -78,7 +75,7 @@ int32_t opilZynqCpu0UpdateSimData(void *simData, int32_t size){
 
     dst = &txbuf[4];
     src = (uint8_t *)simData;
-    for(k = 0; k < size; k++) *dst++ = *src++;
+    for(k = 0; k < (uint32_t) size; k++) *dst++ = *src++;
 
     status = ipcClientRequest( (void *)&txbuf, size + 4, 0, 0, OPIL_ZYNQ_CPU0_REQ_TO );
     if( status < 0 ) return status;

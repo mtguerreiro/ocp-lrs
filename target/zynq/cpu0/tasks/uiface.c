@@ -14,6 +14,7 @@
 #include "netif/xadapter.h"
 #include "xil_printf.h"
 #include "xil_types.h"
+#include "xil_io.h"
 
 /* Network settings */
 #define UIFACE_CONFIG_USE_DHCP      ZYNQ_CONFIG_USE_DHCP
@@ -45,6 +46,9 @@
 /* Ethernet settings */
 #define UIFACE_PLAT_EMAC_BASEADDR                   XPAR_XEMACPS_0_BASEADDR
 
+/* Zynq DNA */
+#define UIFACE_DNA_BASEADDR                         XPAR_ZYNQ_AXI_DNA_0_BASEADDR
+
 typedef struct{
     /* Server netif */
     struct netif servernetif;
@@ -68,9 +72,6 @@ uifaceControl_t xuifaceControl;
 //=============================================================================
 /*-------------------------------- Prototypes -------------------------------*/
 //=============================================================================
-static void uifopilIfThread(void);
-static void uifopilIfProcessThread(void *p);
-
 static void uifocpIfThread(void);
 
 /**
@@ -309,10 +310,24 @@ static void uifocpIfProcessThread(void *param){
 static void uifaceNetworkThread(void *p){
 
     struct netif *netif;
+    uint32_t dnaLow, dnaHigh;
 
     /* The mac address of the board. this should be unique per board */
-    unsigned char mac_ethernet_address[] = { 0x00, 0x0a, 0x75, 0x00, 0x33, 0xf2 };
+    unsigned char mac[6];
     ip_addr_t ipaddr, netmask, gw;
+
+    dnaLow = Xil_In32(UIFACE_DNA_BASEADDR);
+    dnaHigh = Xil_In32(UIFACE_DNA_BASEADDR + 4);
+    mac[0] = (char)(  dnaHigh & 0xFF );
+    mac[1] = (char)( (dnaHigh & 0xFF00) >> 8 );
+    mac[2] = (char)( (dnaHigh & 0xFF0000) >> 16 );
+    mac[3] = (char)( (dnaHigh & 0xFF000000) >> 24 );
+    mac[4] = (char)(  dnaLow  & 0xFF );
+    mac[5] = (char)( (dnaLow  & 0xFF00) >> 8 );
+    xil_printf(
+        "Board MAC: %X:%X:%X:%X:%X:%X\n",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]
+    );
 
 #if UIFACE_CONFIG_USE_DHCP==1
     int mscnt = 0;
@@ -338,7 +353,7 @@ static void uifaceNetworkThread(void *p){
 #endif
 
     /* Add network interface to the netif_list, and set it as default */
-    if (!xemac_add(netif, &ipaddr, &netmask, &gw, mac_ethernet_address, UIFACE_PLAT_EMAC_BASEADDR)) {
+    if (!xemac_add(netif, &ipaddr, &netmask, &gw, mac, UIFACE_PLAT_EMAC_BASEADDR)) {
         xil_printf("Error adding N/W interface\r\n");
         return;
     }
@@ -384,9 +399,9 @@ static void uifacePrintIP(char *msg, ip_addr_t *ip){
 //-----------------------------------------------------------------------------
 static void uifacePrintIPSettings(ip_addr_t *ip, ip_addr_t *mask, ip_addr_t *gw){
 
-    uifacePrintIP("Board IP: ", ip);
-    uifacePrintIP("Netmask : ", mask);
-    uifacePrintIP("Gateway : ", gw);
+    uifacePrintIP("Board IP : ", ip);
+    uifacePrintIP("Netmask  : ", mask);
+    uifacePrintIP("Gateway  : ", gw);
 }
 //-----------------------------------------------------------------------------
 //=============================================================================

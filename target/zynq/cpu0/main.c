@@ -40,12 +40,11 @@
 /*--------------------------------- Defines ---------------------------------*/
 //=============================================================================
 /* Command to wake CPU1 from CPU0. */
-#define sev()			__asm__("sev")
+#define sev()   __asm__("sev")
 
 /* Definitions for the interrupt controller */
-//#define MAIN_XIL_INTC_DEVICE_ID			XPAR_PS7_SCUGIC_0_DEVICE_ID
-#define MAIN_XIL_INTC_ADDRESS           XPAR_XSCUGIC_0_BASEADDR
-#define MAIN_XIL_INTC_HANDLER			XScuGic_InterruptHandler
+#define MAIN_XIL_INTC_ADDRESS       XPAR_XSCUGIC_0_BASEADDR
+#define MAIN_XIL_INTC_HANDLER       XScuGic_InterruptHandler
 
 /*
  * This flag is used to synchronize CPU0 and CPU1. After CPU0 writes the start
@@ -54,7 +53,7 @@
  * clears the sync flag. CPU0 only continues execution after the sync flag has
  * been cleared by CPU1.
  */
-#define MAIN_SYNC_FLAG  		(*(volatile unsigned long *)(ZYNQ_CONFIG_CPU0_CPU1_SYNC_FLAG_ADR))
+#define MAIN_SYNC_FLAG              (*(volatile unsigned long *)(ZYNQ_CONFIG_CPU0_CPU1_SYNC_FLAG_ADR))
 //=============================================================================
 
 //=============================================================================
@@ -84,25 +83,31 @@ XScuGic   xINTCInstance;
 //-----------------------------------------------------------------------------
 int main(void){
 
-	mainSysInit();
+    mainSysInit();
 
-	sys_thread_new("uiface_thrd", uiface,
-					0,
-					UIFACE_CONFIG_TASK_STACK_SIZE,
-					UIFACE_CONFIG_TASK_PRIO);
+    sys_thread_new(
+        "uiface_thrd", uiface,
+        0,
+        UIFACE_CONFIG_TASK_STACK_SIZE,
+        UIFACE_CONFIG_TASK_PRIO
+    );
 
-	sys_thread_new("blink_thrd", blink,
-					0,
-					BLINK_CONFIG_TASK_STACK_SIZE,
-					BLINK_CONFIG_TASK_PRIO);
+    sys_thread_new(
+        "blink_thrd", blink,
+        0,
+        BLINK_CONFIG_TASK_STACK_SIZE,
+        BLINK_CONFIG_TASK_PRIO
+    );
 
-	sys_thread_new("sysinit_thrd", sysinit,
-					(void *)&xINTCInstance,
-					SYSINIT_CONFIG_TASK_STACK_SIZE,
-					SYSINIT_CONFIG_TASK_PRIO);
+    sys_thread_new(
+        "sysinit_thrd", sysinit,
+        (void *)&xINTCInstance,
+        SYSINIT_CONFIG_TASK_STACK_SIZE,
+        SYSINIT_CONFIG_TASK_PRIO
+    );
 
-	vTaskStartScheduler();
-	while(1);
+    vTaskStartScheduler();
+    while(1);
 }
 //-----------------------------------------------------------------------------
 //=============================================================================
@@ -113,78 +118,89 @@ int main(void){
 //-----------------------------------------------------------------------------
 static int mainSysInit(void){
 
-	int Status;
+    uint32_t dnaLow, dnaHigh;
 
-	xil_printf("%s: CPU0 is initializing...\r\n", __FUNCTION__);
+    int Status;
+
+    xil_printf("%s: CPU0 is initializing...\r\n", __FUNCTION__);
 
     /* Disables cache on OCM */
     Xil_SetTlbAttributes(0xFFFF0000,0x14de2);           // S=b1 TEX=b100 AP=b11, Domain=b1111, C=b0, B=b0
 
-	/* Initializes the SCU Interrupt Distributer (ICD) */
-	Status = mainSetupIntrSystem(&xINTCInstance);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
+    /* Initializes the SCU Interrupt Distributer (ICD) */
+    Status = mainSetupIntrSystem(&xINTCInstance);
+    if (Status != XST_SUCCESS) {
+        return XST_FAILURE;
+    }
 
-	/* Sets sync flag (to be cleared by CPU1) */
-	MAIN_SYNC_FLAG = 1;
+    /* Sets sync flag (to be cleared by CPU1) */
+    MAIN_SYNC_FLAG = 1;
 
-	/*
-	 * Writes start address for CPU0, waits until it has been written (dmb)
-	 * and wakes CPU1 up.
-	 */
-	xil_printf("%s: Waking up CPU1...\r\n", __FUNCTION__);
+    /*
+     * Writes start address for CPU0, waits until it has been written (dmb)
+     * and wakes CPU1 up.
+     */
+    xil_printf("%s: Waking up CPU1...\r\n", __FUNCTION__);
     Xil_Out32(ZYNQ_CONFIG_CPU1_RESET_ADR, ZYNQ_CONFIG_CPU1_START_ADR);
     dmb();
     sev();
 
     xil_printf("%s: Waiting for CPU1...\r\n", __FUNCTION__);
-	while(MAIN_SYNC_FLAG == 1);
+    while(MAIN_SYNC_FLAG == 1);
 
     xil_printf("%s: CPU1 has initialized.\r\n", __FUNCTION__);
+
+    dnaLow = Xil_In32(XPAR_ZYNQ_AXI_DNA_0_BASEADDR);
+    dnaHigh = Xil_In32(XPAR_ZYNQ_AXI_DNA_0_BASEADDR + 4);
+
+    xil_printf("%s: FPGA DNA: 0x%X%X\r\n", __FUNCTION__, dnaLow, dnaHigh);
 
     return XST_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 static int mainSetupIntrSystem(XScuGic *intcInstance)
 {
-	int Status;
+    int Status;
 
-	XScuGic_Config *IntcConfig;
+    XScuGic_Config *IntcConfig;
 
-	/*
-	 * Initialize the interrupt controller driver so that it is ready to
-	 * use.
-	 */
-	IntcConfig = XScuGic_LookupConfig(MAIN_XIL_INTC_ADDRESS);
-	if (NULL == IntcConfig) {
-		return XST_FAILURE;
-	}
+    /*
+     * Initialize the interrupt controller driver so that it is ready to
+     * use.
+     */
+    IntcConfig = XScuGic_LookupConfig(MAIN_XIL_INTC_ADDRESS);
+    if (NULL == IntcConfig) {
+        return XST_FAILURE;
+    }
 
-	Status = XScuGic_CfgInitialize(intcInstance, IntcConfig,
-					MAIN_XIL_INTC_ADDRESS);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
+    Status = XScuGic_CfgInitialize(
+        intcInstance, IntcConfig,
+        MAIN_XIL_INTC_ADDRESS
+    );
+    if (Status != XST_SUCCESS) {
+        return XST_FAILURE;
+    }
 
-	/*
-	 * Initialize the  exception table
-	 */
-	Xil_ExceptionInit();
+    /*
+     * Initialize the  exception table
+     */
+    Xil_ExceptionInit();
 
-	/*
-	 * Register the interrupt controller handler with the exception table
-	 */
-	Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT,
-			 (Xil_ExceptionHandler)MAIN_XIL_INTC_HANDLER,
-			 intcInstance);
+    /*
+     * Register the interrupt controller handler with the exception table
+     */
+    Xil_ExceptionRegisterHandler(
+        XIL_EXCEPTION_ID_INT,
+        (Xil_ExceptionHandler)MAIN_XIL_INTC_HANDLER,
+        intcInstance
+    );
 
-	/*
-	 * Enable non-critical exceptions
-	 */
-	Xil_ExceptionEnable();
+    /*
+     * Enable non-critical exceptions
+     */
+    Xil_ExceptionEnable();
 
-	return XST_SUCCESS;
+    return XST_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 //=============================================================================
