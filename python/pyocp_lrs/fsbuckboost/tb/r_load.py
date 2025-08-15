@@ -28,7 +28,7 @@ def run_ref_step(fsbb, model_params, exp_params, plat_params, save=False, ctl='e
     time.sleep(1)
 
     fsbb.set_ref(exp_params['v_ref_step_up'])
-    time.sleep(1)
+    time.sleep(10)
     
     common.wait_for_trigger(fsbb)
 

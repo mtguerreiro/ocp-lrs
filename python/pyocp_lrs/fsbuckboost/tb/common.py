@@ -132,16 +132,16 @@ def wait_for_trigger(fsbb):
         time.sleep(1)
 
 
-def save_data(fsbb, plat, data, meta):
+def save_data(fsbb, file, data, meta):
 
     status, traces = fsbb.trace.get_signals()
 
     meta['traces'] = traces
     
-    fname = f'{plat}_{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}'
+    fname = f'{file}_{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}'
     ds = dmu.DataSet()
     ds.data = data
     ds.meta = meta
-    ds.source = plat
+    ds.source = ''
 
     dmu.save_data(fname, ds)

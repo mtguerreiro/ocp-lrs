@@ -18,9 +18,9 @@
 //=============================================================================
 /*------------------------------- Definitions -------------------------------*/
 //=============================================================================
-#define FS_BUCK_BOOST_HW_CONFIG_ADC_SPI_FREQ_HZ      ((uint32_t)16666666)
+#define FS_BUCK_BOOST_HW_CONFIG_ADC_SPI_FREQ_HZ      ((uint32_t)10000000)
 #define FS_BUCK_BOOST_HW_CONFIG_PWM_FREQ_HZ          ((uint32_t) 100000 )
-#define FS_BUCK_BOOST_HW_CONFIG_PWM_DEAD_TIME_NS     ((float) 100e-9 )
+#define FS_BUCK_BOOST_HW_CONFIG_PWM_DEAD_TIME_NS     ((float) 200e-9 )
 #define FS_BUCK_BOOST_HW_CONFIG_PWM_BASE             XPAR_AXI_PWM_BUCKBOOST_0_BASEADDR
 #define FS_BUCK_BOOST_HW_CONFIG_ADC_BASE             XPAR_ADC_PSCTL_0_BASEADDR
 

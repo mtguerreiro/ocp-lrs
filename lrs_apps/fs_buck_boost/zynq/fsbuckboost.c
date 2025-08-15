@@ -153,6 +153,7 @@ static int32_t fsbuckboostInitializeControlSystem(void){
 
     config.fhwInterface = fsbuckboostHwIf;
     config.fhwStatus = fsbuckboostHwStatus;
+    config.fhwDisable = fsbuckboostHwShutDown;
 
     //config.fgetInputs = buckOpilGetMeasurements;
     config.fgetInputs = fsbuckboostHwGetMeasurements;
