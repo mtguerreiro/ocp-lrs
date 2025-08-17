@@ -8,7 +8,7 @@ from . import common
 def run_ref_step(
     src, src_model_params, src_exp_params, src_plat_params, src_ctl,
     cpl, cpl_model_params, cpl_exp_params, cpl_plat_params, cpl_ctl,
-    save=False
+    save=False, k=1.0
     ):
 
     common.init(src, src_model_params, src_exp_params, src_plat_params)
@@ -28,40 +28,40 @@ def run_ref_step(
     src.trace.reset()
     
     common.init_relays(src)
-    time.sleep(0.5)
+    time.sleep(0.5 * k)
     common.init_relays(cpl)
-    time.sleep(0.5)
+    time.sleep(0.5 * k)
     
     common.ramp_duty_up(src)
-    time.sleep(0.2)
+    time.sleep(0.2 * k)
     common.ramp_duty_up(cpl)
-    time.sleep(0.2)
+    time.sleep(0.2 * k)
 
     cpl.cpl.enable()
-    time.sleep(0.2)
+    time.sleep(0.2 * k)
 
     if src_ctl == 'energy':
         src.boost_energy.enable()
     elif src_ctl == 'energy_mpc':
         src.boost_energy_mpc.enable()
-    time.sleep(0.1)
+    time.sleep(0.1 * k)
 
     cpl.set_ref(cpl_exp_params['v_ref_step_up'])
-    time.sleep(0.1)
+    time.sleep(0.1 * k)
 
     src.set_ref(src_exp_params['v_ref_step_up'])
-    time.sleep(0.1)
+    time.sleep(0.1 * k)
 
     src.set_ref(src_exp_params['v_ref'])
-    time.sleep(0.1)
+    time.sleep(0.1 * k)
     
     cpl.set_ref(cpl_exp_params['v_ref'])
-    time.sleep(0.1)
+    time.sleep(0.1 * k)
     
     common.ramp_duty_down(cpl)
-    time.sleep(0.2)
+    time.sleep(0.2 * k)
     common.ramp_duty_down(src)
-    time.sleep(0.2)
+    time.sleep(0.2 * k)
 
     common.wait_for_trigger(cpl)
     status, cpl_data = cpl.trace.read()
