@@ -1,14 +1,10 @@
-/*
- * cukControlSfb.c
- *
- *  Created on: 24.11.2023
- *      Author: marco
- */
+
+
 
 //=============================================================================
 /*-------------------------------- Includes ---------------------------------*/
 //=============================================================================
-#include "cukControlSfb.h"
+#include "cukControlCascFblin.h"
 
 #include "ocpConfig.h"
 #include "ocp/ocpTrace.h"
@@ -27,32 +23,34 @@
 //=============================================================================
 /*------------------------------- Definitions -------------------------------*/
 //=============================================================================
-static float k[4] = {0.0f};
-static float ke = 0.0f;
-static float dt = 0.0f;
-static float xs[4] = {0.0f};
-static float xe = 0.0f, xe_1 = 0.0f;
-static float us = 0.0f, ue = 0.0f;
 
-static uint32_t first_enter = 0;
 //=============================================================================
 
 //=============================================================================
 /*--------------------------------- Globals ---------------------------------*/
 //=============================================================================
+static float u = 0.0f;
+static float ki, k_ei, kv, k_ev;
+static float dt = 1e-05;
+static float vc = 0.0f;
 
+static float ei = 0.0f, ev = 0.0f;
+
+static uint32_t first_enter = 0;
+
+static float kd = 0.5f;
 //=============================================================================
 
 //=============================================================================
 /*-------------------------------- Functions --------------------------------*/
 //=============================================================================
 //-----------------------------------------------------------------------------
-int32_t cukControlSfbInitialize(void){
+int32_t cukControlCascFblinInitialize(void){
 
     return 0;
 }
 //-----------------------------------------------------------------------------
-int32_t cukControlSfbRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs){
+int32_t cukControlCascFblinRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs){
 
     float **p;
     cukConfigMeasurements_t *hwm;
@@ -60,37 +58,37 @@ int32_t cukControlSfbRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs, v
     cukConfigReferences_t *r = (cukConfigReferences_t *)refs;
     cukConfigControl_t *o = (cukConfigControl_t *)outputs;
 
-    static float x1e, x2e, x3e, x4e;
-    static float vc;
-    static float u, ud;
+    float ir;
+    float vi;
 
     p = (float **)meas;
 
     hwm = (cukConfigMeasurements_t *)p[0];
     swm = (cukConfigSwMeasurements_t *)p[1];
-
+    
     vc = hwm->v1 + (1.0f / CUK_CONFIG_TF_N2N1) * hwm->v2;
 
-    /* Deviations */
-    x1e = hwm->i1 - xs[0];
-    x2e = hwm->i2 - xs[1];
-    x3e = vc - xs[2];
-    x4e = hwm->vo_dc - xs[3];
-
-    /* Integral */
+    /* Voltage controller */
     if( first_enter == 0 ){
-        first_enter = 1;
-        xe = -(k[0] * x1e + k[1] * x2e + k[2] * x3e +  k[3] * x4e) / ke;
+        ev = -(kv * hwm->vo_dc) / k_ev;
     }
     else{
-        xe = xe_1 + dt * (r->vo - hwm->vo_dc);
+        ev = ev + dt * ( (r->vo - kd * swm->io_filt) - hwm->vo_dc );
     }
-    xe_1 = xe;
+    ir = (-kv * hwm->vo_dc - k_ev * ev) * CUK_CONFIG_C_O;
 
-    /* Control */
-    ue = ke * xe;
-    ud = k[0] * x1e + k[1] * x2e + k[2] * x3e + k[3] * x4e;
-    u = us - ud - ue;
+    /* Current controller */
+    if( first_enter == 0 ){
+        ei = -(ki * hwm->i1) / k_ei;
+        first_enter = 1;
+    }
+    else{
+        ei = ei + dt * (ir - hwm->i1);
+    }
+    vi = -ki * hwm->i1 - k_ei * ei;
+
+    /* Feedback linearization */
+    u = 1.0f - (hwm->vi_dc - CUK_CONFIG_L_IN * vi) / vc;
 
     if( u > 1.0f ) u = 1.0f;
     if( u < 0.0f ) u = 0.0f;
@@ -100,67 +98,67 @@ int32_t cukControlSfbRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs, v
     return sizeof(cukConfigControl_t);
 }
 //-----------------------------------------------------------------------------
-int32_t cukControlSfbSetParams(void *params, uint32_t n){
+int32_t cukControlCascFblinSetParams(void *params, uint32_t n){
 
     float *p = (float *)params;
 
-    k[0] = *p++;
-    k[1] = *p++;
-    k[2] = *p++;
-    k[3] = *p++;
-    ke = *p++;
+    ki = *p++;
+    k_ei = *p++;
+
+    kv = *p++;
+    k_ev = *p++;
+
     dt = *p++;
 
-    xs[0] = *p++;
-    xs[1] = *p++;
-    xs[2] = *p++;
-    xs[3] = *p++;
-
-    us = *p++;
+    kd = *p++;
 
     return 0;
 }
 //-----------------------------------------------------------------------------
-int32_t cukControlSfbGetParams(void *buffer, uint32_t size){
+int32_t cukControlCascFblinGetParams(void *buffer, uint32_t size){
 
     float *p = (float *)buffer;
 
-    *p++ = k[0];
-    *p++ = k[1];
-    *p++ = k[2];
-    *p++ = k[3];
-    *p++ = ke;
+    *p++ = ki;
+    *p++ = k_ei;
+
+    *p++ = kv;
+    *p++ = k_ev;
+
     *p++ = dt;
 
-    *p++ = xs[0];
-    *p++ = xs[1];
-    *p++ = xs[2];
-    *p++ = xs[3];
+    *p++ = kd;
 
-    *p++ = us;
-
-    return 44;
+    return 24;
 }
 //-----------------------------------------------------------------------------
-void cukControlSfbReset(void){
+void cukControlCascFblinReset(void){
 
-    xe_1 = 0.0f;
-
+    ei = 0.0f;
+    ev = 0.0f;
     first_enter = 0;
+    u = 0.0f;
 }
 //-----------------------------------------------------------------------------
-void cukControlSfbGetCallbacks(void *callbacksBuffer){
+void cukControlCascFblinGetCallbacks(void *callbacksBuffer){
 
     controllerCallbacks_t *cbs = (controllerCallbacks_t * )callbacksBuffer;
 
-    cbs->init = cukControlSfbInitialize;
-    cbs->run = cukControlSfbRun;
-    cbs->setParams = cukControlSfbSetParams;
-    cbs->getParams = cukControlSfbGetParams;
-    cbs->reset = cukControlSfbReset;
+    cbs->init = cukControlCascFblinInitialize;
+    cbs->run = cukControlCascFblinRun;
+    cbs->setParams = cukControlCascFblinSetParams;
+    cbs->getParams = cukControlCascFblinGetParams;
+    cbs->reset = cukControlCascFblinReset;
     cbs->firstEntry = 0;
     cbs->lastExit = 0;
 }
 //-----------------------------------------------------------------------------
 //=============================================================================
 
+//=============================================================================
+/*----------------------------- Static functions ----------------------------*/
+//=============================================================================
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//=============================================================================

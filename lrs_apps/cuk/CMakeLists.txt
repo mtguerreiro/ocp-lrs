@@ -1,34 +1,42 @@
+cmake_minimum_required(VERSION 3.18)
 
 add_library(cuk)
 
-target_sources(cuk
+target_sources(
+    cuk
     PRIVATE
-    cukOpil.c
-
     cukController.c
     cukControlIdle.c
     cukControlRamp.c
-    cukControlSfb.c
+    cukControlCascFblin.c
     cukControlEnergy.c
     cukControlEnergyMpc.c
-
-    cukHwOpil.c
+    cukControlSfb.c
     cukHwIf.c
 )
 
-target_link_libraries(cuk
+target_sources(
+    cuk
+    PRIVATE
+    posix/cukHw.c
+    posix/cuk.c
+)
+target_include_directories(
+    cuk
+    PUBLIC
+    ./posix
+)
+
+target_link_libraries(
+    cuk
     PRIVATE
     ocp
     opil
 )
 
-target_include_directories(cuk
-    PUBLIC
-    "${CMAKE_CURRENT_LIST_DIR}"
-)
-
-target_include_directories(cuk
+target_include_directories(
+    cuk
     PRIVATE
     "${PROJECT_SOURCE_DIR}"
-    "${PROJECT_BINARY_DIR}/app"
+    ./
 )

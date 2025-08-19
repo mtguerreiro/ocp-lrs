@@ -6,4 +6,9 @@ if(FS_BUCK_BOOST)
     add_subdirectory(lrs_apps/fs_buck_boost)
 endif()
 
+if(CUK)
+    add_subdirectory(lrs_apps/cuk)
+endif()
+
+
 add_subdirectory(target/posix/threads)

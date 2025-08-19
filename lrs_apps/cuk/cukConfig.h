@@ -17,11 +17,9 @@
 //=============================================================================
 /*------------------------------- Definitions -------------------------------*/
 //=============================================================================
+/* Hardware measurements */
 typedef struct{
 
-    //---------------------------------
-    // Sensor-based measurements
-    //---------------------------------
     float ii;
     float i1;
     float vi;
@@ -33,30 +31,18 @@ typedef struct{
     float vo;
     float vo_dc;
     float v2;
-    //---------------------------------
-
-    //---------------------------------
-    // Software-based measurements
-    //---------------------------------
-    float ii_filt;
-    float i1_filt;
-    float vi_filt;
-    float vi_dc_filt;
-    float v1_filt;
-
-    float io_filt;
-    float i2_filt;
-    float vo_filt;
-    float vo_dc_filt;
-    float v2_filt;
-    
-    float pi;
-    float po;
-
-    float p_load;
-    //---------------------------------
 
 }cukConfigMeasurements_t;
+
+/* Software measurements */
+typedef struct{
+
+    float ii_filt;
+    float io_filt;
+
+    float pi;
+    float po;
+}cukConfigSwMeasurements_t;
 
 typedef struct{
     float u;
@@ -133,7 +119,7 @@ typedef struct{
 #define CUK_CONFIG_TRACE_0_MAX_SIGNALS    40
 
 #define CUK_CONFIG_INPUT_BUF_SIZE         50
-#define CUK_CONFIG_OUTPUT_BUG_SIZE        20
+#define CUK_CONFIG_OUTPUT_BUF_SIZE        20
 #define CUK_CONFIG_REFERENCE_BUF_SIZE     20
 
 #define CUK_CONFIG_CS_ID                  OCP_CS_1

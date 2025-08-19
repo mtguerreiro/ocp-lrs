@@ -84,7 +84,9 @@ int32_t cukControlEnergyMpcInitialize(void){
 //-----------------------------------------------------------------------------
 int32_t cukControlEnergyMpcRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs){
 
-    cukConfigMeasurements_t *m = (cukConfigMeasurements_t *)meas;
+    float **p;
+    cukConfigMeasurements_t *hwm;
+    cukConfigSwMeasurements_t *swm;
     cukConfigReferences_t *r = (cukConfigReferences_t *)refs;
     cukConfigControl_t *o = (cukConfigControl_t *)outputs;
 
@@ -95,10 +97,15 @@ int32_t cukControlEnergyMpcRun(void *meas, int32_t nmeas, void *refs, int32_t nr
     static float v;
     uint32_t i;
 
-    x1 = m->i1;
-    x2 = m->i2;
-    x3 = m->v1 + (1.0f / CUK_CONFIG_TF_N2N1) * m->v2;
-    x4 = m->vo_dc;
+    p = (float **)meas;
+
+    hwm = (cukConfigMeasurements_t *)p[0];
+    swm = (cukConfigSwMeasurements_t *)p[1];
+
+    x1 = hwm->i1;
+    x2 = hwm->i2;
+    x3 = hwm->v1 + (1.0f / CUK_CONFIG_TF_N2N1) * hwm->v2;
+    x4 = hwm->vo_dc;
 
     /* Energies */
     e_x1 = (0.5f) * CUK_CONFIG_L_IN * x1 * x1;
@@ -108,15 +115,15 @@ int32_t cukControlEnergyMpcRun(void *meas, int32_t nmeas, void *refs, int32_t nr
     y = e_x1 + e_x2 + e_x3 + e_x4;
 
     /* Input, output and converter power */
-    p_in = m->pi;
-    p_out = m->po;
+    p_in = swm->pi;
+    p_out = swm->po;
     y_dot = p_in - p_out;
 
     /* References */
     x4_r = r->vo;
-    x1_r = p_out / m->vi_dc;
+    x1_r = p_out / hwm->vi_dc;
     x2_r = p_out / x4_r;
-    x3_r = m->vi_dc + x4_r * (1.0f / CUK_CONFIG_TF_N2N1);
+    x3_r = hwm->vi_dc + x4_r * (1.0f / CUK_CONFIG_TF_N2N1);
 
     e_x1_r = (0.5f) * CUK_CONFIG_L_IN * x1_r * x1_r;
     e_x2_r = (0.5f) * CUK_CONFIG_L_OUT * x2_r * x2_r;
@@ -133,13 +140,13 @@ int32_t cukControlEnergyMpcRun(void *meas, int32_t nmeas, void *refs, int32_t nr
     }
 
     /* Updates bounds */
-    u_min = m->vi_dc / CUK_CONFIG_L_IN * (m->vi_dc - x3) / V_GAIN;
-    u_max = m->vi_dc * m->vi_dc / CUK_CONFIG_L_IN / V_GAIN;
+    u_min = hwm->vi_dc / CUK_CONFIG_L_IN * (hwm->vi_dc - x3) / V_GAIN;
+    u_max = hwm->vi_dc * hwm->vi_dc / CUK_CONFIG_L_IN / V_GAIN;
     //DMPC_CONFIG_U_MIN[0] = u_min;
     //DMPC_CONFIG_U_MAX[0] = u_max;
 
-    x_min = il_min * m->vi_dc - p_out;
-    x_max = il_max * m->vi_dc - p_out;
+    x_min = il_min * hwm->vi_dc - p_out;
+    x_max = il_max * hwm->vi_dc - p_out;
     //DMPC_CONFIG_XM_MIN[0] = x_min;
     //DMPC_CONFIG_XM_MAX[0] = x_max;
 
@@ -185,7 +192,7 @@ int32_t cukControlEnergyMpcRun(void *meas, int32_t nmeas, void *refs, int32_t nr
 
     v = u[0] * V_GAIN;
 
-    duty =  1 - (m->vi_dc * m->vi_dc / CUK_CONFIG_L_IN - v) * CUK_CONFIG_L_IN / (x3 * m->vi_dc);
+    duty =  1 - (hwm->vi_dc * hwm->vi_dc / CUK_CONFIG_L_IN - v) * CUK_CONFIG_L_IN / (x3 * hwm->vi_dc);
 
     o->u = duty;
 

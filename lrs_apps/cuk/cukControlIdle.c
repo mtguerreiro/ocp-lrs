@@ -36,7 +36,6 @@ int32_t cukControlIdleInitialize(void){
 //-----------------------------------------------------------------------------
 int32_t cukControlIdleRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs){
 
-    cukConfigMeasurements_t *m = (cukConfigMeasurements_t *)meas;
     cukConfigControl_t *o = (cukConfigControl_t *)outputs;
 
     o->u = 0;

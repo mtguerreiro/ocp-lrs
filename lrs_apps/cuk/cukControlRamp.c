@@ -60,8 +60,6 @@ int32_t cukControlRampGetParams(void *buffer, uint32_t size){
 //-----------------------------------------------------------------------------
 int32_t cukControlRampRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs){
 
-    cukConfigMeasurements_t *m = (cukConfigMeasurements_t *)meas;
-    cukConfigReferences_t *r = (cukConfigReferences_t *)refs;
     cukConfigControl_t *o = (cukConfigControl_t *)outputs;
 
     if( o->u < u_ref  ){

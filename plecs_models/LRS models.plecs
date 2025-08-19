@@ -3742,8 +3742,8 @@ Plecs {
           }
           Schematic {
             Location      [960, 28; 1920, 893]
-            ZoomFactor    0.667275
-            SliderPosition [0, 0]
+            ZoomFactor    1.49863
+            SliderPosition [397, 12]
             ShowBrowser   off
             BrowserWidth  100
             Component {
@@ -3845,7 +3845,7 @@ Plecs {
               Type          Output
               Name          "signal_outputs"
               Show          on
-              Position      [545, 65]
+              Position      [545, 75]
               Direction     right
               Flipped       off
               LabelPosition south
@@ -4334,24 +4334,10 @@ Plecs {
               }
             }
             Component {
-              Type          SignalMux
-              Name          "Mux1"
-              Show          off
-              Position      [195, 760]
-              Direction     right
-              Flipped       off
-              LabelPosition south
-              Parameter {
-                Variable      "Width"
-                Value         "2"
-                Show          off
-              }
-            }
-            Component {
               Type          From
               Name          "From9"
               Show          off
-              Position      [165, 775]
+              Position      [165, 865]
               Direction     right
               Flipped       off
               LabelPosition south
@@ -4386,24 +4372,10 @@ Plecs {
               }
             }
             Component {
-              Type          SignalDemux
-              Name          "Demux"
-              Show          off
-              Position      [285, 760]
-              Direction     right
-              Flipped       on
-              LabelPosition south
-              Parameter {
-                Variable      "Width"
-                Value         "2"
-                Show          off
-              }
-            }
-            Component {
               Type          Goto
               Name          "Goto23"
               Show          off
-              Position      [330, 755]
+              Position      [245, 755]
               Direction     right
               Flipped       off
               LabelPosition south
@@ -4422,7 +4394,7 @@ Plecs {
               Type          Goto
               Name          "Goto24"
               Show          off
-              Position      [330, 775]
+              Position      [245, 865]
               Direction     right
               Flipped       off
               LabelPosition south
@@ -4442,7 +4414,7 @@ Plecs {
               SrcComponent  "Components/Control/Sources/White Noise"
               Name          "White Noise"
               Show          on
-              Position      [200, 810]
+              Position      [175, 800]
               Direction     up
               Flipped       off
               LabelPosition south
@@ -4477,7 +4449,7 @@ Plecs {
               Type          Sum
               Name          "Sum"
               Show          off
-              Position      [245, 760]
+              Position      [205, 755]
               Direction     up
               Flipped       off
               LabelPosition south
@@ -4779,13 +4751,13 @@ Plecs {
               Type          SignalMux
               Name          "Mux"
               Show          off
-              Position      [470, 65]
+              Position      [470, 75]
               Direction     right
               Flipped       off
               LabelPosition south
               Parameter {
                 Variable      "Width"
-                Value         "8"
+                Value         "10"
                 Show          off
               }
             }
@@ -4797,17 +4769,17 @@ Plecs {
               Direction     up
               Flipped       off
               LabelPosition south
-              Location      [86, 114; 436, 377]
+              Location      [86, 114; 436, 409]
               State         "AAAA/wAAAAD9AAAAAgAAAAEAAAAAAAAAAPwCAAAAA/sAAAAQA"
 "FoAbwBvAG0AQQByAGUAYQAAAAAA/////wAAAIEA////+wAAABQAUwBhAHYAZQBkAFYAaQBlAHcAcw"
 "AAAAAA/////wAAAGMA////+wAAAAwAVAByAGEAYwBlAHMAAAAAAP////8AAABjAP///wAAAAMAAAA"
 "AAAAAAPwBAAAAAfsAAAAUAEQAYQB0AGEAVwBpAGQAZwBlAHQAAAAAAP////8AAABEAP///wAAAV4A"
-"AADoAAAABAAAAAQAAAAIAAAACPwAAAABAAAAAgAAAAEAAAAOAFQAbwBvAGwAQgBhAHIBAAAAAP///"
+"AAEIAAAABAAAAAQAAAAIAAAACPwAAAABAAAAAgAAAAEAAAAOAFQAbwBvAGwAQgBhAHIBAAAAAP///"
 "/8AAAAAAAAAAA=="
               SavedViews    "AAAAAgAAAAA="
               HeaderState   "AAAA/wAAAAAAAAABAAAAAQAAAAAAAAAAAAAAAAAAAAAL/gMAA"
-"AAJAAAACQAAAGQAAAAIAAAAZAAAAAcAAABkAAAABgAAAGQAAAAFAAAAZAAAAAQAAABkAAAAAwAAAG"
-"QAAAACAAAAZAAAAAEAAABkAAAAZQAAAAsBAAABAAAAAAAAAAAAAAAAZP////8AAACBAAAAAAAAAAs"
+"AAJAAAACQAAAGQAAAAIAAAAZAAAAAMAAABkAAAAAgAAAGQAAAABAAAAZAAAAAcAAABkAAAABgAAAG"
+"QAAAAFAAAAZAAAAAQAAABkAAAAZQAAAAsBAAABAAAAAAAAAAAAAAAAZP////8AAACBAAAAAAAAAAs"
 "AAABCAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAA"
 "AAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA"
 "QAAAAAAAAAjAAAAAQAAAAAAAAPoAAAAACM="
@@ -4904,7 +4876,7 @@ Plecs {
               LabelPosition south
               Parameter {
                 Variable      "Tag"
-                Value         "i1"
+                Value         "i1_m"
                 Show          off
               }
               Parameter {
@@ -4923,7 +4895,7 @@ Plecs {
               LabelPosition south
               Parameter {
                 Variable      "Tag"
-                Value         "i2"
+                Value         "i2_m"
                 Show          off
               }
               Parameter {
@@ -4933,24 +4905,10 @@ Plecs {
               }
             }
             Component {
-              Type          SignalMux
-              Name          "Mux2"
-              Show          off
-              Position      [200, 880]
-              Direction     right
-              Flipped       off
-              LabelPosition south
-              Parameter {
-                Variable      "Width"
-                Value         "2"
-                Show          off
-              }
-            }
-            Component {
               Type          From
               Name          "From14"
               Show          off
-              Position      [170, 895]
+              Position      [385, 880]
               Direction     right
               Flipped       off
               LabelPosition south
@@ -4969,7 +4927,7 @@ Plecs {
               Type          From
               Name          "From15"
               Show          off
-              Position      [170, 875]
+              Position      [380, 755]
               Direction     right
               Flipped       off
               LabelPosition south
@@ -4985,24 +4943,10 @@ Plecs {
               }
             }
             Component {
-              Type          SignalDemux
-              Name          "Demux1"
-              Show          off
-              Position      [290, 880]
-              Direction     right
-              Flipped       on
-              LabelPosition south
-              Parameter {
-                Variable      "Width"
-                Value         "2"
-                Show          off
-              }
-            }
-            Component {
               Type          Goto
               Name          "Goto26"
               Show          off
-              Position      [335, 875]
+              Position      [495, 755]
               Direction     right
               Flipped       off
               LabelPosition south
@@ -5021,7 +4965,7 @@ Plecs {
               Type          Goto
               Name          "Goto27"
               Show          off
-              Position      [335, 895]
+              Position      [495, 880]
               Direction     right
               Flipped       off
               LabelPosition south
@@ -5040,7 +4984,7 @@ Plecs {
               Type          Sum
               Name          "Sum2"
               Show          off
-              Position      [250, 880]
+              Position      [450, 755]
               Direction     up
               Flipped       off
               LabelPosition south
@@ -5070,7 +5014,7 @@ Plecs {
               SrcComponent  "Components/Control/Sources/White Noise"
               Name          "White Noise1"
               Show          on
-              Position      [205, 930]
+              Position      [390, 800]
               Direction     up
               Flipped       off
               LabelPosition south
@@ -5111,7 +5055,7 @@ Plecs {
               LabelPosition south
               Parameter {
                 Variable      "Tag"
-                Value         "ii"
+                Value         "ii_m"
                 Show          off
               }
               Parameter {
@@ -5130,7 +5074,7 @@ Plecs {
               LabelPosition south
               Parameter {
                 Variable      "Tag"
-                Value         "io"
+                Value         "io_m"
                 Show          off
               }
               Parameter {
@@ -5442,6 +5386,136 @@ Plecs {
                 Show          off
               }
             }
+            Component {
+              Type          Reference
+              SrcComponent  "Components/Control/Sources/White Noise"
+              Name          "White Noise2"
+              Show          on
+              Position      [175, 910]
+              Direction     up
+              Flipped       off
+              LabelPosition south
+              Frame         [-15, -15; 15, 15]
+              Parameter {
+                Variable      "mu"
+                Value         "0"
+                Show          off
+              }
+              Parameter {
+                Variable      "sigma"
+                Value         "il_std"
+                Show          off
+              }
+              Parameter {
+                Variable      "seed"
+                Value         "647"
+                Show          off
+              }
+              Parameter {
+                Variable      "Ts"
+                Value         "1 / f_pwm / 5"
+                Show          off
+              }
+              Terminal {
+                Type          Output
+                Position      [19, 0]
+                Direction     right
+              }
+            }
+            Component {
+              Type          Sum
+              Name          "Sum1"
+              Show          off
+              Position      [205, 865]
+              Direction     up
+              Flipped       off
+              LabelPosition south
+              Parameter {
+                Variable      "IconShape"
+                Value         "2"
+                Show          off
+              }
+              Parameter {
+                Variable      "Inputs"
+                Value         "|++"
+                Show          off
+              }
+              Parameter {
+                Variable      "DataType"
+                Value         "10"
+                Show          off
+              }
+              Parameter {
+                Variable      "DataTypeOverflowMode"
+                Value         "1"
+                Show          off
+              }
+            }
+            Component {
+              Type          Reference
+              SrcComponent  "Components/Control/Sources/White Noise"
+              Name          "White Noise3"
+              Show          on
+              Position      [390, 915]
+              Direction     up
+              Flipped       off
+              LabelPosition south
+              Frame         [-15, -15; 15, 15]
+              Parameter {
+                Variable      "mu"
+                Value         "0"
+                Show          off
+              }
+              Parameter {
+                Variable      "sigma"
+                Value         "io_std"
+                Show          off
+              }
+              Parameter {
+                Variable      "seed"
+                Value         "916"
+                Show          off
+              }
+              Parameter {
+                Variable      "Ts"
+                Value         "1 / f_pwm / 5"
+                Show          off
+              }
+              Terminal {
+                Type          Output
+                Position      [19, 0]
+                Direction     right
+              }
+            }
+            Component {
+              Type          Sum
+              Name          "Sum3"
+              Show          off
+              Position      [450, 880]
+              Direction     up
+              Flipped       off
+              LabelPosition south
+              Parameter {
+                Variable      "IconShape"
+                Value         "2"
+                Show          off
+              }
+              Parameter {
+                Variable      "Inputs"
+                Value         "|++"
+                Show          off
+              }
+              Parameter {
+                Variable      "DataType"
+                Value         "10"
+                Show          off
+              }
+              Parameter {
+                Variable      "DataTypeOverflowMode"
+                Value         "1"
+                Show          off
+              }
+            }
             Connection {
               Type          Wire
               SrcComponent  "FET1"
@@ -5703,46 +5777,8 @@ Plecs {
               Type          Signal
               SrcComponent  "From10"
               SrcTerminal   1
-              DstComponent  "Mux1"
-              DstTerminal   2
-            }
-            Connection {
-              Type          Signal
-              SrcComponent  "From9"
-              SrcTerminal   1
-              Points        [180, 775]
-              DstComponent  "Mux1"
-              DstTerminal   3
-            }
-            Connection {
-              Type          Signal
-              SrcComponent  "Demux"
-              SrcTerminal   2
-              DstComponent  "Goto23"
-              DstTerminal   1
-            }
-            Connection {
-              Type          Signal
-              SrcComponent  "Demux"
-              SrcTerminal   3
-              Points        [300, 765; 300, 775]
-              DstComponent  "Goto24"
-              DstTerminal   1
-            }
-            Connection {
-              Type          Signal
-              SrcComponent  "Mux1"
-              SrcTerminal   1
               DstComponent  "Sum"
               DstTerminal   2
-            }
-            Connection {
-              Type          Signal
-              SrcComponent  "White Noise"
-              SrcTerminal   1
-              Points        [245, 810]
-              DstComponent  "Sum"
-              DstTerminal   3
             }
             Connection {
               Type          Wire
@@ -5846,68 +5882,9 @@ Plecs {
             }
             Connection {
               Type          Signal
-              SrcComponent  "Sum"
-              SrcTerminal   1
-              DstComponent  "Demux"
-              DstTerminal   1
-            }
-            Connection {
-              Type          Signal
               SrcComponent  "signal_inputs"
               SrcTerminal   1
               DstComponent  "Goto10"
-              DstTerminal   1
-            }
-            Connection {
-              Type          Signal
-              SrcComponent  "From15"
-              SrcTerminal   1
-              DstComponent  "Mux2"
-              DstTerminal   2
-            }
-            Connection {
-              Type          Signal
-              SrcComponent  "From14"
-              SrcTerminal   1
-              Points        [185, 895]
-              DstComponent  "Mux2"
-              DstTerminal   3
-            }
-            Connection {
-              Type          Signal
-              SrcComponent  "Demux1"
-              SrcTerminal   2
-              DstComponent  "Goto26"
-              DstTerminal   1
-            }
-            Connection {
-              Type          Signal
-              SrcComponent  "Demux1"
-              SrcTerminal   3
-              Points        [305, 885; 305, 895]
-              DstComponent  "Goto27"
-              DstTerminal   1
-            }
-            Connection {
-              Type          Signal
-              SrcComponent  "Mux2"
-              SrcTerminal   1
-              DstComponent  "Sum2"
-              DstTerminal   2
-            }
-            Connection {
-              Type          Signal
-              SrcComponent  "White Noise1"
-              SrcTerminal   1
-              Points        [250, 930]
-              DstComponent  "Sum2"
-              DstTerminal   3
-            }
-            Connection {
-              Type          Signal
-              SrcComponent  "Sum2"
-              SrcTerminal   1
-              DstComponent  "Demux1"
               DstTerminal   1
             }
             Connection {
@@ -5954,38 +5931,6 @@ Plecs {
               Points        [420, 90; 420, 60]
               DstComponent  "Mux"
               DstTerminal   5
-            }
-            Connection {
-              Type          Signal
-              SrcComponent  "From20"
-              SrcTerminal   1
-              Points        [425, 110; 425, 70]
-              DstComponent  "Mux"
-              DstTerminal   6
-            }
-            Connection {
-              Type          Signal
-              SrcComponent  "From18"
-              SrcTerminal   1
-              Points        [430, 130; 430, 80]
-              DstComponent  "Mux"
-              DstTerminal   7
-            }
-            Connection {
-              Type          Signal
-              SrcComponent  "From19"
-              SrcTerminal   1
-              Points        [435, 150; 435, 90]
-              DstComponent  "Mux"
-              DstTerminal   8
-            }
-            Connection {
-              Type          Signal
-              SrcComponent  "From21"
-              SrcTerminal   1
-              Points        [440, 170; 440, 100]
-              DstComponent  "Mux"
-              DstTerminal   9
             }
             Connection {
               Type          Signal
@@ -6078,6 +6023,133 @@ Plecs {
               Points        [835, 205]
               DstComponent  "Scope"
               DstTerminal   3
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "White Noise"
+              SrcTerminal   1
+              Points        [205, 800]
+              DstComponent  "Sum"
+              DstTerminal   3
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "Sum"
+              SrcTerminal   1
+              DstComponent  "Goto23"
+              DstTerminal   1
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "From9"
+              SrcTerminal   1
+              DstComponent  "Sum1"
+              DstTerminal   2
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "White Noise2"
+              SrcTerminal   1
+              Points        [205, 910]
+              DstComponent  "Sum1"
+              DstTerminal   3
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "Sum1"
+              SrcTerminal   1
+              DstComponent  "Goto24"
+              DstTerminal   1
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "From15"
+              SrcTerminal   1
+              DstComponent  "Sum2"
+              DstTerminal   2
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "White Noise1"
+              SrcTerminal   1
+              Points        [450, 800]
+              DstComponent  "Sum2"
+              DstTerminal   3
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "Sum2"
+              SrcTerminal   1
+              DstComponent  "Goto26"
+              DstTerminal   1
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "White Noise3"
+              SrcTerminal   1
+              Points        [450, 915]
+              DstComponent  "Sum3"
+              DstTerminal   3
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "From14"
+              SrcTerminal   1
+              DstComponent  "Sum3"
+              DstTerminal   2
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "Sum3"
+              SrcTerminal   1
+              DstComponent  "Goto27"
+              DstTerminal   1
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "From20"
+              SrcTerminal   1
+              Points        [425, 110; 425, 80]
+              Branch {
+                Points        [425, 70]
+                DstComponent  "Mux"
+                DstTerminal   6
+              }
+              Branch {
+                DstComponent  "Mux"
+                DstTerminal   7
+              }
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "From18"
+              SrcTerminal   1
+              Points        [430, 130; 430, 90]
+              DstComponent  "Mux"
+              DstTerminal   8
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "From19"
+              SrcTerminal   1
+              Points        [435, 150; 435, 100]
+              DstComponent  "Mux"
+              DstTerminal   9
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "From21"
+              SrcTerminal   1
+              Points        [440, 170; 440, 120]
+              Branch {
+                Points        [440, 110]
+                DstComponent  "Mux"
+                DstTerminal   10
+              }
+              Branch {
+                DstComponent  "Mux"
+                DstTerminal   11
+              }
             }
           }
         }

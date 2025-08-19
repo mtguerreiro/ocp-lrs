@@ -82,7 +82,9 @@ int32_t cukControlEnergyInitialize(void){
 //-----------------------------------------------------------------------------
 int32_t cukControlEnergyRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs){
 
-    cukConfigMeasurements_t *m = (cukConfigMeasurements_t *)meas;
+    float **p;
+    cukConfigMeasurements_t *hwm;
+    cukConfigSwMeasurements_t *swm;
     cukConfigReferences_t *r = (cukConfigReferences_t *)refs;
     cukConfigControl_t *o = (cukConfigControl_t *)outputs;
 
@@ -91,25 +93,30 @@ int32_t cukControlEnergyRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs
     static float e_x1_r, e_x2_r, e_x3_r, e_x4_r;
     static float v;
 
-    vc = m->v1 + (1.0f / CUK_CONFIG_TF_N2N1) * m->v2;
+    p = (float **)meas;
+
+    hwm = (cukConfigMeasurements_t *)p[0];
+    swm = (cukConfigSwMeasurements_t *)p[1];
+
+    vc = hwm->v1 + (1.0f / CUK_CONFIG_TF_N2N1) * hwm->v2;
 
     /* Energies */
-    e_x1 = (0.5f) * CUK_CONFIG_L_IN * m->i1 * m->i1;
-    e_x2 = (0.5f) * CUK_CONFIG_L_OUT * m->i2 * m->i2;
+    e_x1 = (0.5f) * CUK_CONFIG_L_IN * hwm->i1 * hwm->i1;
+    e_x2 = (0.5f) * CUK_CONFIG_L_OUT * hwm->i2 * hwm->i2;
     e_x3 = (0.5f) * CUK_CONFIG_C_C * vc * vc * CUK_CONFIG_TF_N2N1_SQ / (CUK_CONFIG_TF_N2N1_SQ + 1.0f);
-    e_x4 = (0.5f) * C_out * m->vo_dc * m->vo_dc;
+    e_x4 = (0.5f) * C_out * hwm->vo_dc * hwm->vo_dc;
     y = e_x1 + e_x2 + e_x3 + e_x4;
 
     /* Input, output and converter power */
-    p_in = m->pi;
-    p_out = m->po;
+    p_in = swm->pi;
+    p_out = swm->po;
     y_dot = p_in - p_out;
 
     /* References */
-    x4_r = r->vo - kd * m->io_filt;
-    x1_r = p_out / m->vi_dc;
+    x4_r = r->vo - kd * swm->io_filt;
+    x1_r = p_out / hwm->vi_dc;
     x2_r = p_out / x4_r;
-    x3_r = m->vi_dc + x4_r * (1.0f / CUK_CONFIG_TF_N2N1);
+    x3_r = hwm->vi_dc + x4_r * (1.0f / CUK_CONFIG_TF_N2N1);
 
     e_x1_r = (0.5f) * CUK_CONFIG_L_IN * x1_r * x1_r;
     e_x2_r = (0.5f) * CUK_CONFIG_L_OUT * x2_r * x2_r;
@@ -132,7 +139,7 @@ int32_t cukControlEnergyRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs
 
     if( notchEnable > 0.5f ) v = cukControlEnergyFilterRun(v);
 
-    u =  1 - (m->vi_dc * m->vi_dc / CUK_CONFIG_L_IN - v) * CUK_CONFIG_L_IN / (vc * m->vi_dc);
+    u =  1 - (hwm->vi_dc * hwm->vi_dc / CUK_CONFIG_L_IN - v) * CUK_CONFIG_L_IN / (vc * hwm->vi_dc);
 
     if( u > 1.0f ) u = 1.0f;
     if( u < 0.0f ) u = 0.0f;
