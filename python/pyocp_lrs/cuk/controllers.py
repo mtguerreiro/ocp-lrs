@@ -55,8 +55,6 @@ class Controllers:
         self.idle = _Idle(0, ctl_if)
         self.ramp = _Ramp(1, ctl_if)
         self.energy = _Energy(3, ctl_if)
-        #self.sfb = _SFB(2, ctl_if)
-        #self.cascaded = _Cascaded(3, ctl_if)
 
 
 class _Idle(pyocp.controller.ControllerTemplate):
@@ -102,7 +100,6 @@ class _Energy(pyocp.controller.ControllerTemplate):
             'k1', 'k2', 'k3', 'dt',
             'a0', 'a1', 'a2', 'b1', 'b2', 'notch_en',
             'C_out',
-            'kd'
         )
         
 

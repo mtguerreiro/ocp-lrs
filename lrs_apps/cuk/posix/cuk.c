@@ -121,11 +121,13 @@ static int32_t cukInitializeTraceSignals(void){
     meas = (cukConfigMeasurements_t *)bInputs;
     ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &meas->ii, "Input current");
     ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &meas->i1, "Primary inductor current");
-    ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &meas->vi_dc, "DC link voltage");
+    ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &meas->vi, "Input voltage");
+    ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &meas->vi_dc, "Input dc link");
     ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &meas->v1, "Primary coupling cap voltage");
 
     ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &meas->io, "Output current");
     ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &meas->i2, "Secondary inductor current");
+    ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &meas->vo_dc, "Output dc link");
     ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &meas->vo, "Output voltage");
     ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &meas->v2, "Secondary coupling cap voltage");
 

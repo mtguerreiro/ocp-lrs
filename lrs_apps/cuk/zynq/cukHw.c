@@ -501,13 +501,9 @@ static void cukHwInitializeGpio(void){
 //-----------------------------------------------------------------------------
 static void cukHwInitializeMeasGains(void){
 
-//    hwControl.gains.ii_gain = 0.012609869672308061f;
-//    hwControl.gains.ii_ofs =  -25.269847795362907f;
     hwControl.gains.ii_gain = 0.01246531060105208f;
     hwControl.gains.ii_ofs =  -25.036777021743315f;
 
-//    hwControl.gains.i1_gain = 0.026246737138454348f;
-//    hwControl.gains.i1_ofs =  -52.861529301961006f;
     hwControl.gains.i1_gain = 0.025588979403530776f;
     hwControl.gains.i1_ofs =  -51.611508457879715f;
 
@@ -520,13 +516,9 @@ static void cukHwInitializeMeasGains(void){
     hwControl.gains.v1_gain = 0.014919540229885057f;
     hwControl.gains.v1_ofs = 0.014919540229886508f;
 
-//    hwControl.gains.io_gain = 0.012327860955684866f;
-//    hwControl.gains.io_ofs =  -24.943995861772958f;
     hwControl.gains.io_gain = 0.012489042423884562f;
     hwControl.gains.io_ofs =  -25.025032570046353f;
 
-//    hwControl.gains.i2_gain = 0.02595658415851647f;
-//    hwControl.gains.i2_ofs =  -53.053563135347005f;
     hwControl.gains.i2_gain = 0.025757493479617852f;
     hwControl.gains.i2_ofs =  -52.08143710783329f;
 
@@ -539,11 +531,6 @@ static void cukHwInitializeMeasGains(void){
     hwControl.gains.v2_gain = 0.01487120334913248f;
     hwControl.gains.v2_ofs =  0.058881268243716534f;
 
-}
-//-----------------------------------------------------------------------------
-static float cukHwExpMovAvg(float sample, float average){
-
-    return hwControl.alpha * sample + (1.0f - hwControl.alpha) * average;
 }
 //-----------------------------------------------------------------------------
 //=============================================================================

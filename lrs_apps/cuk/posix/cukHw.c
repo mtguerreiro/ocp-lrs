@@ -176,15 +176,7 @@ int32_t cukHwGetMeasurements(void *meas){
     hwMeas = (cukConfigMeasurements_t *)p[0];
     softMeas = (cukConfigSwMeasurements_t *)p[1];
 
-    //-------------------------------------------------------------------------
-    // Sensor-based measurements
-    //-------------------------------------------------------------------------
-    /*
-     * Skips the first adc channel of header. Each Cuk connector has five
-     * measurements, but the ADC board has 6 channels. Thus, we skip the
-     * first channel.
-     */
-
+    /* Sensor-based measurements */
     hwMeas->ii      =   xtMeasurements.ii;
     hwMeas->i1      =   xtMeasurements.i1;
 
@@ -199,18 +191,12 @@ int32_t cukHwGetMeasurements(void *meas){
     hwMeas->vo_dc   =   xtMeasurements.vo_dc;
     hwMeas->v2      =   xtMeasurements.v2;
 
-    fflush(stdout);
-    //-------------------------------------------------------------------------
-
-    //-------------------------------------------------------------------------
-    // Software-based measurements
-    //-------------------------------------------------------------------------
+    /* Software-based measurements */
     softMeas->ii_filt = dfiltExpMovAvg(hwMeas->ii, softMeas->ii_filt, hwControl.alpha);
     softMeas->io_filt = dfiltExpMovAvg(hwMeas->io, softMeas->io_filt, hwControl.alpha);
 
     softMeas->pi = hwMeas->i1 * hwMeas->vi_dc;
     softMeas->po = softMeas->io_filt * hwMeas->vo_dc;
-    //-------------------------------------------------------------------------
 
     /* Protection */
     if( (hwMeas->ii > CUK_CONFIG_I_PRIM_LIM) || (hwMeas->i1 > CUK_CONFIG_I_PRIM_LIM) )

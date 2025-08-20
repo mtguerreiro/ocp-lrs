@@ -1,9 +1,3 @@
-/*
- * cukControlEnergy.c
- *
- *  Created on: 22.11.2023
- *      Author: marco
- */
 
 //=============================================================================
 /*-------------------------------- Includes ---------------------------------*/
@@ -16,6 +10,8 @@
 #include "cukConfig.h"
 
 #include "controller/controller.h"
+
+#include "string.h"
 //=============================================================================
 
 //=============================================================================
@@ -45,13 +41,30 @@ typedef struct{
     float y_2;
 
 }filter_t;
+
+typedef struct{
+    float k1;
+    float k2;
+    float k3;
+    float dt;
+
+    float a0;
+    float a1;
+    float a2;
+
+    float b1;
+    float b2;
+
+    float notchEnable;
+
+    float C_out;
+}params_t;
 //=============================================================================
 
 //=============================================================================
 /*--------------------------------- Globals ---------------------------------*/
 //=============================================================================
 static float u = 0.0f;
-static float k1 = 22864929.498738717, k2 = 9333.3333286044, k3 = -33914344673.813805, dt = 1e-05;
 static float vc = 0.0f;
 static float p_in = 0.0f, p_out = 0.0f, y_dot = 0.0f, y = 0.0f, y_r = 0.0f;
 
@@ -62,13 +75,15 @@ static filter_t notch = {.a0 = 1.0f, .a1 = -1.8954516649246216f, .a2 = 0.9887202
         .x_1 = 0.0f, .x_2 = 0.0f, .y = 0.0f, .y_1 = 0.0f, .y_2 = 0.0f
 };
 
-static float notchEnable = 0.0f;
-
 static uint32_t first_enter = 0;
 
-static float C_out = CUK_CONFIG_C_O;
-
-static float kd = 0.5f;
+static params_t params = {
+    .k1 = 22864929.498738717, .k2 = 9333.3333286044, .k3 = -33914344673.813805, .dt = 1e-05,
+    .a0 = 1.0f, .a1 = -1.8954516649246216f, .a2 = 0.9887202978134155f,
+    .b1 = -1.3892015218734741, .b2 = 0.48247018456459045f,
+    .notchEnable = 0.0f,
+    .C_out = CUK_CONFIG_C_O
+};
 //=============================================================================
 
 //=============================================================================
@@ -104,7 +119,7 @@ int32_t cukControlEnergyRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs
     e_x1 = (0.5f) * CUK_CONFIG_L_IN * hwm->i1 * hwm->i1;
     e_x2 = (0.5f) * CUK_CONFIG_L_OUT * hwm->i2 * hwm->i2;
     e_x3 = (0.5f) * CUK_CONFIG_C_C * vc * vc * CUK_CONFIG_TF_N2N1_SQ / (CUK_CONFIG_TF_N2N1_SQ + 1.0f);
-    e_x4 = (0.5f) * C_out * hwm->vo_dc * hwm->vo_dc;
+    e_x4 = (0.5f) * params.C_out * hwm->vo_dc * hwm->vo_dc;
     y = e_x1 + e_x2 + e_x3 + e_x4;
 
     /* Input, output and converter power */
@@ -113,7 +128,7 @@ int32_t cukControlEnergyRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs
     y_dot = p_in - p_out;
 
     /* References */
-    x4_r = r->vo - kd * swm->io_filt;
+    x4_r = r->vo;
     x1_r = p_out / hwm->vi_dc;
     x2_r = p_out / x4_r;
     x3_r = hwm->vi_dc + x4_r * (1.0f / CUK_CONFIG_TF_N2N1);
@@ -121,23 +136,23 @@ int32_t cukControlEnergyRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs
     e_x1_r = (0.5f) * CUK_CONFIG_L_IN * x1_r * x1_r;
     e_x2_r = (0.5f) * CUK_CONFIG_L_OUT * x2_r * x2_r;
     e_x3_r = (0.5f) * CUK_CONFIG_C_C * x3_r * x3_r * CUK_CONFIG_TF_N2N1_SQ / (CUK_CONFIG_TF_N2N1_SQ + 1.0f);
-    e_x4_r = (0.5f) * C_out * x4_r * x4_r;
+    e_x4_r = (0.5f) * params.C_out * x4_r * x4_r;
     y_r = e_x1_r + e_x2_r + e_x3_r + e_x4_r;
 
     /* Integrator */
     if( first_enter == 0 ){
         first_enter = 1;
-        y_e = (-k1 * y - k2 * y_dot) / k3;
+        y_e = (-params.k1 * y - params.k2 * y_dot) / params.k3;
     }
     else{
-        y_e = y_e_1 + dt * (y_r - y);
+        y_e = y_e_1 + params.dt * (y_r - y);
     }
     y_e_1 = y_e;
 
     /* Control */
-    v = - k1 * y - k2 * y_dot - k3 * y_e;
+    v = - params.k1 * y - params.k2 * y_dot - params.k3 * y_e;
 
-    if( notchEnable > 0.5f ) v = cukControlEnergyFilterRun(v);
+    if( params.notchEnable > 0.5f ) v = cukControlEnergyFilterRun(v);
 
     u =  1 - (hwm->vi_dc * hwm->vi_dc / CUK_CONFIG_L_IN - v) * CUK_CONFIG_L_IN / (vc * hwm->vi_dc);
 
@@ -149,54 +164,29 @@ int32_t cukControlEnergyRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs
     return sizeof(cukConfigControl_t);
 }
 //-----------------------------------------------------------------------------
-int32_t cukControlEnergySetParams(void *params, uint32_t n){
+int32_t cukControlEnergySetParams(void *buffer, uint32_t size){
 
-    float *p = (float *)params;
+    if( size != sizeof(params_t) ) return -1;
 
-    k1 = *p++;
-    k2 = *p++;
-    k3 = *p++;
-    dt = *p++;
+    memcpy( (void *)&params, buffer, sizeof(params_t) );
 
-    notch.a0 = *p++;
-    notch.a1 = *p++;
-    notch.a2 = *p++;
+    notch.a0 = params.a0;
+    notch.a1 = params.a1;
+    notch.a2 = params.a2;
 
-    notch.b1 = *p++;
-    notch.b2 = *p++;
-
-    notchEnable = *p++;
-
-    C_out = *p++;
-
-    kd = *p++;
+    notch.b1 = params.b1;
+    notch.b2 = params.b2;
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 int32_t cukControlEnergyGetParams(void *buffer, uint32_t size){
 
-    float *p = (float *)buffer;
+    if( size < sizeof(params_t) ) return -1;
 
-    *p++ = k1;
-    *p++ = k2;
-    *p++ = k3;
-    *p++ = dt;
+    memcpy( buffer, (void *)&params, sizeof(params_t) );
 
-    *p++ = notch.a0;
-    *p++ = notch.a1;
-    *p++ = notch.a2;
-
-    *p++ = notch.b1;
-    *p++ = notch.b2;
-
-    *p++ = notchEnable;
-
-    *p++ = C_out;
-
-    *p++ = kd;
-
-    return 48;
+    return sizeof(params_t);
 }
 //-----------------------------------------------------------------------------
 void cukControlEnergyReset(void){
@@ -207,9 +197,9 @@ void cukControlEnergyReset(void){
     u = 0.0f;
 }
 //-----------------------------------------------------------------------------
-void cukControlEnergyGetCallbacks(void *callbacksBuffer){
+void cukControlEnergyGetCallbacks(void *cbBuffer){
 
-    controllerCallbacks_t *cbs = (controllerCallbacks_t * )callbacksBuffer;
+    controllerCallbacks_t *cbs = (controllerCallbacks_t * )cbBuffer;
 
     cbs->init = cukControlEnergyInitialize;
     cbs->run = cukControlEnergyRun;
