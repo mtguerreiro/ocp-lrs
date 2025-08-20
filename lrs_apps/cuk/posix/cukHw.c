@@ -185,19 +185,21 @@ int32_t cukHwGetMeasurements(void *meas){
      * first channel.
      */
 
-    hwMeas->ii =        xtMeasurements.ii;
-    hwMeas->i1 =        xtMeasurements.i1;
+    hwMeas->ii      =   xtMeasurements.ii;
+    hwMeas->i1      =   xtMeasurements.i1;
 
-    hwMeas->vi =        xtMeasurements.vi;
-    hwMeas->vi_dc =     xtMeasurements.vi_dc;
-    hwMeas->v1  =       xtMeasurements.v1;
+    hwMeas->vi      =   xtMeasurements.vi;
+    hwMeas->vi_dc   =   xtMeasurements.vi_dc;
+    hwMeas->v1      =   xtMeasurements.v1;
 
-    hwMeas->io =        xtMeasurements.io;
-    hwMeas->i2 =        xtMeasurements.i2;
+    hwMeas->io      =   xtMeasurements.io;
+    hwMeas->i2      =   xtMeasurements.i2;
 
-    hwMeas->vo =        xtMeasurements.vo;
-    hwMeas->vo_dc =     xtMeasurements.vo_dc;
-    hwMeas->v2 =        xtMeasurements.v2;
+    hwMeas->vo      =   xtMeasurements.vo;
+    hwMeas->vo_dc   =   xtMeasurements.vo_dc;
+    hwMeas->v2      =   xtMeasurements.v2;
+
+    fflush(stdout);
     //-------------------------------------------------------------------------
 
     //-------------------------------------------------------------------------
@@ -226,7 +228,6 @@ int32_t cukHwGetMeasurements(void *meas){
         hwControl.status = 1;
 
     if( hwControl.status != 0 ){
-        //cukHwSetPwmOutputEnable(0);
         cukHwShutDown();
         return -1;
     }

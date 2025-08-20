@@ -3742,8 +3742,8 @@ Plecs {
           }
           Schematic {
             Location      [960, 28; 1920, 893]
-            ZoomFactor    1.49863
-            SliderPosition [397, 12]
+            ZoomFactor    1.71498
+            SliderPosition [77, -1]
             ShowBrowser   off
             BrowserWidth  100
             Component {
@@ -4732,7 +4732,7 @@ Plecs {
               Type          Goto
               Name          "Goto10"
               Show          off
-              Position      [170, 75]
+              Position      [200, 65]
               Direction     right
               Flipped       off
               LabelPosition south
@@ -4751,7 +4751,7 @@ Plecs {
               Type          SignalMux
               Name          "Mux"
               Show          off
-              Position      [470, 75]
+              Position      [480, 75]
               Direction     right
               Flipped       off
               LabelPosition south
@@ -4769,17 +4769,17 @@ Plecs {
               Direction     up
               Flipped       off
               LabelPosition south
-              Location      [86, 114; 436, 409]
+              Location      [86, 114; 436, 425]
               State         "AAAA/wAAAAD9AAAAAgAAAAEAAAAAAAAAAPwCAAAAA/sAAAAQA"
 "FoAbwBvAG0AQQByAGUAYQAAAAAA/////wAAAIEA////+wAAABQAUwBhAHYAZQBkAFYAaQBlAHcAcw"
 "AAAAAA/////wAAAGMA////+wAAAAwAVAByAGEAYwBlAHMAAAAAAP////8AAABjAP///wAAAAMAAAA"
 "AAAAAAPwBAAAAAfsAAAAUAEQAYQB0AGEAVwBpAGQAZwBlAHQAAAAAAP////8AAABEAP///wAAAV4A"
-"AAEIAAAABAAAAAQAAAAIAAAACPwAAAABAAAAAgAAAAEAAAAOAFQAbwBvAGwAQgBhAHIBAAAAAP///"
+"AAEYAAAABAAAAAQAAAAIAAAACPwAAAABAAAAAgAAAAEAAAAOAFQAbwBvAGwAQgBhAHIBAAAAAP///"
 "/8AAAAAAAAAAA=="
               SavedViews    "AAAAAgAAAAA="
               HeaderState   "AAAA/wAAAAAAAAABAAAAAQAAAAAAAAAAAAAAAAAAAAAL/gMAA"
-"AAJAAAACQAAAGQAAAAIAAAAZAAAAAMAAABkAAAAAgAAAGQAAAABAAAAZAAAAAcAAABkAAAABgAAAG"
-"QAAAAFAAAAZAAAAAQAAABkAAAAZQAAAAsBAAABAAAAAAAAAAAAAAAAZP////8AAACBAAAAAAAAAAs"
+"AAJAAAACAAAAGQAAAABAAAAZAAAAAMAAABkAAAAAgAAAGQAAAAFAAAAZAAAAAQAAABkAAAABwAAAG"
+"QAAAAGAAAAZAAAAAkAAABkAAAAZQAAAAsBAAABAAAAAAAAAAAAAAAAZP////8AAACBAAAAAAAAAAs"
 "AAABCAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAA"
 "AAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA"
 "QAAAAAAAAAjAAAAAQAAAAAAAAPoAAAAACM="
@@ -4889,7 +4889,7 @@ Plecs {
               Type          From
               Name          "From13"
               Show          off
-              Position      [375, 70]
+              Position      [375, 130]
               Direction     right
               Flipped       off
               LabelPosition south
@@ -5068,7 +5068,7 @@ Plecs {
               Type          From
               Name          "From17"
               Show          off
-              Position      [375, 90]
+              Position      [375, 110]
               Direction     right
               Flipped       off
               LabelPosition south
@@ -5087,7 +5087,7 @@ Plecs {
               Type          From
               Name          "From18"
               Show          off
-              Position      [375, 130]
+              Position      [375, 90]
               Direction     right
               Flipped       off
               LabelPosition south
@@ -5106,7 +5106,7 @@ Plecs {
               Type          From
               Name          "From19"
               Show          off
-              Position      [375, 150]
+              Position      [375, 170]
               Direction     right
               Flipped       off
               LabelPosition south
@@ -5125,7 +5125,7 @@ Plecs {
               Type          From
               Name          "From20"
               Show          off
-              Position      [375, 110]
+              Position      [375, 70]
               Direction     right
               Flipped       off
               LabelPosition south
@@ -5144,7 +5144,7 @@ Plecs {
               Type          From
               Name          "From21"
               Show          off
-              Position      [375, 170]
+              Position      [375, 150]
               Direction     right
               Flipped       off
               LabelPosition south
@@ -5516,6 +5516,20 @@ Plecs {
                 Show          off
               }
             }
+            Component {
+              Type          SignalDemux
+              Name          "Demux"
+              Show          off
+              Position      [155, 75]
+              Direction     right
+              Flipped       on
+              LabelPosition south
+              Parameter {
+                Variable      "Width"
+                Value         "3"
+                Show          off
+              }
+            }
             Connection {
               Type          Wire
               SrcComponent  "FET1"
@@ -5882,13 +5896,6 @@ Plecs {
             }
             Connection {
               Type          Signal
-              SrcComponent  "signal_inputs"
-              SrcTerminal   1
-              DstComponent  "Goto10"
-              DstTerminal   1
-            }
-            Connection {
-              Type          Signal
               SrcComponent  "Am4"
               SrcTerminal   3
               DstComponent  "Goto6"
@@ -5900,37 +5907,6 @@ Plecs {
               SrcTerminal   1
               DstComponent  "L3"
               DstTerminal   2
-            }
-            Connection {
-              Type          Signal
-              SrcComponent  "From16"
-              SrcTerminal   1
-              DstComponent  "Mux"
-              DstTerminal   2
-            }
-            Connection {
-              Type          Signal
-              SrcComponent  "From12"
-              SrcTerminal   1
-              Points        [410, 50; 410, 40]
-              DstComponent  "Mux"
-              DstTerminal   3
-            }
-            Connection {
-              Type          Signal
-              SrcComponent  "From13"
-              SrcTerminal   1
-              Points        [415, 70; 415, 50]
-              DstComponent  "Mux"
-              DstTerminal   4
-            }
-            Connection {
-              Type          Signal
-              SrcComponent  "From17"
-              SrcTerminal   1
-              Points        [420, 90; 420, 60]
-              DstComponent  "Mux"
-              DstTerminal   5
             }
             Connection {
               Type          Signal
@@ -6107,49 +6083,94 @@ Plecs {
             }
             Connection {
               Type          Signal
+              SrcComponent  "signal_inputs"
+              SrcTerminal   1
+              DstComponent  "Demux"
+              DstTerminal   1
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "Demux"
+              SrcTerminal   2
+              DstComponent  "Goto10"
+              DstTerminal   1
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "From16"
+              SrcTerminal   1
+              DstComponent  "Mux"
+              DstTerminal   2
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "From12"
+              SrcTerminal   1
+              Points        [420, 50; 420, 40]
+              DstComponent  "Mux"
+              DstTerminal   3
+            }
+            Connection {
+              Type          Signal
               SrcComponent  "From20"
               SrcTerminal   1
-              Points        [425, 110; 425, 80]
+              Points        [425, 70; 425, 60]
               Branch {
-                Points        [425, 70]
+                Points        [425, 50]
                 DstComponent  "Mux"
-                DstTerminal   6
+                DstTerminal   4
               }
               Branch {
                 DstComponent  "Mux"
-                DstTerminal   7
+                DstTerminal   5
               }
             }
             Connection {
               Type          Signal
               SrcComponent  "From18"
               SrcTerminal   1
-              Points        [430, 130; 430, 90]
+              Points        [430, 90; 430, 70]
+              DstComponent  "Mux"
+              DstTerminal   6
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "From17"
+              SrcTerminal   1
+              Points        [435, 110; 435, 80]
+              DstComponent  "Mux"
+              DstTerminal   7
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "From13"
+              SrcTerminal   1
+              Points        [440, 130; 440, 90]
               DstComponent  "Mux"
               DstTerminal   8
             }
             Connection {
               Type          Signal
-              SrcComponent  "From19"
-              SrcTerminal   1
-              Points        [435, 150; 435, 100]
-              DstComponent  "Mux"
-              DstTerminal   9
-            }
-            Connection {
-              Type          Signal
               SrcComponent  "From21"
               SrcTerminal   1
-              Points        [440, 170; 440, 120]
+              Points        [445, 150; 445, 110]
               Branch {
-                Points        [440, 110]
+                Points        [445, 100]
+                DstComponent  "Mux"
+                DstTerminal   9
+              }
+              Branch {
                 DstComponent  "Mux"
                 DstTerminal   10
               }
-              Branch {
-                DstComponent  "Mux"
-                DstTerminal   11
-              }
+            }
+            Connection {
+              Type          Signal
+              SrcComponent  "From19"
+              SrcTerminal   1
+              Points        [455, 170; 455, 120]
+              DstComponent  "Mux"
+              DstTerminal   11
             }
           }
         }
