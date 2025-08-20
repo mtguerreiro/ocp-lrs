@@ -128,9 +128,13 @@ set(USER_LINK_OTHER_FLAGS
 include(${OCP_LRS_PATH}/target/zynq/ocp_sources.cmake)
 include(${OCP_LRS_PATH}/target/zynq/ocp_headers.cmake)
 
-include(${OCP_LRS_PATH}/examples/fs_buck_boost/zynq/ocp_lrs_defs_cpu0.cmake)
-include(${OCP_LRS_PATH}/examples/fs_buck_boost/zynq/ocp_lrs_sources_cpu0.cmake)
-include(${OCP_LRS_PATH}/examples/fs_buck_boost/zynq/ocp_lrs_headers_cpu0.cmake)
+include(${OCP_LRS_PATH}/target/zynq/cpu0/defs.cmake)
+include(${OCP_LRS_PATH}/target/zynq/cpu0/sources.cmake)
+include(${OCP_LRS_PATH}/target/zynq/cpu0/headers.cmake)
+
+include(${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/zynq/cmake/cpu0_defs.cmake)
+include(${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/zynq/cmake/cpu0_sources.cmake)
+include(${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/zynq/cmake/cpu0_headers.cmake)
 
 # -----------------------------------------
 
