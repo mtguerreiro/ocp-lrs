@@ -14,9 +14,3 @@ list(APPEND USER_COMPILE_SOURCES
     "${OCP_LRS_PATH}/lrs_apps/cuk/cukControlCascFblin.c"
     "${OCP_LRS_PATH}/lrs_apps/cuk/cukHwIf.c"
 )
-
-
-list(APPEND USER_COMPILE_SOURCES
-    "${OCP_LRS_PATH}/lrs_apps/cuk/cdmpc/mvops.c"
-    "${OCP_LRS_PATH}/lrs_apps/cuk/cdmpc/dmpc_matrices.c"
-)

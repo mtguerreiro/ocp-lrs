@@ -37,7 +37,7 @@
 //=============================================================================
 #define UIFACE_CONFIG_SERVER_PORT_OCP               ZYNQ_CONFIG_TCP_SERVER_PORT_OCP
 #define UIFACE_CONFIG_SERVER_PORT_OPIL              ZYNQ_CONFIG_TCP_SERVER_PORT_OPIL
-#define UIFACE_CONFIG_THREAD_STACK_SIZE_DEFAULT     1024
+#define UIFACE_CONFIG_THREAD_STACK_SIZE_DEFAULT     2048
 #define UIFACE_CONFIG_THREAD_PRIO_DEFAULT           DEFAULT_THREAD_PRIO
 
 /* Ticks to wait to process new request */

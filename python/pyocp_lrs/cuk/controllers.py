@@ -220,10 +220,14 @@ class _EnergyMpc(pyocp.controller.ControllerTemplate):
     def __init__(self, ctl_id, ctl_if):
         super().__init__(ctl_id, ctl_if)
 
-        self.keys = (
+        self.keys = [
             'Ky', 'K_dz_1', 'K_dz_2', 'dt',
-            'alpha', 'Co', 'il_max', 'il_min'
-        )
+            'alpha', 'Co', 'il_max', 'il_min',
+            'Ku_freq_1'
+        ]
+
+        for i in range(200):
+            self.keys.append(f'Ku_freq_2_{i}')
         
 
     def _decode(self, params_bin):
@@ -304,13 +308,25 @@ class _EnergyMpc(pyocp.controller.ControllerTemplate):
             l_past=l_past, q=qw, window=window
         )
 
-        sys.export(r'/home/marco/projects/ocp-lrs/lrs_apps/cuk/cdmpc/')
+        #sys.export(r'/home/marco/projects/ocp-lrs/lrs_apps/cuk/cdmpc/')
 
         Ky = sys.Ky[0][0]
         K_dz_1 = sys.Kx[0][0]
         K_dz_2 = sys.Kx[0][1]
+        Ku_freq = sys.Ku_freq[0]
+        Ku_freq_1 = np.sum(Ku_freq[l_past:])
+        Ku_freq_2 = Ku_freq[:l_past]
 
-        return {'Ky':Ky, 'K_dz_1':K_dz_1, 'K_dz_2':K_dz_2, 'dt':dt, 'alpha':alpha}
+        _gains = {
+            'Ky':Ky, 'K_dz_1':K_dz_1, 'K_dz_2':K_dz_2,
+            'Ku_freq_1': Ku_freq_1, 'Ku_freq_2': Ku_freq_2,
+            'dt':dt, 'alpha':alpha
+        }
+        
+        for i in range(l_past):
+            _gains[f'Ku_freq_2_{i}'] = Ku_freq_2[i].astype(np.float32)#.tobytes()
+
+        return _gains
 
 
     def _get_q(self, f, qw, dt, l_pred, l_past):

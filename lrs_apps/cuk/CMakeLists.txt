@@ -15,14 +15,6 @@ target_sources(
     cukHwIf.c
 )
 
-
-target_sources(
-    cuk
-    PRIVATE
-    cdmpc/mvops.c
-    cdmpc/dmpc_matrices.c
-)
-
 target_sources(
     cuk
     PRIVATE
