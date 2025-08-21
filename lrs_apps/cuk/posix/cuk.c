@@ -162,6 +162,8 @@ static int32_t cukInitializeControlSystem(void){
     /*
      * Initializes control sys lib. Here we give bInputsPointer as buffer to
      * the inputs, because we have measurements and software measurements.
+     * The vector bInputsPointer is used by the hw and the controllers to
+     * access the hardware and software measurements.
      */
     config.binputs = (void *)bInputsPointer;
     config.boutputs = (void *)bOutputs;

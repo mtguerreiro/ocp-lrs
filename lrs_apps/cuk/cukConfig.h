@@ -85,16 +85,6 @@ typedef struct{
     float v2_ofs;
 }cukConfigMeasGains_t;
 
-#define CUK_CONFIG_ADC_GAIN_INV             (float)((5.0f / 4095.0f))
-
-#define CUK_CONFIG_VSENS_GAIN_INV           (float)((60.0f / 5.0f))
-
-#define CUK_CONFIG_ISENS_ACS730_GAIN_INV    (float)((20.0f))
-#define CUK_CONFIG_ISENS_ACS730_OFFS        (float)((2.5f))
-
-#define CUK_CONFIG_ISENS_ACS712_GAIN_INV    (float)((10.0f))
-#define CUK_CONFIG_ISENS_ACS712_OFFS        (float)((2.5f))
-
 #define CUK_CONFIG_TF_N2N1                  (float)((5.0f / 3.0f))
 #define CUK_CONFIG_TF_N2N1_SQ               (float)(CUK_CONFIG_TF_N2N1 * CUK_CONFIG_TF_N2N1)
 
@@ -108,22 +98,21 @@ typedef struct{
 #define CUK_CONFIG_I_SEC_LIM                (10.0f)
 #define CUK_CONFIG_V_SEC_LIM                (50.0f)
 
-#define CUK_CONFIG_SHUTDOWN_U_DEC           (0.00025f)
+#define CUK_CONFIG_TRACE_0_NAME_LEN         500
+#define CUK_CONFIG_TRACE_0_MAX_SIGNALS      40
 
-#ifdef SOC_CPU1
-#define CUK_CONFIG_TRACE_ADDR             ZYNQ_CONFIG_MEM_TRACE_ADR
-#define CUK_CONFIG_TRACE_SIZE             ZYNQ_CONFIG_MEM_TRACE_SIZE_MAX
+#define CUK_CONFIG_INPUT_BUF_SIZE           50
+#define CUK_CONFIG_OUTPUT_BUF_SIZE          20
+#define CUK_CONFIG_REFERENCE_BUF_SIZE       20
+
+#define CUK_CONFIG_CS_ID                    OCP_CS_1
+#define CUK_CONFIG_TRACE_ID                 OCP_TRACE_1
+
+#ifdef OCP_LRS_ZYNQ_BUILD_CPU1
+#include "zynqConfig.h"
+#define CUK_CONFIG_TRACE_ADDR               ZYNQ_CONFIG_MEM_TRACE_ADR
+#define CUK_CONFIG_TRACE_SIZE               ZYNQ_CONFIG_MEM_TRACE_SIZE_MAX
 #endif
-
-#define CUK_CONFIG_TRACE_0_NAME_LEN       500
-#define CUK_CONFIG_TRACE_0_MAX_SIGNALS    40
-
-#define CUK_CONFIG_INPUT_BUF_SIZE         50
-#define CUK_CONFIG_OUTPUT_BUF_SIZE        20
-#define CUK_CONFIG_REFERENCE_BUF_SIZE     20
-
-#define CUK_CONFIG_CS_ID                  OCP_CS_1
-#define CUK_CONFIG_TRACE_ID               OCP_TRACE_1
 
 //=============================================================================
 

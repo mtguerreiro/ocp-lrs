@@ -7,10 +7,10 @@
 
 /* Open controller project */
 #include "ocpConfig.h"
-#include "ocpTrace.h"
-#include "ocpCS.h"
-#include "ocpIf.h"
-#include "ocpOpil.h"
+#include "ocp/ocpTrace.h"
+#include "ocp/ocpCS.h"
+#include "ocp/ocpIf.h"
+#include "ocp/ocpOpil.h"
 
 /* Controller lib */
 #include "controller/controller.h"
@@ -61,7 +61,9 @@ static char traceNames[CUK_CONFIG_TRACE_0_NAME_LEN];
 static size_t traceData[CUK_CONFIG_TRACE_0_MAX_SIGNALS];
 
 static float bInputs[CUK_CONFIG_INPUT_BUF_SIZE];
-static float bOutputs[CUK_CONFIG_OUTPUT_BUG_SIZE];
+static float bOutputs[CUK_CONFIG_OUTPUT_BUF_SIZE];
+
+static float *bInputsPointer[2];
 
 static float texec = 0.0f;
 //=============================================================================
@@ -116,35 +118,38 @@ static int32_t cukInitializeHw(void *intcInst){
 //-----------------------------------------------------------------------------
 static int32_t cukInitializeTraceSignals(void){
 
+    cukConfigSwMeasurements_t *softMeas;
     cukConfigMeasurements_t *meas;
     cukConfigControl_t *outputs;
 
     /* Adds measurements to trace */
     meas = (cukConfigMeasurements_t *)bInputs;
-    ocpTraceAddSignal(OCP_TRACE_1, &meas->ii, "Input current");
-    ocpTraceAddSignal(OCP_TRACE_1, &meas->i1, "Primary inductor current");
-    ocpTraceAddSignal(OCP_TRACE_1, &meas->vi, "Input voltage");
-    ocpTraceAddSignal(OCP_TRACE_1, &meas->vi_dc, "DC link voltage");
-    ocpTraceAddSignal(OCP_TRACE_1, &meas->v1, "Primary coupling cap voltage");
+    ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &meas->ii, "Input current");
+    ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &meas->i1, "Primary inductor current");
+    ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &meas->vi, "Input voltage");
+    ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &meas->vi_dc, "DC link voltage");
+    ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &meas->v1, "Primary coupling cap voltage");
 
-    ocpTraceAddSignal(OCP_TRACE_1, &meas->io, "Output current");
-    ocpTraceAddSignal(OCP_TRACE_1, &meas->i2, "Secondary inductor current");
-    ocpTraceAddSignal(OCP_TRACE_1, &meas->vo, "Output voltage");
-    ocpTraceAddSignal(OCP_TRACE_1, &meas->vo_dc, "Output DC link voltage");
-    ocpTraceAddSignal(OCP_TRACE_1, &meas->v2, "Secondary coupling cap voltage");
+    ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &meas->io, "Output current");
+    ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &meas->i2, "Secondary inductor current");
+    ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &meas->vo, "Output voltage");
+    ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &meas->vo_dc, "Output DC link voltage");
+    ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &meas->v2, "Secondary coupling cap voltage");
 
     /* Adds control signals to trace */
     outputs = (cukConfigControl_t *)bOutputs;
-    ocpTraceAddSignal(OCP_TRACE_1, &outputs->u, "Duty-cycle");
-    //ocpTraceAddSignal(OCP_TRACE_1, &outputs->sw_o, "Output switch");
+    ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &outputs->u, "Duty-cycle");
+    //ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &outputs->sw_o, "Output switch");
 
     /* Other signals to add */
-    ocpTraceAddSignal(OCP_TRACE_1, &texec, "Exec. time");
+    ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &texec, "Exec. time");
 
-    ocpTraceAddSignal(OCP_TRACE_1, &meas->io_filt, "Io filt");
+    softMeas = (cukConfigSwMeasurements_t *) &bInputs[sizeof(cukConfigMeasurements_t) >> 2];
 
-    ocpTraceAddSignal(OCP_TRACE_1, &meas->pi, "Input power");
-    ocpTraceAddSignal(OCP_TRACE_1, &meas->po, "Output power");
+    ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &softMeas->io_filt, "Io filt");
+
+    ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &softMeas->pi, "Input power");
+    ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, &softMeas->po, "Output power");
 
     return 0;
 }
@@ -157,12 +162,21 @@ static int32_t cukInitializeControlSystem(void){
     cukControllerInit();
     cukHwIfInitialize();
 
-    /* Initializes control sys lib */
-    config.binputs = (void *)bInputs;
+    bInputsPointer[0] = bInputs;
+    bInputsPointer[1] = &bInputs[sizeof(cukConfigMeasurements_t) >> 2];
+
+    /*
+     * Initializes control sys lib. Here we give bInputsPointer as buffer to
+     * the inputs, because we have measurements and software measurements.
+     * The vector bInputsPointer is used by the hw and the controllers to
+     * access the hardware and software measurements.
+     */
+    config.binputs = (void *)bInputsPointer;
     config.boutputs = (void *)bOutputs;
 
     config.fhwInterface = cukHwIf;
     config.fhwStatus = cukHwStatus;
+    config.fhwDisable = cukHwShutDown;
 
     //config.fgetInputs = buckOpilGetMeasurements;
     config.fgetInputs = cukHwGetMeasurements;

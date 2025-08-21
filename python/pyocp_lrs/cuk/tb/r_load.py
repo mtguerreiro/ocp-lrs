@@ -33,6 +33,8 @@ def run_ref_step(cuk, model_params, exp_params, plat_params, save=False, ctl='en
     
     common.ramp_duty_down(cuk)
     time.sleep(0.5 * k)
+
+    common.wait_for_trigger(cuk)
     
     cuk.idle.enable()
     cuk.disable()

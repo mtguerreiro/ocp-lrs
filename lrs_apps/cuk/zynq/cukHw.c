@@ -3,7 +3,6 @@
  *
  */
 
-#ifdef SOC_CPU1
 //=============================================================================
 /*-------------------------------- Includes ---------------------------------*/
 //=============================================================================
@@ -18,24 +17,25 @@
 #include "zynqConfig.h"
 
 #include "xgpio.h"
+
+#include "utils/dfilt.h"
 //=============================================================================
 
 //=============================================================================
 /*------------------------------- Definitions -------------------------------*/
 //=============================================================================
-#define CUK_HW_CONFIG_ADC_SPI_FREQ_HZ      ((uint32_t)16666666)
-#define CUK_HW_CONFIG_PWM_FREQ_HZ          ((uint32_t) 100000 )
-#define CUK_HW_CONFIG_PWM_DEAD_TIME_NS     ((float) 75e-9 )
-#define CUK_HW_CONFIG_PWM_BASE              XPAR_AXI_PWM_0_S00_AXI_BASEADDR
-#define CUK_HW_CONFIG_ADC_BASE              XPAR_ADC_PSCTL_0_S00_AXI_BASEADDR
+#define CUK_HW_CONFIG_ADC_SPI_FREQ_HZ       ((uint32_t)16666666)
+#define CUK_HW_CONFIG_PWM_FREQ_HZ           ((uint32_t) 100000 )
+#define CUK_HW_CONFIG_PWM_DEAD_TIME_NS      ((float) 75e-9 )
+#define CUK_HW_CONFIG_PWM_BASE              XPAR_AXI_PWM_0_BASEADDR
+#define CUK_HW_CONFIG_ADC_BASE              XPAR_ADC_PSCTL_0_BASEADDR
 
 #define CUK_HW_CONFIG_IRQ_PL_CPU1           ZYNQ_CONFIG_IRQ_PL_TO_CPU1
 #define CUK_HW_CONFIG_IRQ_PL_CPU1_PRIO      ZYNQ_CONFIG_IRQ_PL_TO_CPU1_PRIO
 #define CUK_HW_CONFIG_ADC_BUFFER            ZYNQ_CONFIG_MEM_PL_TO_CPU1_ADR
 
-#define CUK_HW_CONFIG_GPIO_ID               XPAR_AXI_GPIO_0_DEVICE_ID
+#define CUK_HW_CONFIG_GPIO_BASE             XPAR_XGPIO_0_BASEADDR
 #define CUK_HW_CONFIG_GPIO_CHANNEL          1
-#define CUK_HW_CONFIG_GPIO_MASK             0b11
 
 #define CUK_HW_CONFIG_GPIO_OUTPUT_OFFS      (1U)
 #define CUK_HW_CONFIG_GPIO_OUTPUT           (1 << CUK_HW_CONFIG_GPIO_OUTPUT_OFFS)
@@ -71,14 +71,12 @@ static void cukHwInitializeAdc(void *intc, cukHwAdcIrqHandle_t irqhandle);
 static void cukHwInitializePwm(void);
 static void cukHwInitializeGpio(void);
 static void cukHwInitializeMeasGains(void);
-static float cukHwExpMovAvg(float sample, float average);
 //=============================================================================
 
 //=============================================================================
 /*--------------------------------- Globals ---------------------------------*/
 //=============================================================================
 static cukHwControl_t hwControl = {.pwmPeriod = 0, .status = 0, .alpha = 0.2f};
-static float i_i_filt = 0.0f, i_1_filt = 0.0f, i_o_filt = 0.0f, i_2_filt = 0.0f;
 //=============================================================================
 
 //=============================================================================
@@ -249,12 +247,15 @@ uint32_t cukHwGetAdcSpiFreq(void){
 //-----------------------------------------------------------------------------
 int32_t cukHwGetMeasurements(void *meas){
 
-    cukConfigMeasurements_t *dst;
+    cukConfigMeasurements_t *hwMeas;
+    cukConfigSwMeasurements_t *swMeas;
+    float **p;
     uint16_t *src;
 
     src = (uint16_t *)CUK_HW_CONFIG_ADC_BUFFER;
-    dst = (cukConfigMeasurements_t *)meas;
-
+    p = (float **)meas;
+    hwMeas = (cukConfigMeasurements_t *)p[0];
+    swMeas = (cukConfigSwMeasurements_t *)p[1];
 
     //-------------------------------------------------------------------------
     // Sensor-based measurements
@@ -265,76 +266,50 @@ int32_t cukHwGetMeasurements(void *meas){
      * first channel.
      */
     src++;
+    hwMeas->ii      = hwControl.gains.ii_gain * ((float)(*src++)) + hwControl.gains.ii_ofs;
+    hwMeas->i1      = hwControl.gains.i1_gain * ((float)(*src++)) + hwControl.gains.i1_ofs;
 
-    dst->ii =  hwControl.gains.ii_gain * ((float)(*src++)) + hwControl.gains.ii_ofs;
-    dst->i1 =  hwControl.gains.i1_gain * ((float)(*src++)) + hwControl.gains.i1_ofs;
-
-    dst->vi = hwControl.gains.vi_gain * ((float)(*src++)) + hwControl.gains.vi_ofs;
-    dst->vi_dc = hwControl.gains.vi_dc_gain * ((float)(*src++)) + hwControl.gains.vi_dc_ofs;
-    dst->v1  = hwControl.gains.v1_gain * ((float)(*src++)) + hwControl.gains.v1_ofs;
+    hwMeas->vi      = hwControl.gains.vi_gain * ((float)(*src++)) + hwControl.gains.vi_ofs;
+    hwMeas->vi_dc   = hwControl.gains.vi_dc_gain * ((float)(*src++)) + hwControl.gains.vi_dc_ofs;
+    hwMeas->v1      = hwControl.gains.v1_gain * ((float)(*src++)) + hwControl.gains.v1_ofs;
 
     /* Skips the seventh adc channel of header */
     src++;
-    dst->io =  -( hwControl.gains.io_gain * ((float)(*src++)) + hwControl.gains.io_ofs );
-    dst->i2 =  -( hwControl.gains.i2_gain * ((float)(*src++)) + hwControl.gains.i2_ofs );
+    hwMeas->io      = -( hwControl.gains.io_gain * ((float)(*src++)) + hwControl.gains.io_ofs );
+    hwMeas->i2      = -( hwControl.gains.i2_gain * ((float)(*src++)) + hwControl.gains.i2_ofs );
 
-    dst->vo =    hwControl.gains.vo_gain * ((float)(*src++)) + hwControl.gains.vo_ofs;
-    dst->vo_dc = hwControl.gains.vo_dc_gain * ((float)(*src++)) + hwControl.gains.vo_dc_ofs;
-    dst->v2 =      hwControl.gains.v2_gain * ((float)(*src++)) + hwControl.gains.v2_ofs;
+    hwMeas->vo      = hwControl.gains.vo_gain * ((float)(*src++)) + hwControl.gains.vo_ofs;
+    hwMeas->vo_dc   = hwControl.gains.vo_dc_gain * ((float)(*src++)) + hwControl.gains.vo_dc_ofs;
+    hwMeas->v2      = hwControl.gains.v2_gain * ((float)(*src++)) + hwControl.gains.v2_ofs;
     //-------------------------------------------------------------------------
 
     //-------------------------------------------------------------------------
     // Software-based measurements
     //-------------------------------------------------------------------------
-    dst->ii_filt = 0.0f;
-    dst->i1_filt = 0.0f;
+    swMeas->ii_filt = dfiltExpMovAvg(hwMeas->ii, swMeas->ii_filt, hwControl.alpha);
+    swMeas->io_filt = dfiltExpMovAvg(hwMeas->io, swMeas->io_filt, hwControl.alpha);
 
-    dst->vi_filt = 0.0f;
-    dst->vi_dc_filt = 0.0f;
-    dst->v1_filt  = 0.0f;
-
-    dst->io_filt = 0.0f;
-    dst->i2_filt = 0.0f;
-
-    dst->vo_filt =    0.0f;
-    dst->vo_dc_filt = 0.0f;
-    dst->v2_filt =      0.0f;
-
-    i_1_filt = cukHwExpMovAvg(dst->i1, i_1_filt);
-    dst->i1_filt = i_1_filt;
-
-    i_i_filt = cukHwExpMovAvg(dst->ii, i_i_filt);
-    dst->ii_filt = i_i_filt;
-
-    i_o_filt = cukHwExpMovAvg(dst->io, i_o_filt);
-    dst->io_filt = i_o_filt;
-
-    i_2_filt = cukHwExpMovAvg(dst->i2, i_2_filt);
-    dst->i2_filt = i_2_filt;
-
-    dst->pi = dst->i1 * dst->vi_dc;
-    dst->po = i_o_filt * dst->vo_dc;
-    dst->p_load = dst->po;
+    swMeas->pi = hwMeas->i1 * hwMeas->vi_dc;
+    swMeas->po = swMeas->io_filt * hwMeas->vo_dc;
     //-------------------------------------------------------------------------
 
     /* Protection */
-    if( (dst->ii > CUK_CONFIG_I_PRIM_LIM) || (dst->i1 > CUK_CONFIG_I_PRIM_LIM) ) hwControl.status = 1;
-    if( (dst->ii < -CUK_CONFIG_I_PRIM_LIM) || (dst->i1 < -CUK_CONFIG_I_PRIM_LIM) ) hwControl.status = 1;
+    if( (hwMeas->ii > CUK_CONFIG_I_PRIM_LIM) || (hwMeas->i1 > CUK_CONFIG_I_PRIM_LIM) ) hwControl.status = 1;
+    if( (hwMeas->ii < -CUK_CONFIG_I_PRIM_LIM) || (hwMeas->i1 < -CUK_CONFIG_I_PRIM_LIM) ) hwControl.status = 1;
 
-    if( (dst->vi > CUK_CONFIG_V_PRIM_LIM) || (dst->vi_dc > CUK_CONFIG_V_PRIM_LIM) || (dst->v1 > CUK_CONFIG_V_PRIM_LIM) ) hwControl.status = 1;
+    if( (hwMeas->vi > CUK_CONFIG_V_PRIM_LIM) || (hwMeas->vi_dc > CUK_CONFIG_V_PRIM_LIM) || (hwMeas->v1 > CUK_CONFIG_V_PRIM_LIM) ) hwControl.status = 1;
 
-    if( (dst->i2 > CUK_CONFIG_I_SEC_LIM) ) hwControl.status = 1;
-    if( (dst->i2 < -CUK_CONFIG_I_SEC_LIM) ) hwControl.status = 1;
+    if( (hwMeas->i2 > CUK_CONFIG_I_SEC_LIM) ) hwControl.status = 1;
+    if( (hwMeas->i2 < -CUK_CONFIG_I_SEC_LIM) ) hwControl.status = 1;
 
-    if( (dst->vo > CUK_CONFIG_V_SEC_LIM) || (dst->vo_dc > CUK_CONFIG_V_SEC_LIM) || (dst->v2 > CUK_CONFIG_V_SEC_LIM) ) hwControl.status = 1;
+    if( (hwMeas->vo > CUK_CONFIG_V_SEC_LIM) || (hwMeas->vo_dc > CUK_CONFIG_V_SEC_LIM) || (hwMeas->v2 > CUK_CONFIG_V_SEC_LIM) ) hwControl.status = 1;
 
     if( hwControl.status != 0 ){
-        //cukHwSetPwmOutputEnable(0);
         cukHwShutDown();
         return -1;
     }
-    else
-        return sizeof(cukConfigMeasurements_t);
+
+    return sizeof(cukConfigMeasurements_t) + sizeof(cukConfigSwMeasurements_t);
 }
 //-----------------------------------------------------------------------------
 int32_t cukHwApplyOutputs(void *outputs, int32_t size){
@@ -470,7 +445,7 @@ static void cukHwInitializeAdc(void *intc, cukHwAdcIrqHandle_t irqhandle){
 
     zynqAxiAdcBufferAddressWrite(CUK_HW_CONFIG_ADC_BASE, CUK_HW_CONFIG_ADC_BUFFER);
 
-    zynqAxiAdcInterruptConfig(intc, CUK_HW_CONFIG_IRQ_PL_CPU1, ZYNQ_CONFIG_IRQ_PL_TO_CPU1_PRIO, irqhandle);
+    zynqAxiAdcInterruptConfig(intc, CUK_HW_CONFIG_IRQ_PL_CPU1, CUK_HW_CONFIG_IRQ_PL_CPU1_PRIO, irqhandle);
 
     zynqAxiAdcEnableWrite(CUK_HW_CONFIG_ADC_BASE, 1);
 }
@@ -491,12 +466,12 @@ static void cukHwInitializePwm(void){
 //-----------------------------------------------------------------------------
 static void cukHwInitializeGpio(void){
 
-    XGpio_Config *cfg_ptr = 0;
-
     /* Initializes GPIOs */
-    cfg_ptr = XGpio_LookupConfig(CUK_HW_CONFIG_GPIO_ID);
-    XGpio_CfgInitialize(&hwControl.gpio, cfg_ptr, cfg_ptr->BaseAddress);
+    XGpio_Initialize(&hwControl.gpio, CUK_HW_CONFIG_GPIO_BASE);
     XGpio_SetDataDirection(&hwControl.gpio, CUK_HW_CONFIG_GPIO_CHANNEL, 0);
+
+    cukHwSetOutputSwitch(0);
+    cukHwSetLoadSwitch(0);
 }
 //-----------------------------------------------------------------------------
 static void cukHwInitializeMeasGains(void){
@@ -530,8 +505,6 @@ static void cukHwInitializeMeasGains(void){
 
     hwControl.gains.v2_gain = 0.01487120334913248f;
     hwControl.gains.v2_ofs =  0.058881268243716534f;
-
 }
 //-----------------------------------------------------------------------------
 //=============================================================================
-#endif /* SOC_CPU1 */

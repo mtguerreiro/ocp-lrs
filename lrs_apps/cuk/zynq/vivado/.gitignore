@@ -1,0 +1,5 @@
+NA/
+pynq_lrssoc/
+.Xil/
+vivado*.jou
+vivado*.log

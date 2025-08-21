@@ -177,19 +177,19 @@ int32_t cukHwGetMeasurements(void *meas){
     softMeas = (cukConfigSwMeasurements_t *)p[1];
 
     /* Sensor-based measurements */
-    hwMeas->ii      =   xtMeasurements.ii;
-    hwMeas->i1      =   xtMeasurements.i1;
+    hwMeas->ii      = xtMeasurements.ii;
+    hwMeas->i1      = xtMeasurements.i1;
 
-    hwMeas->vi      =   xtMeasurements.vi;
-    hwMeas->vi_dc   =   xtMeasurements.vi_dc;
-    hwMeas->v1      =   xtMeasurements.v1;
+    hwMeas->vi      = xtMeasurements.vi;
+    hwMeas->vi_dc   = xtMeasurements.vi_dc;
+    hwMeas->v1      = xtMeasurements.v1;
 
-    hwMeas->io      =   xtMeasurements.io;
-    hwMeas->i2      =   xtMeasurements.i2;
+    hwMeas->io      = xtMeasurements.io;
+    hwMeas->i2      = xtMeasurements.i2;
 
-    hwMeas->vo      =   xtMeasurements.vo;
-    hwMeas->vo_dc   =   xtMeasurements.vo_dc;
-    hwMeas->v2      =   xtMeasurements.v2;
+    hwMeas->vo      = xtMeasurements.vo;
+    hwMeas->vo_dc   = xtMeasurements.vo_dc;
+    hwMeas->v2      = xtMeasurements.v2;
 
     /* Software-based measurements */
     softMeas->ii_filt = dfiltExpMovAvg(hwMeas->ii, softMeas->ii_filt, hwControl.alpha);
