@@ -1,11 +1,5 @@
-/*
- * cukControlEnergy.c
- *
- *  Created on: 11.09.2023
- *      Author: marco
- */
 
-#ifdef SOC_CPU1
+
 //=============================================================================
 /*-------------------------------- Includes ---------------------------------*/
 //=============================================================================
@@ -16,12 +10,13 @@
 
 #include "cukConfig.h"
 
-#include "mvops.h"
-#include "dmpc.h"
-#include "dmpc_defs.h"
-#include "dmpc_matrices.h"
+#include "cdmpc/mvops.h"
+#include "cdmpc/dmpc_matrices.h"
+#include "cdmpc/dmpc_defs.h"
 
 #include "controller/controller.h"
+
+#include "string.h"
 //=============================================================================
 
 //=============================================================================
@@ -32,45 +27,85 @@
 //=============================================================================
 /*------------------------------- Definitions -------------------------------*/
 //=============================================================================
-#define V_GAIN          ((float) 1e6 )
+typedef struct{
+
+    float Ky;
+    float K_dz_1;
+    float K_dz_2;
+    float dt;
+
+    float alpha;
+
+    float Co;
+
+    float il_max;
+    float il_min;
+}params_t;
 
 //=============================================================================
 
 //=============================================================================
 /*--------------------------------- Globals ---------------------------------*/
 //=============================================================================
-static float p_in = 0.0f, p_out = 0.0f, y_dot = 0.0f, y = 0.0f, y_r = 0.0f;
 
-static float xm[DMPC_CONFIG_NXM] = {0};
-static float xm_1[DMPC_CONFIG_NXM] = {0};
+static float p_in = 0.0f, p_out = 0.0f;
 
-static float ref[DMPC_CONFIG_NY];
+/* y_1 and y_dot_1 are past samples of y and y_dot */
+static float y = 0.0f, y_1 = 0.0f, y_dot = 0.0f, y_dot_1 = 0.0f;
+static float yr = 0.0f;
 
-static float u[DMPC_CONFIG_NU + DMPC_CONFIG_ND] = {0};
-static float du[DMPC_CONFIG_NU + DMPC_CONFIG_ND] = {0};
+static float v, v_1;
+static float v_init;
+static float dv;
 
 static uint32_t first_enter = 0;
 
-static float u_init, u_min, u_max;
-static float x_init, x_min, x_max;
+static float dv_min, dv_min_v, dv_min_z2;
+static float dv_max, dv_max_v, dv_max_z2;
 
-static float il_max = 7.0f;
-static float il_min = 0.0f;
+static float D[DMPC_CONFIG_L_PAST + DMPC_CONFIG_L_PRED];
 
-static float duty = 0.0f;
+static params_t params = {
+    .Ky = 4.142886638641357f, .K_dz_1 = 108.40249633789062f, .K_dz_2 = 0.01472429372370243f,
+    .dt=1.0f/100e3, .alpha = 1e6, .Co = CUK_CONFIG_C_O,
+    .il_max = 6.0f, .il_min = 0.15f
+};
 
-static float du_min_1, du_min_2;
-static float du_max_1, du_max_2;
+#define ALPHA   ((float)1e6)
+#define TS      ((float)(1.0f/100e3))
 
-static float Kx[2] = {9.40077310e+01, 1.36080265e-02};
-static float Ky = 3.79121039;
-
-static float Co = CUK_CONFIG_C_O;
-
-static float du_1[DMPC_CONFIG_NC];
-static float aux[DMPC_CONFIG_NC_x_NU];
-
-static float freq_en = 0.0f;
+// static float p_in = 0.0f, p_out = 0.0f, y_dot = 0.0f, y = 0.0f, y_r = 0.0f;
+//
+// static float xm[DMPC_CONFIG_NXM] = {0};
+// static float xm_1[DMPC_CONFIG_NXM] = {0};
+//
+// static float ref[DMPC_CONFIG_NY];
+//
+// static float u[DMPC_CONFIG_NU + DMPC_CONFIG_ND] = {0};
+// static float du[DMPC_CONFIG_NU + DMPC_CONFIG_ND] = {0};
+//
+// static uint32_t first_enter = 0;
+//
+// static float u_init, u_min, u_max;
+// static float x_init, x_min, x_max;
+//
+// static float il_max = 7.0f;
+// static float il_min = 0.0f;
+//
+// static float duty = 0.0f;
+//
+// static float du_min_1, du_min_2;
+// static float du_max_1, du_max_2;
+//
+// static float Kx[2] = {9.40077310e+01, 1.36080265e-02};
+// static float Ky = 3.79121039;
+//
+// static float Co = CUK_CONFIG_C_O;
+//
+// static float du_1[DMPC_CONFIG_NC];
+// static float aux[DMPC_CONFIG_NC_x_NU];
+//
+// static float freq_en = 0.0f;
 //=============================================================================
 
 //=============================================================================
@@ -94,8 +129,8 @@ int32_t cukControlEnergyMpcRun(void *meas, int32_t nmeas, void *refs, int32_t nr
     static float e_x1, e_x2, e_x3, e_x4;
     static float x1_r, x2_r, x3_r, x4_r;
     static float e_x1_r, e_x2_r, e_x3_r, e_x4_r;
-    static float v;
     uint32_t i;
+    float duty, aux;
 
     p = (float **)meas;
 
@@ -111,7 +146,7 @@ int32_t cukControlEnergyMpcRun(void *meas, int32_t nmeas, void *refs, int32_t nr
     e_x1 = (0.5f) * CUK_CONFIG_L_IN * x1 * x1;
     e_x2 = (0.5f) * CUK_CONFIG_L_OUT * x2 * x2;
     e_x3 = (0.5f) * CUK_CONFIG_C_C * x3 * x3 * CUK_CONFIG_TF_N2N1_SQ / (CUK_CONFIG_TF_N2N1_SQ + 1.0f);
-    e_x4 = (0.5f) * Co * x4 * x4;
+    e_x4 = (0.5f) * params.Co * x4 * x4;
     y = e_x1 + e_x2 + e_x3 + e_x4;
 
     /* Input, output and converter power */
@@ -128,129 +163,91 @@ int32_t cukControlEnergyMpcRun(void *meas, int32_t nmeas, void *refs, int32_t nr
     e_x1_r = (0.5f) * CUK_CONFIG_L_IN * x1_r * x1_r;
     e_x2_r = (0.5f) * CUK_CONFIG_L_OUT * x2_r * x2_r;
     e_x3_r = (0.5f) * CUK_CONFIG_C_C * x3_r * x3_r * CUK_CONFIG_TF_N2N1_SQ / (CUK_CONFIG_TF_N2N1_SQ + 1.0f);
-    e_x4_r = (0.5f) * Co * x4_r * x4_r;
-    y_r = e_x1_r + e_x2_r + e_x3_r + e_x4_r;
+    e_x4_r = (0.5f) * params.Co * x4_r * x4_r;
+    yr = e_x1_r + e_x2_r + e_x3_r + e_x4_r;
 
     /* Initialization */
     if( first_enter == 0 ){
         first_enter = 1;
 
-        u[0] = 0;
-        xm_1[0] = y;
+        //o->u = hwm->vo / (CUK_CONFIG_TF_N2N1_SQ * hwm->vi_dc + hwm->vo);
+        v_init = hwm->vi_dc / CUK_CONFIG_L_IN * (hwm->vi_dc - (1.0f - o->u) * x3) / params.alpha;
+
+        v_1 = v_init;
+        y_1 = y;
+        y_dot_1 = y_dot;
+
+        for(i = 0; i < (DMPC_CONFIG_L_PRED + DMPC_CONFIG_L_PAST); i++){
+            D[i] = v_init;
+        }
     }
-
-    /* Updates bounds */
-    u_min = hwm->vi_dc / CUK_CONFIG_L_IN * (hwm->vi_dc - x3) / V_GAIN;
-    u_max = hwm->vi_dc * hwm->vi_dc / CUK_CONFIG_L_IN / V_GAIN;
-    //DMPC_CONFIG_U_MIN[0] = u_min;
-    //DMPC_CONFIG_U_MAX[0] = u_max;
-
-    x_min = il_min * hwm->vi_dc - p_out;
-    x_max = il_max * hwm->vi_dc - p_out;
-    //DMPC_CONFIG_XM_MIN[0] = x_min;
-    //DMPC_CONFIG_XM_MAX[0] = x_max;
-
-    du_min_1 = (x_min - y_dot) / 10.0f - u[0];
-    du_min_2 = u_min;
-
-    du_max_1 = (x_max - y_dot) / 10.0f - u[0];
-    du_max_2 = u_max;
-
-    /* Assembles state vector */
-    xm[0] = y;
-    xm[1] = y_dot;
 
     /* Delay compensation */
-    dmpcDelayComp(xm, xm, u);
+    y = y + params.dt * y_dot + params.alpha * params.dt * params.dt / 2.0f * v_1;
+    y_dot = y_dot + params.alpha * params.dt * v_1;
+
+    /* Determine bounds for dv */
+    dv_min_v = hwm->vi_dc / CUK_CONFIG_L_IN * (hwm->vi_dc - x3) / params.alpha - v_1;
+    dv_max_v = hwm->vi_dc * hwm->vi_dc / CUK_CONFIG_L_IN / params.alpha - v_1;
+
+    dv_min_z2 = (params.il_min * hwm->vi_dc - hwm->vo * hwm->io - 2.0f * y_dot + y_dot_1) / (params.alpha * params.dt);
+    dv_max_z2 = (params.il_max * hwm->vi_dc - hwm->vo * hwm->io - 2.0f * y_dot + y_dot_1) / (params.alpha * params.dt);
+
+    dv_min = dv_min_v > dv_min_z2 ? dv_min_v : dv_min_z2;
+    dv_max = dv_max_v < dv_max_z2 ? dv_max_v : dv_max_z2;
 
     /* Optimization */
-    //dmpcOpt(xm, xm_1, &y_r, u, 0, du, 0);
-    du[0] = -Kx[0] * (xm[0] - xm_1[0]) - Kx[1] * (xm[1] - xm_1[1]) - Ky * (xm[0] - y_r);
-
-    if( freq_en > 0.5f ){
-        mulmv(DMPC_M_Fj_3, DMPC_CONFIG_NU, du_1, DMPC_CONFIG_NC_x_NU, aux);
-        du[0] = du[0] - aux[0];
-        for(i = 0; i < (DMPC_CONFIG_NC - 1); i++){
-            du_1[i] = du_1[i+1];
-        }
-        du_1[DMPC_CONFIG_NC - 1] = du[0];
-    }
-
-    if( du[0] < du_min_1 ) du[0] = du_min_1;
-    if( du[0] < du_min_2 ) du[0] = du_min_2;
-
-    if( du[0] > du_max_1 ) du[0] = du_max_1;
-    if( du[0] > du_max_2 ) du[0] = du_max_2;
-
-    /* Computes u = du + u_1 */
-    sumv(u, du, DMPC_CONFIG_NU, u);
+    dv = - params.Ky * (y - yr) - params.K_dz_1 * (y - y_1) - params.K_dz_2 * (y_dot - y_dot_1);
+    mulmv(DMPC_Ku_freq, 1, D, DMPC_CONFIG_L_PRED + DMPC_CONFIG_L_PAST, &aux);
+    dv = dv - aux;
+    if( dv > dv_max ) dv = dv_max;
+    else if( dv < dv_min ) dv = dv_min;
+    v = v_1 + dv;
 
     /* Saves variables */
-    for(i = 0; i < DMPC_CONFIG_NXM; i++){
-        xm_1[i] = xm[i];
-    }
+    y_1 = y;
+    y_dot_1 = y_dot;
+    v_1 = v;
 
-    v = u[0] * V_GAIN;
-
-    duty =  1 - (hwm->vi_dc * hwm->vi_dc / CUK_CONFIG_L_IN - v) * CUK_CONFIG_L_IN / (x3 * hwm->vi_dc);
+    /* Feedback linearization */
+    duty = 1.0f - 1.0f / x3 * (hwm->vi_dc - CUK_CONFIG_L_IN / hwm->vi_dc * params.alpha * v);
 
     o->u = duty;
 
     if( o->u > 1.0f ) o->u = 1.0f;
     else if ( o->u < 0.0f ) o->u = 0.0f;
 
+    for(i = 0; i < (DMPC_CONFIG_L_PAST - 1); i++){
+        D[i] = D[i + 1];
+    }
+    for(i = (DMPC_CONFIG_L_PAST - 1); i < (DMPC_CONFIG_L_PAST + DMPC_CONFIG_L_PRED); i++){
+        D[i] = v_1;
+    }
+
     return sizeof(cukConfigControl_t);
 }
 //-----------------------------------------------------------------------------
-int32_t cukControlEnergyMpcSetParams(void *params, uint32_t n){
+int32_t cukControlEnergyMpcSetParams(void *buffer, uint32_t size){
 
-    float *p = (float *)params;
+    if( size != sizeof(params_t) ) return -1;
 
-    Kx[0] = *p++;
-    Kx[1] = *p++;
-
-    Ky = *p++;
-
-    il_max = *p++;
-    il_min = *p++;
-
-    Co = *p++;
-
-    freq_en = *p++;
+    memcpy( (void *)&params, buffer, size );
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 int32_t cukControlEnergyMpcGetParams(void *buffer, uint32_t size){
 
-    float *p = (float *)buffer;
+    if( size < sizeof(params_t) ) return -1;
 
-    *p++ = Kx[0];
-    *p++ = Kx[1];
+    memcpy( buffer, (void *)&params, sizeof(params_t) );
 
-    *p++ = Ky;
-
-    *p++ = il_max;
-    *p++ = il_min;
-
-    *p++ = Co;
-
-    *p++ = freq_en;
-
-    return 28;
+    return sizeof(params_t);
 }
 //-----------------------------------------------------------------------------
 void cukControlEnergyMpcReset(void){
 
-    uint32_t i;
-
     first_enter = 0;
-
-    for(i = 0; i < DMPC_CONFIG_NXM; i++) xm_1[i] = 0.0f;
-    for(i = 0; i < (DMPC_CONFIG_NU + DMPC_CONFIG_ND); i++) u[i] = 0.0f;
-
-    for(i = 0; i < DMPC_CONFIG_NC; i++) du_1[i] = 0.0f;
-
 }
 //-----------------------------------------------------------------------------
 void cukControlEnergyMpcGetCallbacks(void *callbacksBuffer){
@@ -267,12 +264,3 @@ void cukControlEnergyMpcGetCallbacks(void *callbacksBuffer){
 }
 //-----------------------------------------------------------------------------
 //=============================================================================
-
-//=============================================================================
-/*----------------------------- Static functions ----------------------------*/
-//=============================================================================
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//=============================================================================
-
-#endif /* SOC_CPU1 */

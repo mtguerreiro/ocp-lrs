@@ -9,6 +9,7 @@ import struct
 import numpy as np
 import scipy.signal
 import control
+import pyctl
 
 from dataclasses import dataclass
 
@@ -55,6 +56,7 @@ class Controllers:
         self.idle = _Idle(0, ctl_if)
         self.ramp = _Ramp(1, ctl_if)
         self.energy = _Energy(3, ctl_if)
+        self.energy_mpc = _EnergyMpc(4, ctl_if)
 
 
 class _Idle(pyocp.controller.ControllerTemplate):
@@ -211,3 +213,116 @@ class _Energy(pyocp.controller.ControllerTemplate):
         
         return filt
 
+
+
+class _EnergyMpc(pyocp.controller.ControllerTemplate):
+    
+    def __init__(self, ctl_id, ctl_if):
+        super().__init__(ctl_id, ctl_if)
+
+        self.keys = (
+            'Ky', 'K_dz_1', 'K_dz_2', 'dt',
+            'alpha', 'Co', 'il_max', 'il_min'
+        )
+        
+
+    def _decode(self, params_bin):
+        
+        keys = self.keys
+
+        _params = struct.unpack(f'<{len(keys)}f', params_bin)
+        params = dict(zip(keys, _params))
+
+        return params
+    
+
+    def get_model_params(self):
+
+        return self._model_params
+    
+
+    def set_model_params(self, params):
+
+        self._model_params = params
+        
+
+    def _encode(self, params):
+
+        keys = self.keys
+        
+        _params = [params[key] for key in keys]
+        params_bin = struct.pack(f'<{len(keys)}f', *_params)
+
+        return params_bin
+    
+        
+    def set_gains(
+        self,
+        rw=0.05, l_pred=200, alpha=1e6,
+        fw=None, qw=None, l_past=None, window='hann',
+        il_max=6, il_min=0.15, Co=330e-6,
+        dt=1/100e3
+        ):
+
+        if l_past is not None:
+            qw = self._get_q(fw, qw, dt, l_pred, l_past)
+
+        mpc_params = self._get_mpc_gains(
+            rw=rw, l_pred=l_pred, alpha=alpha,
+            qw=qw, l_past=l_past, window=window,
+            dt=dt
+        )
+
+        params = dict(mpc_params)
+        params['Co'] = Co
+        params['il_max'] = il_max
+        params['il_min'] = il_min
+
+        return self.set_params(params)
+
+
+    def _get_mpc_gains(
+        self,
+        rw=0.05, l_pred=200, alpha=1e6,
+        qw=None, l_past=None, window='hann',
+        dt=1/100e3
+        ):
+
+        Am = np.array([[0.0, 1.0],
+               [0.0, 0.0]])
+
+        Bm = np.array([[0.0],
+                       [alpha]])
+
+        Cm = np.array([1.0, 0.0])
+        
+        Ad, Bd, Cd, _, _ = scipy.signal.cont2discrete((Am, Bm, Cm, 0), dt, method='zoh')
+
+        sys = pyctl.mpc.System(
+            Ad, Bd, Cd,
+            l_pred=l_pred, rw=rw,
+            l_past=l_past, q=qw, window=window
+        )
+
+        sys.export(r'/home/marco/projects/ocp-lrs/lrs_apps/cuk/cdmpc/')
+
+        Ky = sys.Ky[0][0]
+        K_dz_1 = sys.Kx[0][0]
+        K_dz_2 = sys.Kx[0][1]
+
+        return {'Ky':Ky, 'K_dz_1':K_dz_1, 'K_dz_2':K_dz_2, 'dt':dt, 'alpha':alpha}
+
+
+    def _get_q(self, f, qw, dt, l_pred, l_past):
+
+        l = l_pred + l_past
+        df = (1 / dt) / l
+
+        idx = [round(fi / df) for fi in f]
+
+        q = np.zeros(l)
+        for i, qwi in zip(idx, qw):
+            q[i] = qwi
+            if i != 0: q[l - i] = qwi
+
+        return q

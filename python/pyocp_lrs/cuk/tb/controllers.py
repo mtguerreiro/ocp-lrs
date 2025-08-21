@@ -8,13 +8,13 @@ def config_cuk(cuk, model_params, plat_params):
             plat_params['energy_params']
         )
 
-    if 'cuk_energy_mpc_params' in plat_params:
+    if 'energy_mpc_params' in plat_params:
         _config_cuk_energy_mpc_controller(
             cuk,
             model_params,
             plat_params['energy_mpc_params']
         )
-        
+
 ##def config(fsbb, model_params, plat_params):
 ##
 ##    if 'buck_cpl_params' in plat_params:
@@ -82,6 +82,35 @@ def _config_cuk_energy_controller(cuk, model_params, ctl_params):
     cuk.energy.set_params({'C_out':C_out})
 
     cuk.energy.reset()
+
+
+def _config_cuk_energy_mpc_controller(cuk, model_params, ctl_params):
+    
+    f_pwm = model_params['f_pwm']
+    dt = 1 / f_pwm
+
+    rw = ctl_params['rw']
+    l_pred = ctl_params['l_pred']
+    alpha = ctl_params['alpha']
+
+    fw = ctl_params['fw']
+    qw = ctl_params['qw']
+    l_past = ctl_params['l_past']
+    window = ctl_params['window']
+
+    il_max = ctl_params['il_max']
+    il_min = ctl_params['il_min']
+    
+    Co = ctl_params['C_out']
+
+    cuk.energy_mpc.set_gains(
+        rw=rw, l_pred=l_pred, alpha=alpha,
+        fw=fw, qw=qw, l_past=l_past, window=window,
+        il_max=il_max, il_min=il_min, Co=Co,
+        dt=dt
+    )
+
+    cuk.energy_mpc.reset()
 
 ##def _config_boost_energy_mpc_controller(fsbb, model_params, ctl_params):
 ##    
