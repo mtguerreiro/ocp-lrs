@@ -22,7 +22,7 @@ int32_t fsbuckboostControlRampInitialize(void);
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostControlRampRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs);
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControlRampSetParams(void *params, uint32_t n);
+int32_t fsbuckboostControlRampSetParams(void *buffer, uint32_t size);
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostControlRampGetParams(void *buffer, uint32_t size);
 //-----------------------------------------------------------------------------

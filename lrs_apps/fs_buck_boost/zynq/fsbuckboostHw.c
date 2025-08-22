@@ -73,7 +73,6 @@ static void fsbuckboostHwInitializeMeasGains(void);
 /*--------------------------------- Globals ---------------------------------*/
 //=============================================================================
 static fsbuckboostHwControl_t hwControl = {.pwmPeriod = 0, .status = 0, .alpha = 0.2f};
-static float i_i_filt = 0.0f, i_1_filt = 0.0f, i_o_filt = 0.0f, i_2_filt = 0.0f;
 //=============================================================================
 
 //=============================================================================
@@ -403,6 +402,7 @@ uint32_t fsbuckboostHwGetOutputRelay(void){
 //-----------------------------------------------------------------------------
 void fsbuckboostHwSetLoadSwitch(uint32_t state){
 
+    (void)state;
 //    uint32_t gpio;
 //
 //    state = (state & 0x01) << FS_BUCK_BOOST_HW_CONFIG_GPIO_LOAD_SW_OFFS;

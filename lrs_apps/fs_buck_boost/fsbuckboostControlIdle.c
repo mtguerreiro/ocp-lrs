@@ -49,12 +49,18 @@ int32_t fsbuckboostControlIdleRun(void *meas, int32_t nmeas, void *refs, int32_t
     return sizeof(fsbuckboostConfigControl_t);
 }
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControlIdleSetParams(void *params, uint32_t size){
+int32_t fsbuckboostControlIdleSetParams(void *buffer, uint32_t size){
 
-	return 0;
+    (void)buffer;
+    (void)size;
+
+    return 0;
 }
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostControlIdleGetParams(void *buffer, uint32_t size){
+
+    (void)buffer;
+    (void)size;
 
     return 0;
 }

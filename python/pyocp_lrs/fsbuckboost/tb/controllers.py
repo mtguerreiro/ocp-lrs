@@ -7,6 +7,13 @@ def config(fsbb, model_params, plat_params):
             model_params,
             plat_params['buck_cpl_params']
         )
+
+    if 'buck_sfb_params' in plat_params:
+        _config_buck_sfb_controller(
+            fsbb,
+            model_params,
+            plat_params['buck_sfb_params']
+        )
         
     if 'boost_energy_params' in plat_params:
         _config_boost_energy_controller(
@@ -46,6 +53,28 @@ def _config_buck_cpl_controller(fsbb, model_params, ctl_params):
     )
     
     fsbb.cpl.reset()
+
+
+def _config_buck_sfb_controller(fsbb, model_params, ctl_params):
+
+    f_pwm = model_params['f_pwm']
+    dt = 1 / f_pwm
+    
+    ts = ctl_params['ts']
+    os = ctl_params['os']
+
+    _mparams = fsbb.cpl.get_model_params()
+    _mparams.v_in = model_params['V_in']
+    _mparams.R = model_params['R_load']
+    _mparams.L = model_params['L']
+    _mparams.Co = model_params['C_out']
+
+    fsbb.buck_sfb.set_model_params(_mparams)
+
+    fsbb.buck_sfb.set_gains(ts=ts, os=os, dt=dt)
+
+    fsbb.buck_sfb.reset()
+    
 
 def _config_boost_energy_controller(fsbb, model_params, ctl_params):
     

@@ -20,11 +20,11 @@
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostControlIdleInitialize(void);
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControlIdleSetParams(void *params, uint32_t n);
+int32_t fsbuckboostControlIdleRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs);
+//-----------------------------------------------------------------------------
+int32_t fsbuckboostControlIdleSetParams(void *buffer, uint32_t size);
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostControlIdleGetParams(void *buffer, uint32_t size);
-//-----------------------------------------------------------------------------
-int32_t fsbuckboostControlIdleRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs);
 //-----------------------------------------------------------------------------
 void fsbuckboostControlIdleReset(void);
 //-----------------------------------------------------------------------------

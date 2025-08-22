@@ -26,7 +26,7 @@ int32_t fsbuckboostControlBuckSfbRun(void *meas, int32_t nmeas,
     void *refs, int32_t nrefs,
     void *outputs, int32_t nmaxoutputs);
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControlBuckSfbSetParams(void *params, uint32_t size);
+int32_t fsbuckboostControlBuckSfbSetParams(void *buffer, uint32_t size);
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostControlBuckSfbGetParams(void *buffer, uint32_t size);
 //-----------------------------------------------------------------------------

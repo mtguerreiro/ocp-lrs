@@ -10,19 +10,23 @@
 
 /* Controllers */
 #include "controller/controller.h"
+
+#include "string.h"
 //=============================================================================
 
 //=============================================================================
 /*------------------------------- Definitions -------------------------------*/
 //=============================================================================
-
+typedef struct{
+    float u_step;
+    float u_ref;
+}ctlparams_t;
 //=============================================================================
 
 //=============================================================================
 /*--------------------------------- Globals ---------------------------------*/
 //=============================================================================
-static float u_ref  = 0.5f;
-static float u_step = 0.001;
+static ctlparams_t params = {.u_ref = 0.5f, .u_step = 0.001f};
 //=============================================================================
 
 //=============================================================================
@@ -32,31 +36,6 @@ static float u_step = 0.001;
 int32_t fsbuckboostControlRampInitialize(void){
 
     return 0;
-}
-//-----------------------------------------------------------------------------
-int32_t fsbuckboostControlRampSetParams(void *params, uint32_t n){
-
-    float *p = (float *)params;
-
-    u_step = *p++;
-    u_ref  = *p++;
-
-    if( u_step < 0 ) u_step = 0.0f;
-
-    if( u_ref  > 1.0f ) u_ref  = 1.0f;
-    else if( u_ref  < 0.0f) u_ref  = 0.0f;
-
-	return 0;
-}
-//-----------------------------------------------------------------------------
-int32_t fsbuckboostControlRampGetParams(void *buffer, uint32_t size){
-
-    float *p = (float *)buffer;
-
-    *p++ = u_step;
-    *p++ = u_ref ;
-
-    return 8;
 }
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostControlRampRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs){
@@ -69,17 +48,39 @@ int32_t fsbuckboostControlRampRun(void *meas, int32_t nmeas, void *refs, int32_t
 
     fsbuckboostConfigControl_t *o = (fsbuckboostConfigControl_t *)outputs;
 
-    if( o->u < u_ref  ){
-        o->u = o->u + u_step;
-        if(o->u > u_ref ) o->u = u_ref ;
+    if( o->u < params.u_ref  ){
+        o->u = o->u + params.u_step;
+        if(o->u > params.u_ref ) o->u = params.u_ref ;
     }
 
     else{
-        o->u = o->u - u_step;
-        if(o->u < u_ref ) o->u = u_ref ;
+        o->u = o->u - params.u_step;
+        if(o->u < params.u_ref ) o->u = params.u_ref ;
     }
 
     return sizeof(fsbuckboostConfigControl_t);
+}
+//-----------------------------------------------------------------------------
+int32_t fsbuckboostControlRampSetParams(void *buffer, uint32_t size){
+
+    if( size != sizeof(ctlparams_t) ) return -1;
+    memcpy( (void *)&params, buffer, sizeof(ctlparams_t) );
+
+    if( params.u_step < 0 ) params.u_step = 0.0f;
+
+    if( params.u_ref  > 1.0f ) params.u_ref  = 1.0f;
+    else if( params.u_ref  < 0.0f) params.u_ref  = 0.0f;
+
+    return 0;
+}
+//-----------------------------------------------------------------------------
+int32_t fsbuckboostControlRampGetParams(void *buffer, uint32_t size){
+
+    if( size < sizeof(ctlparams_t) ) return -1;
+
+    memcpy(buffer, (void *)&params, sizeof(ctlparams_t));
+
+    return sizeof(ctlparams_t);
 }
 //-----------------------------------------------------------------------------
 void fsbuckboostControlRampReset(void){
