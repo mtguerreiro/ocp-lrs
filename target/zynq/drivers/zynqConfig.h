@@ -31,6 +31,7 @@
  * sync startup. Then, it can be used for other purposes.
  */
 #define ZYNQ_CONFIG_CPU0_CPU1_SYNC_FLAG_ADR     0xFFFF0000
+#define ZYNQ_CONFIG_CPU0_CPU1_SYNC_VALUE        0x11AA22BB
 
 /* Software generated interrupts between CPU0 and CPU1 */
 #define ZYNQ_CONFIG_SIG_CPU0_TO_CPU1            0x0EU

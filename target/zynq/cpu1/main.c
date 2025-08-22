@@ -9,8 +9,6 @@
 /*-------------------------------- Includes ---------------------------------*/
 //=============================================================================
 #include <stdio.h>
-//#include "platform.h"
-#include "xil_printf.h"
 
 #include "xparameters.h"
 #include <stdio.h>
@@ -32,7 +30,8 @@
 //=============================================================================
 /*--------------------------------- Defines ---------------------------------*/
 //=============================================================================
-#define SYNC_FLAG  		(*(volatile unsigned long *)(ZYNQ_CONFIG_CPU0_CPU1_SYNC_FLAG_ADR))
+#define SYNC_FLAG           (*(volatile uint32_t *)(ZYNQ_CONFIG_CPU0_CPU1_SYNC_FLAG_ADR))
+#define SYNC_VALUE          ZYNQ_CONFIG_CPU0_CPU1_SYNC_VALUE
 
 #define MAIN_LED_ADDRESS    XPAR_AXI_GPIO_RGB_LED_BASEADDR
 #define MAIN_LED_CHANNEL    1
@@ -43,24 +42,21 @@
 #define MAIN_LED_GREEN     (1 << 1)
 #define MAIN_LED_RED       (1 << 2)
 
-#define INTC		    XScuGic
-//#define INTC_DEVICE_ID	XPAR_PS7_SCUGIC_0_DEVICE_ID
+#define INTC                XScuGic
+
 #define MAIN_XIL_INTC_ADDRESS           XPAR_XSCUGIC_0_BASEADDR
-#define INTC_HANDLER	XScuGic_InterruptHandler
+#define INTC_HANDLER                    XScuGic_InterruptHandler
 
 //=============================================================================
 
 //=============================================================================
 /*--------------------------------- Globals ---------------------------------*/
 //=============================================================================
-
 INTC   IntcInstancePtr;
 
 XGpio led;
 
-
 uint32_t blinkPeriod = 1000;
-
 //=============================================================================
 
 //=============================================================================
@@ -78,12 +74,12 @@ static void mainRgbLedToggleColor(uint32_t color);
 //-----------------------------------------------------------------------------
 int main(){
 
-	mainSysInit();
+    mainSysInit();
 
     while(1){
 
         mainRgbLedToggleColor(MAIN_LED_GREEN);
-       	usleep(blinkPeriod * 1000);
+        usleep(blinkPeriod * 1000);
     }
 
     return 0;
@@ -97,72 +93,68 @@ int main(){
 //-----------------------------------------------------------------------------
 static int mainSysInit(void){
 
-	int Status;
+    int Status;
 
     //Disable cache on OCM
-	Xil_SetTlbAttributes(0xFFFF0000,0x14de2);           // S=b1 TEX=b100 AP=b11, Domain=b1111, C=b0, B=b0
+    Xil_SetTlbAttributes(0xFFFF0000,0x14de2);           // S=b1 TEX=b100 AP=b11, Domain=b1111, C=b0, B=b0
 
-    print("CPU1: init_platform\n\r");
+    // Initialize the SCU Interrupt Distributer (ICD)
+    Status = mainSetupIntrSystem(&IntcInstancePtr);
+    if (Status != XST_SUCCESS) {
+        return XST_FAILURE;
+    }
 
-	// Initialize the SCU Interrupt Distributer (ICD)
-	Status = mainSetupIntrSystem(&IntcInstancePtr);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
+    /* Initializes hardware and OCP */
+    ocpZynqCpu1Initialize(&IntcInstancePtr);
 
-	/* Initializes hardware and OCP */
-	ocpZynqCpu1Initialize(&IntcInstancePtr);
+    /* Initializes PYNQ's (RGB) LEDs */
+    XGpio_Initialize(&led, MAIN_LED_ADDRESS);
+    XGpio_SetDataDirection(&led, MAIN_LED_CHANNEL, 0);
 
-	/* Initializes PYNQ's (RGB) LEDs */
-	XGpio_Initialize(&led, MAIN_LED_ADDRESS);
-	XGpio_SetDataDirection(&led, MAIN_LED_CHANNEL, 0);
+    SYNC_FLAG = SYNC_VALUE;
 
-	SYNC_FLAG = 0;
-
-	return XST_SUCCESS;
+    return XST_SUCCESS;
 }
 //-----------------------------------------------------------------------------
-static int mainSetupIntrSystem(INTC *IntcInstancePtr)
-{
-	int Status;
+static int mainSetupIntrSystem(INTC *IntcInstancePtr){
 
+    int Status;
 
-	XScuGic_Config *IntcConfig;
+    XScuGic_Config *IntcConfig;
 
-	/*
-	 * Initialize the interrupt controller driver so that it is ready to
-	 * use.
-	 */
-	IntcConfig = XScuGic_LookupConfig(MAIN_XIL_INTC_ADDRESS);
-	if (NULL == IntcConfig) {
-		return XST_FAILURE;
-	}
+    /*
+     * Initialize the interrupt controller driver so that it is ready to
+     * use.
+     */
+    IntcConfig = XScuGic_LookupConfig(MAIN_XIL_INTC_ADDRESS);
+    if (NULL == IntcConfig) {
+        return XST_FAILURE;
+    }
 
-	Status = XScuGic_CfgInitialize(IntcInstancePtr, IntcConfig,
-					IntcConfig->CpuBaseAddress);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
+    Status = XScuGic_CfgInitialize(IntcInstancePtr, IntcConfig,
+                                   IntcConfig->CpuBaseAddress);
+    if (Status != XST_SUCCESS) {
+        return XST_FAILURE;
+    }
 
-	/*
-	 * Initialize the  exception table
-	 */
-	Xil_ExceptionInit();
+    /*
+     * Initialize the  exception table
+     */
+    Xil_ExceptionInit();
 
-	/*
-	 * Register the interrupt controller handler with the exception table
-	 */
-	Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT,
-			 (Xil_ExceptionHandler)INTC_HANDLER,
-			 IntcInstancePtr);
+    /*
+     * Register the interrupt controller handler with the exception table
+     */
+    Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT,
+                                 (Xil_ExceptionHandler)INTC_HANDLER,
+                                 IntcInstancePtr);
 
-	/*
-	 * Enable non-critical exceptions
-	 */
-	Xil_ExceptionEnable();
+    /*
+     * Enable non-critical exceptions
+     */
+    Xil_ExceptionEnable();
 
-	return XST_SUCCESS;
-
+    return XST_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 static void mainRgbLedToggleColor(uint32_t color){

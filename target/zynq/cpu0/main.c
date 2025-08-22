@@ -53,7 +53,8 @@
  * clears the sync flag. CPU0 only continues execution after the sync flag has
  * been cleared by CPU1.
  */
-#define MAIN_SYNC_FLAG              (*(volatile unsigned long *)(ZYNQ_CONFIG_CPU0_CPU1_SYNC_FLAG_ADR))
+#define MAIN_SYNC_FLAG              (*(volatile uint32_t *)(ZYNQ_CONFIG_CPU0_CPU1_SYNC_FLAG_ADR))
+#define MAIN_SYNC_VALUE             ZYNQ_CONFIG_CPU0_CPU1_SYNC_VALUE
 //=============================================================================
 
 //=============================================================================
@@ -134,7 +135,7 @@ static int mainSysInit(void){
     }
 
     /* Sets sync flag (to be cleared by CPU1) */
-    MAIN_SYNC_FLAG = 1;
+    MAIN_SYNC_FLAG = 0;
 
     /*
      * Writes start address for CPU0, waits until it has been written (dmb)
@@ -146,9 +147,11 @@ static int mainSysInit(void){
     sev();
 
     xil_printf("%s: Waiting for CPU1...\r\n", __FUNCTION__);
-    while(MAIN_SYNC_FLAG == 1);
+    while(MAIN_SYNC_FLAG != MAIN_SYNC_VALUE);
 
     xil_printf("%s: CPU1 has initialized.\r\n", __FUNCTION__);
+
+    MAIN_SYNC_FLAG = 0;
 
     dnaLow = Xil_In32(XPAR_ZYNQ_AXI_DNA_0_BASEADDR);
     dnaHigh = Xil_In32(XPAR_ZYNQ_AXI_DNA_0_BASEADDR + 4);
