@@ -114,6 +114,8 @@ void lwip_init();
 //-----------------------------------------------------------------------------
 void uiface(void *param){
 
+    (void)param;
+
     struct netif *netif;
 
 #if UIFACE_CONFIG_USE_DHCP==1
@@ -308,6 +310,8 @@ static void uifocpIfProcessThread(void *param){
 }
 //-----------------------------------------------------------------------------
 static void uifaceNetworkThread(void *p){
+
+    (void)p;
 
     struct netif *netif;
     uint32_t dnaLow, dnaHigh;

@@ -186,6 +186,7 @@ static int32_t fsbuckboostInitializeControlSystem(void){
 //-----------------------------------------------------------------------------
 void fsbuckboostAdcIrq(void *callbackRef){
 
+    (void)callbackRef;
     uint32_t ticks;
 
     ticks = GetTicks();

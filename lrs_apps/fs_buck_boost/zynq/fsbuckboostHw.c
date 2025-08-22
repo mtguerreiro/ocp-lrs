@@ -318,6 +318,8 @@ int32_t fsbuckboostHwGetMeasurements(void *meas){
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostHwApplyOutputs(void *outputs, int32_t size){
 
+    (void)size;
+
     fsbuckboostConfigControl_t *control;
 
     control = (fsbuckboostConfigControl_t *)outputs;

@@ -52,6 +52,10 @@ int32_t fsbuckboostControlCplRun(void *meas, int32_t nmeas,
     void *refs, int32_t nrefs,
     void *outputs, int32_t nmaxoutputs){
 
+    (void)nmeas;
+    (void)nrefs;
+    (void)nmaxoutputs;
+
     fsbuckboostConfigMeasurements_t *m = (fsbuckboostConfigMeasurements_t *)meas;
     fsbuckboostConfigControl_t *o = (fsbuckboostConfigControl_t *)outputs;
     fsbuckboostConfigReferences_t *r = (fsbuckboostConfigReferences_t *)refs;
@@ -97,6 +101,12 @@ int32_t fsbuckboostControlCplFirstEntry(void *meas, int32_t nmeas,
     void *refs, int32_t nrefs,
     void *outputs, int32_t nmaxoutputs){
 
+    (void)nmeas;
+    (void)refs;
+    (void)nrefs;
+    (void)outputs;
+    (void)nmaxoutputs;
+
     fsbuckboostConfigMeasurements_t *m = (fsbuckboostConfigMeasurements_t *)meas;
 
     e = 1 / params.k_ev * (-params.ki * m->il - params.kv * m->v_dc_out - m->v_dc_out / m->v_in);
@@ -108,6 +118,13 @@ int32_t fsbuckboostControlCplFirstEntry(void *meas, int32_t nmeas,
 int32_t fsbuckboostControlCplLastExit(void *meas, int32_t nmeas,
     void *refs, int32_t nrefs,
     void *outputs, int32_t nmaxoutputs){
+
+    (void)meas;
+    (void)nmeas;
+    (void)refs;
+    (void)nrefs;
+    (void)outputs;
+    (void)nmaxoutputs;
 
     return 0;
 }

@@ -36,6 +36,12 @@ int32_t fsbuckboostControlIdleInitialize(void){
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostControlIdleRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs){
 
+    (void)meas;
+    (void)nmeas;
+    (void)refs;
+    (void)nrefs;
+    (void)nmaxoutputs;
+
     fsbuckboostConfigControl_t *o = (fsbuckboostConfigControl_t *)outputs;
     
     o->u = 0;
@@ -59,12 +65,26 @@ void fsbuckboostControlIdleReset(void){
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostControlIdleFirstEntry(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs){
 
+    (void)meas;
+    (void)nmeas;
+    (void)refs;
+    (void)nrefs;
+    (void)outputs;
+    (void)nmaxoutputs;
+
     fsbuckboostHwControllerDisable();
 
     return sizeof(fsbuckboostConfigControl_t);
 }
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostControlIdleLastExit(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs){
+
+    (void)meas;
+    (void)nmeas;
+    (void)refs;
+    (void)nrefs;
+    (void)outputs;
+    (void)nmaxoutputs;
 
     fsbuckboostHwControllerEnable();
 

@@ -61,6 +61,12 @@ int32_t fsbuckboostControlRampGetParams(void *buffer, uint32_t size){
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostControlRampRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs){
 
+    (void)meas;
+    (void)nmeas;
+    (void)refs;
+    (void)nrefs;
+    (void)nmaxoutputs;
+
     fsbuckboostConfigControl_t *o = (fsbuckboostConfigControl_t *)outputs;
 
     if( o->u < u_ref  ){

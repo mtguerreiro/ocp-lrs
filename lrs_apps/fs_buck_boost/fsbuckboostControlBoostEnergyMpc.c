@@ -85,6 +85,10 @@ int32_t fsbuckboostControlBoostEnergyMpcRun(void *meas, int32_t nmeas,
     void *refs, int32_t nrefs,
     void *outputs, int32_t nmaxoutputs){
 
+    (void)nmeas;
+    (void)nrefs;
+    (void)nmaxoutputs;
+
     // uint32_t i;
     float duty;
 
@@ -180,12 +184,26 @@ int32_t fsbuckboostControlBoostEnergyMpcFirstEntry(void *meas, int32_t nmeas,
     void *refs, int32_t nrefs,
     void *outputs, int32_t nmaxoutputs){
 
+    (void)meas;
+    (void)nmeas;
+    (void)refs;
+    (void)nrefs;
+    (void)outputs;
+    (void)nmaxoutputs;
+
     return 0;
 }
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostControlBoostEnergyMpcLastExit(void *meas, int32_t nmeas,
     void *refs, int32_t nrefs,
     void *outputs, int32_t nmaxoutputs){
+
+    (void)meas;
+    (void)nmeas;
+    (void)refs;
+    (void)nrefs;
+    (void)outputs;
+    (void)nmaxoutputs;
 
     first_enter = 0;
 

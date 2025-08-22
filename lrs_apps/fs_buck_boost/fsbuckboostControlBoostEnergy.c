@@ -62,6 +62,10 @@ int32_t fsbuckboostControlBoostEnergyRun(void *meas, int32_t nmeas,
     void *refs, int32_t nrefs,
     void *outputs, int32_t nmaxoutputs){
 
+    (void)nmeas;
+    (void)nrefs;
+    (void)nmaxoutputs;
+
     fsbuckboostConfigMeasurements_t *m = (fsbuckboostConfigMeasurements_t *)meas;
     fsbuckboostConfigControl_t *o = (fsbuckboostConfigControl_t *)outputs;
     fsbuckboostConfigReferences_t *r = (fsbuckboostConfigReferences_t *)refs;
@@ -157,12 +161,26 @@ int32_t fsbuckboostControlBoostEnergyFirstEntry(void *meas, int32_t nmeas,
     void *refs, int32_t nrefs,
     void *outputs, int32_t nmaxoutputs){
 
+    (void)meas;
+    (void)nmeas;
+    (void)refs;
+    (void)nrefs;
+    (void)outputs;
+    (void)nmaxoutputs;
+
     return 0;
 }
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostControlBoostEnergyLastExit(void *meas, int32_t nmeas,
     void *refs, int32_t nrefs,
     void *outputs, int32_t nmaxoutputs){
+
+    (void)meas;
+    (void)nmeas;
+    (void)refs;
+    (void)nrefs;
+    (void)outputs;
+    (void)nmaxoutputs;
 
     first_enter = 0;
 

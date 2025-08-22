@@ -3,6 +3,6 @@ list(APPEND USER_COMPILE_DEFINITIONS
     OCP_CONFIG_MASTER_CORE=1
 )
 
-list(APPEND USER_COMPILE_OTHER_FLAGS
-    -Wno-unused-parameter
-)
+# list(APPEND USER_COMPILE_OTHER_FLAGS
+#     -Wno-unused-parameter
+# )

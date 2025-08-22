@@ -13,6 +13,8 @@
 #include "fsbuckboostConfig.h"
 
 #include "rp/rp.h"
+
+#include "string.h"
 //=============================================================================
 
 //=============================================================================
@@ -177,9 +179,13 @@ int32_t fsbuckboostHwIf(void *in, uint32_t insize, void **out, uint32_t maxoutsi
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfSetPwmReset(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t reset;
 
-    reset = *( (uint32_t *)in ) & 0x01;
+    if( insize != sizeof(reset) ) return -1;
+
+    memcpy( (void *)&reset, in, sizeof(reset) );
 
     fsbuckboostHwSetPwmReset(reset);
 
@@ -188,21 +194,28 @@ static int32_t fsbuckboostHwIfSetPwmReset(void *in, uint32_t insize, void **out,
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfGetPwmReset(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t reset;
 
     reset = fsbuckboostHwGetPwmReset();
 
-    *o = reset;
+    if( maxoutsize < sizeof(reset) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&reset, sizeof(reset) );
+
+    return sizeof(reset);
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfSetPwmOutputEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t enable;
 
-    enable = *( (uint32_t *)in ) & 0x01;
+    if( insize != sizeof(enable) ) return -1;
+
+    memcpy( (void *)&enable, in, sizeof(enable) );
 
     fsbuckboostHwSetPwmOutputEnable(enable);
 
@@ -211,21 +224,28 @@ static int32_t fsbuckboostHwIfSetPwmOutputEnable(void *in, uint32_t insize, void
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfGetPwmOutputEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t enable;
 
     enable = fsbuckboostHwGetPwmOutputEnable();
 
-    *o = enable;
+    if( maxoutsize < sizeof(enable) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&enable, sizeof(enable) );
+
+    return sizeof(enable);
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfSetPwmOvfTriggerEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t enable;
 
-    enable = *( (uint32_t *)in ) & 0x01;
+    if( insize != sizeof(enable) ) return -1;
+
+    memcpy( (void *)&enable, in, sizeof(enable) );
 
     fsbuckboostHwSetPwmOvfTriggerEnable(enable);
 
@@ -234,113 +254,148 @@ static int32_t fsbuckboostHwIfSetPwmOvfTriggerEnable(void *in, uint32_t insize, 
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfGetPwmOvfTriggerEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t enable;
 
     enable = fsbuckboostHwGetPwmOvfTriggerEnable();
 
-    *o = enable;
+    if( maxoutsize < sizeof(enable) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&enable, sizeof(enable) );
+
+    return sizeof(enable);
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfSetPwmInv(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t enable;
+    (void)out;
+    (void)maxoutsize;
+    uint32_t inv;
 
-    enable = *( (uint32_t *)in ) & 0x01;
+    if( insize != sizeof(inv) ) return -1;
 
-    fsbuckboostHwSetPwmInv(enable);
+    memcpy( (void *)&inv, in, sizeof(inv) );
+
+    fsbuckboostHwSetPwmInv(inv & 0x01);
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfGetPwmInv(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
-    uint32_t enable;
+    (void)in;
+    (void)insize;
+    uint32_t inv;
 
-    enable = fsbuckboostHwGetPwmInv();
+    inv = fsbuckboostHwGetPwmInv();
 
-    *o = enable;
+    if( maxoutsize < sizeof(inv) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&inv, sizeof(inv) );
+
+    return sizeof(inv);
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfSetPwmMode(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t mode;
 
-    mode = *( (uint32_t *)in ) & 0x01;
+    if( insize != sizeof(mode) ) return -1;
 
-    fsbuckboostHwSetPwmMode(mode);
+    memcpy( (void *)&mode, in, sizeof(mode) );
+
+    fsbuckboostHwSetPwmMode(mode & 0x01);
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfGetPwmMode(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t mode;
 
     mode = fsbuckboostHwGetPwmMode();
 
-    *o = mode;
+    if( maxoutsize < sizeof(mode) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&mode, sizeof(mode) );
+
+    return sizeof(mode);
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfSetPwmLsSw(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t state;
 
-    state = *( (uint32_t *)in ) & 0x01;
+    if( insize != sizeof(state) ) return -1;
 
-    fsbuckboostHwSetPwmLsSw(state);
+    memcpy( (void *)&state, in, sizeof(state) );
+
+    fsbuckboostHwSetPwmLsSw(state & 0x01 );
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfGetPwmLsSw(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t state;
 
     state = fsbuckboostHwGetPwmLsSw();
 
-    *o = state;
+    if( maxoutsize < sizeof(state) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&state, sizeof(state) );
+
+    return sizeof(state);
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfSetPwmHsSw(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t state;
 
-    state = *( (uint32_t *)in ) & 0x01;
+    if( insize != sizeof(state) ) return -1;
 
-    fsbuckboostHwSetPwmHsSw(state);
+    memcpy( (void *)&state, in, sizeof(state) );
+
+    fsbuckboostHwSetPwmHsSw(state & 0x01);
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfGetPwmHsSw(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t state;
 
     state = fsbuckboostHwGetPwmHsSw();
 
-    *o = state;
+    if( maxoutsize < sizeof(state) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&state, sizeof(state) );
+
+    return sizeof(state);
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfSetPwmFrequency(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t freq;
 
-    freq = *( (uint32_t *)in );
+    if( insize != sizeof(freq) ) return -1;
+
+    memcpy( (void *)&freq, in, sizeof(freq) );
 
     fsbuckboostHwSetPwmFrequency(freq);
 
@@ -349,21 +404,28 @@ static int32_t fsbuckboostHwIfSetPwmFrequency(void *in, uint32_t insize, void **
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfGetPwmFrequency(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t freq;
 
     freq = fsbuckboostHwGetPwmFrequency();
 
-    *o = freq;
+    if( maxoutsize < sizeof(freq) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&freq, sizeof(freq) );
+
+    return sizeof(freq);
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfSetPwmDutyCycle(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     float duty;
 
-    duty = *( (float *)in );
+    if( insize != sizeof(duty) ) return -1;
+
+    memcpy( (void *)&duty, in, sizeof(duty) );
 
     fsbuckboostHwSetPwmDuty(duty);
 
@@ -372,21 +434,28 @@ static int32_t fsbuckboostHwIfSetPwmDutyCycle(void *in, uint32_t insize, void **
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfGetPwmDutyCycle(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    float *o = (float *)*out;
+    (void)in;
+    (void)insize;
     float duty;
 
     duty = fsbuckboostHwGetPwmDuty();
 
-    *o = duty;
+    if( maxoutsize < sizeof(duty) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&duty, sizeof(duty) );
+
+    return sizeof(duty);
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfSetPwmDeadTime(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     float deadtime;
 
-    deadtime = *( (float *)in );
+    if( insize != sizeof(deadtime) ) return -1;
+
+    memcpy( (void *)&deadtime, in, sizeof(deadtime) );
 
     fsbuckboostHwSetPwmDeadTime(deadtime);
 
@@ -395,90 +464,118 @@ static int32_t fsbuckboostHwIfSetPwmDeadTime(void *in, uint32_t insize, void **o
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfGetPwmDeadTime(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    float *o = (float *)*out;
+    (void)in;
+    (void)insize;
     float deadtime;
 
     deadtime = fsbuckboostHwGetPwmDeadTime();
 
-    *o = deadtime;
+    if( maxoutsize < sizeof(deadtime) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&deadtime, sizeof(deadtime) );
+
+    return sizeof(deadtime);
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfSetAdcEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t enable;
 
-    enable = *( (uint32_t *)in ) & 0x01;
+    if( insize != sizeof(enable) ) return -1;
 
-    fsbuckboostHwSetAdcEnable(enable);
+    memcpy( (void *)&enable, in, sizeof(enable) );
+
+    fsbuckboostHwSetAdcEnable(enable & 0x01);
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfGetAdcEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t enable;
 
     enable = fsbuckboostHwGetAdcEnable();
 
-    *o = enable;
+    if( maxoutsize < sizeof(enable) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&enable, sizeof(enable) );
+
+    return sizeof(enable);
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfSetAdcManualTrig(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t trigger;
 
-    trigger = *( (uint32_t *)in ) & 0x01;
+    if( insize != sizeof(trigger) ) return -1;
 
-    fsbuckboostHwSetAdcManualTrigger(trigger);
+    memcpy( (void *)&trigger, in, sizeof(trigger) );
+
+    fsbuckboostHwSetAdcManualTrigger(trigger & 0x01);
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfGetAdcManualTrig(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t trigger;
 
     trigger = fsbuckboostHwGetAdcManualTrigger();
 
-    *o = trigger;
+    if( maxoutsize < sizeof(trigger) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&trigger, sizeof(trigger) );
+
+    return sizeof(trigger);
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfSetAdcInterruptEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t enable;
 
-    enable = *( (uint32_t *)in ) & 0x01;
+    if( insize != sizeof(enable) ) return -1;
 
-    fsbuckboostHwSetAdcInterruptEnable(enable);
+    memcpy( (void *)&enable, in, sizeof(enable) );
+
+    fsbuckboostHwSetAdcInterruptEnable(enable  & 0x01);
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfGetAdcInterruptEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t enable;
 
     enable = fsbuckboostHwGetAdcInterruptEnable();
 
-    *o = enable;
+    if( maxoutsize < sizeof(enable) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&enable, sizeof(enable) );
+
+    return sizeof(enable);
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfSetAdcSpiFreq(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t freq;
 
-    freq = *( (uint32_t *)in );
+    if( insize != sizeof(freq) ) return -1;
+
+    memcpy( (void *)&freq, in, sizeof(freq) );
 
     fsbuckboostHwSetAdcSpiFreq(freq);
 
@@ -487,43 +584,58 @@ static int32_t fsbuckboostHwIfSetAdcSpiFreq(void *in, uint32_t insize, void **ou
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfGetAdcSpiFreq(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t freq;
 
     freq = fsbuckboostHwGetAdcSpiFreq();
 
-    *o = freq;
+    if( maxoutsize < sizeof(freq) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&freq, sizeof(freq) );
+
+    return sizeof(freq);
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfSetInputRelay(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t state;
 
-    state = *( (uint32_t *)in );
+    if( insize != sizeof(state) ) return -1;
+
+    memcpy( (void *)&state, in, sizeof(state) );
 
     fsbuckboostHwSetInputRelay(state);
+
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfGetInputRelay(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t state;
 
     state = fsbuckboostHwGetInputRelay();
 
-    *o = state;
+    if( maxoutsize < sizeof(state) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&state, sizeof(state) );
+
+    return sizeof(state);
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfSetOutputRelay(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t state;
 
-    state = *( (uint32_t *)in );
+    if( insize != sizeof(state) ) return -1;
+
+    memcpy( (void *)&state, in, sizeof(state) );
 
     fsbuckboostHwSetOutputRelay(state);
 
@@ -532,21 +644,28 @@ static int32_t fsbuckboostHwIfSetOutputRelay(void *in, uint32_t insize, void **o
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfGetOutputRelay(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t state;
 
     state = fsbuckboostHwGetOutputRelay();
 
-    *o = state;
+    if( maxoutsize < sizeof(state) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&state, sizeof(state) );
+
+    return sizeof(state);
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfSetLoadSwitch(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t state;
 
-    state = *( (uint32_t *)in );
+    if( insize != sizeof(state) ) return -1;
+
+    memcpy( (void *)&state, in, sizeof(state) );
 
     fsbuckboostHwSetLoadSwitch(state);
 
@@ -555,41 +674,55 @@ static int32_t fsbuckboostHwIfSetLoadSwitch(void *in, uint32_t insize, void **ou
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfGetLoadSwitch(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t state;
 
     state = fsbuckboostHwGetLoadSwitch();
 
-    *o = state;
+    if( maxoutsize < sizeof(state) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&state, sizeof(state) );
+
+    return sizeof(state);
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfSetMeasGains(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    fsbuckboostConfigMeasGains_t *gains;
+    (void)out;
+    (void)maxoutsize;
+    fsbuckboostConfigMeasGains_t gains;
 
-    gains = ( (fsbuckboostConfigMeasGains_t *)in );
+    if( insize != sizeof(gains) ) return -1;
 
-    fsbuckboostHwSetMeasGains(gains);
+    memcpy( (void* )&gains, in, sizeof(gains) );
+
+    fsbuckboostHwSetMeasGains(&gains);
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfGetMeasGains(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    fsbuckboostConfigMeasGains_t *o = (fsbuckboostConfigMeasGains_t *)*out;
+    (void)in;
+    (void)insize;
     fsbuckboostConfigMeasGains_t gains;
-    uint32_t size;
 
-    size = fsbuckboostHwGetMeasGains(&gains);
+    fsbuckboostHwGetMeasGains(&gains);
 
-    *o = gains;
+    if( maxoutsize < sizeof(gains) ) return -1;
 
-    return size;
+    memcpy( *out, (void *)&gains, sizeof(gains) );
+
+    return sizeof(gains);
 }
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfClearStatus(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
+
+    (void)in;
+    (void)insize;
+    (void)out;
+    (void)maxoutsize;
 
     fsbuckboostHwStatusClear();
 
@@ -598,14 +731,20 @@ static int32_t fsbuckboostHwIfClearStatus(void *in, uint32_t insize, void **out,
 //-----------------------------------------------------------------------------
 static int32_t fsbuckboostHwIfGetStatus(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)in;
+    (void)insize;
+    (void)out;
+    (void)maxoutsize;
+
     uint32_t status;
-    uint32_t *o = (uint32_t *)*out;
 
     status = fsbuckboostHwStatus();
 
-    *o = status;
+    if( maxoutsize < sizeof(status) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&status, sizeof(status) );
+
+    return sizeof(status);
 }
 //-----------------------------------------------------------------------------
 //=============================================================================
