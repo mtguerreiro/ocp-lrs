@@ -209,6 +209,8 @@ static int32_t cukInitializeControlSystem(void){
 //-----------------------------------------------------------------------------
 void cukAdcIrq(void *callbackRef){
 
+    (void)callbackRef;
+
     uint32_t ticks;
 
     ticks = GetTicks();

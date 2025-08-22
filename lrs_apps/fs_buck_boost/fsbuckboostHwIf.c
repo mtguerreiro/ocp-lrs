@@ -217,7 +217,7 @@ static int32_t fsbuckboostHwIfSetPwmOutputEnable(void *in, uint32_t insize, void
 
     memcpy( (void *)&enable, in, sizeof(enable) );
 
-    fsbuckboostHwSetPwmOutputEnable(enable);
+    fsbuckboostHwSetPwmOutputEnable(enable & 0x01);
 
     return 0;
 }
@@ -247,7 +247,7 @@ static int32_t fsbuckboostHwIfSetPwmOvfTriggerEnable(void *in, uint32_t insize, 
 
     memcpy( (void *)&enable, in, sizeof(enable) );
 
-    fsbuckboostHwSetPwmOvfTriggerEnable(enable);
+    fsbuckboostHwSetPwmOvfTriggerEnable(enable & 0x01);
 
     return 0;
 }

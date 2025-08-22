@@ -22,7 +22,7 @@ int32_t cukControlRampInitialize(void);
 //-----------------------------------------------------------------------------
 int32_t cukControlRampRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs);
 //-----------------------------------------------------------------------------
-int32_t cukControlRampSetParams(void *params, uint32_t n);
+int32_t cukControlRampSetParams(void *buffer, uint32_t size);
 //-----------------------------------------------------------------------------
 int32_t cukControlRampGetParams(void *buffer, uint32_t size);
 //-----------------------------------------------------------------------------

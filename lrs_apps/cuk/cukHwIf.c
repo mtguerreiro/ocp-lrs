@@ -1,7 +1,4 @@
-/*
- * cukHwIf.c
- *
- */
+
 //=============================================================================
 /*-------------------------------- Includes ---------------------------------*/
 //=============================================================================
@@ -12,6 +9,8 @@
 #include "cukConfig.h"
 
 #include "rp/rp.h"
+
+#include "string.h"
 //=============================================================================
 
 //=============================================================================
@@ -151,464 +150,450 @@ int32_t cukHwIf(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfSetPwmReset(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t reset;
 
-    reset = *( (uint32_t *)in ) & 0x01;
+    if( insize != sizeof(reset) ) return -1;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    cukHwOpilSetPwmReset(reset);
-#else
-    cukHwSetPwmReset(reset);
-#endif
+    memcpy( (void *)&reset, in, sizeof(reset) );
+
+    cukHwSetPwmReset(reset & 0x01);
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfGetPwmReset(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t reset;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    reset = cukHwOpilGetPwmReset();
-#else
     reset = cukHwGetPwmReset();
-#endif
 
-    *o = reset;
+    if( maxoutsize < sizeof(reset) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&reset, sizeof(reset) );
+
+    return sizeof(reset);
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfSetPwmOutputEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t enable;
 
-    enable = *( (uint32_t *)in ) & 0x01;
+    if( insize != sizeof(enable) ) return -1;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    cukHwOpilSetPwmOutputEnable(enable);
-#else
-    cukHwSetPwmOutputEnable(enable);
-#endif
+    memcpy( (void *)&enable, in, sizeof(enable) );
+
+    cukHwSetPwmOutputEnable(enable & 0x01);
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfGetPwmOutputEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t enable;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    enable = cukHwOpilGetPwmOutputEnable();
-#else
     enable = cukHwGetPwmOutputEnable();
-#endif
 
-    *o = enable;
+    if( maxoutsize < sizeof(enable) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&enable, sizeof(enable) );
+
+    return sizeof(enable);
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfSetPwmOvfTriggerEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t enable;
 
-    enable = *( (uint32_t *)in ) & 0x01;
+    if( insize != sizeof(enable) ) return -1;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    cukHwOpilSetPwmOvfTriggerEnable(enable);
-#else
-    cukHwSetPwmOvfTriggerEnable(enable);
-#endif
+    memcpy( (void *)&enable, in, sizeof(enable) );
+
+    cukHwSetPwmOvfTriggerEnable(enable & 0x01);
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfGetPwmOvfTriggerEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t enable;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    enable = cukHwOpilGetPwmOvfTriggerEnable();
-#else
     enable = cukHwGetPwmOvfTriggerEnable();
-#endif
 
-    *o = enable;
+    if( maxoutsize < sizeof(enable) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&enable, sizeof(enable) );
+
+    return sizeof(enable);
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfSetPwmFrequency(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t freq;
 
-    freq = *( (uint32_t *)in );
+    if( insize != sizeof(freq) ) return -1;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    cukHwOpilSetPwmFrequency(freq);
-#else
+    memcpy( (void *)&freq, in, sizeof(freq) );
+
     cukHwSetPwmFrequency(freq);
-#endif
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfGetPwmFrequency(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t freq;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    freq = cukHwOpilGetPwmFrequency();
-#else
     freq = cukHwGetPwmFrequency();
-#endif
 
-    *o = freq;
+    if( maxoutsize < sizeof(freq) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&freq, sizeof(freq) );
+
+    return sizeof(freq);
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfSetPwmDutyCycle(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     float duty;
 
-    duty = *( (float *)in );
+    if( insize != sizeof(duty) ) return -1;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    cukHwOpilSetPwmDuty(duty);
-#else
+    memcpy( (void *)&duty, in, sizeof(duty) );
+
     cukHwSetPwmDuty(duty);
-#endif
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfGetPwmDutyCycle(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    float *o = (float *)*out;
+    (void)in;
+    (void)insize;
     float duty;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    duty = cukHwOpilGetPwmDuty();
-#else
     duty = cukHwGetPwmDuty();
-#endif
 
-    *o = duty;
+    if( maxoutsize < sizeof(duty) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&duty, sizeof(duty) );
+
+    return sizeof(duty);
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfSetPwmDeadTime(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     float deadtime;
 
-    deadtime = *( (float *)in );
+    if( insize != sizeof(deadtime) ) return -1;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    cukHwOpilSetPwmDeadTime(deadtime);
-#else
+    memcpy( (void *)&deadtime, in, sizeof(deadtime) );
+
     cukHwSetPwmDeadTime(deadtime);
-#endif
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfGetPwmDeadTime(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    float *o = (float *)*out;
+    (void)in;
+    (void)insize;
     float deadtime;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    deadtime = cukHwOpilGetPwmDeadTime();
-#else
     deadtime = cukHwGetPwmDeadTime();
-#endif
 
-    *o = deadtime;
+    if( maxoutsize < sizeof(deadtime) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&deadtime, sizeof(deadtime) );
+
+    return sizeof(deadtime);
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfSetAdcEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t enable;
 
-    enable = *( (uint32_t *)in ) & 0x01;
+    if( insize != sizeof(enable) ) return -1;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    cukHwOpilSetAdcEnable(enable);
-#else
-    cukHwSetAdcEnable(enable);
-#endif
+    memcpy( (void *)&enable, in, sizeof(enable) );
+
+    cukHwSetAdcEnable(enable & 0x01);
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfGetAdcEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t enable;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    enable = cukHwOpilGetAdcEnable();
-#else
     enable = cukHwGetAdcEnable();
-#endif
 
-    *o = enable;
+    if( maxoutsize < sizeof(enable) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&enable, sizeof(enable) );
+
+    return sizeof(enable);
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfSetAdcManualTrig(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t trigger;
 
-    trigger = *( (uint32_t *)in ) & 0x01;
+    if( insize != sizeof(trigger) ) return -1;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    cukHwOpilSetAdcManualTrigger(trigger);
-#else
-    cukHwSetAdcManualTrigger(trigger);
-#endif
+    memcpy( (void *)&trigger, in, sizeof(trigger) );
+
+    cukHwSetAdcManualTrigger(trigger & 0x01);
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfGetAdcManualTrig(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t trigger;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    trigger = cukHwOpilGetAdcManualTrigger();
-#else
     trigger = cukHwGetAdcManualTrigger();
-#endif
 
-    *o = trigger;
+    if( maxoutsize < sizeof(trigger) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&trigger, sizeof(trigger) );
+
+    return sizeof(trigger);
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfSetAdcInterruptEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t enable;
 
-    enable = *( (uint32_t *)in ) & 0x01;
+    if( insize != sizeof(enable) ) return -1;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    cukHwOpilSetAdcInterruptEnable(enable);
-#else
-    cukHwSetAdcInterruptEnable(enable);
-#endif
+    memcpy( (void *)&enable, in, sizeof(enable) );
+
+    cukHwSetAdcInterruptEnable(enable & 0x01);
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfGetAdcInterruptEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t enable;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    enable = cukHwOpilGetAdcInterruptEnable();
-#else
     enable = cukHwGetAdcInterruptEnable();
-#endif
 
-    *o = enable;
+    if( maxoutsize < sizeof(enable) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&enable, sizeof(enable) );
+
+    return sizeof(enable);
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfSetAdcSpiFreq(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t freq;
 
-    freq = *( (uint32_t *)in );
+    if( insize != sizeof(freq) ) return -1;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    cukHwOpilSetAdcSpiFreq(freq);
-#else
+    memcpy( (void *)&freq, in, sizeof(freq) );
+
     cukHwSetAdcSpiFreq(freq);
-#endif
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfGetAdcSpiFreq(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t freq;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    freq = cukHwOpilGetAdcSpiFreq();
-#else
     freq = cukHwGetAdcSpiFreq();
-#endif
 
-    *o = freq;
+    if( maxoutsize < sizeof(freq) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&freq, sizeof(freq) );
+
+    return sizeof(freq);
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfSetLoadSwitch(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t state;
 
-    state = *( (uint32_t *)in );
+    if( insize != sizeof(state) ) return -1;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    cukHwOpilSetLoadSwitch(state);
-#else
+    memcpy( (void *)&state, in, sizeof(state) );
+
     cukHwSetLoadSwitch(state);
-#endif
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfGetLoadSwitch(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t state;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    state = cukHwOpilGetLoadSwitch();
-#else
     state = cukHwGetLoadSwitch();
-#endif
 
-    *o = state;
+    if( maxoutsize < sizeof(state) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&state, sizeof(state) );
+
+    return sizeof(state);
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfSetOutputSwitch(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t state;
 
-    state = *( (uint32_t *)in );
+    if( insize != sizeof(state) ) return -1;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    cukHwOpilSetOutputSwitch(state);
-#else
+    memcpy( (void *)&state, in, sizeof(state) );
+
     cukHwSetOutputSwitch(state);
-#endif
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfGetOutputSwitch(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t state;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    state = cukHwOpilGetOutputSwitch();
-#else
     state = cukHwGetOutputSwitch();
-#endif
 
-    *o = state;
+    if( maxoutsize < sizeof(state) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&state, sizeof(state) );
+
+    return sizeof(state);
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfSetMeasGains(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    cukConfigMeasGains_t *gains;
+    (void)out;
+    (void)maxoutsize;
+    cukConfigMeasGains_t gains;
 
-    gains = ( (cukConfigMeasGains_t *)in );
+    if( insize != sizeof(gains) ) return -1;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    cukHwOpilSetMeasGains(gains);
-#else
-    cukHwSetMeasGains(gains);
-#endif
+    memcpy( (void* )&gains, in, sizeof(gains) );
+
+    cukHwSetMeasGains(&gains);
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfGetMeasGains(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    cukConfigMeasGains_t *o = (cukConfigMeasGains_t *)*out;
+    (void)in;
+    (void)insize;
     cukConfigMeasGains_t gains;
-    uint32_t size;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    size = cukHwOpilGetMeasGains(&gains);
-#else
-    size = cukHwGetMeasGains(&gains);
-#endif
+    cukHwGetMeasGains(&gains);
 
-    *o = gains;
+    if( maxoutsize < sizeof(gains) ) return -1;
 
-    return size;
+    memcpy( *out, (void *)&gains, sizeof(gains) );
+
+    return sizeof(gains);
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfClearStatus(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    cukHwOpilStatusClear();
-#else
+    (void)in;
+    (void)insize;
+    (void)out;
+    (void)maxoutsize;
+
     cukHwStatusClear();
-#endif
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfGetStatus(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)in;
+    (void)insize;
+
     uint32_t status;
-    uint32_t *o = (uint32_t *)*out;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    status = cukHwOpilStatus();
-#else
     status = cukHwStatus();
-#endif
 
-    *o = status;
+    if( maxoutsize < sizeof(status) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&status, sizeof(status) );
+
+    return sizeof(status);
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfSetFiltCoef(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     float alpha;
 
-    alpha = *( (float *)in );
+    if( insize != sizeof(alpha) ) return -1;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    cukHwOpilSetFilterCoef(alpha);
-#else
+    memcpy( (void *)&alpha, in, sizeof(alpha) );
+
     cukHwSetFilterCoef(alpha);
-#endif
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t cukHwIfGetFiltCoef(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    float *o = (float *)*out;
+    (void)in;
+    (void)insize;
     float alpha;
 
-#ifdef CUK_HW_IF_CONFIG_OPIL
-    alpha = cukHwOpilGetFilterCoef();
-#else
     alpha = cukHwGetFilterCoef();
-#endif
 
-    *o = alpha;
+    if( maxoutsize < sizeof(alpha) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&alpha, sizeof(alpha) );
+
+    return sizeof(alpha);
 }
 //-----------------------------------------------------------------------------
 //=============================================================================

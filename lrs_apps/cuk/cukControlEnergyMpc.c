@@ -101,6 +101,10 @@ int32_t cukControlEnergyMpcInitialize(void){
 //-----------------------------------------------------------------------------
 int32_t cukControlEnergyMpcRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs){
 
+    (void)nmeas;
+    (void)nrefs;
+    (void)nmaxoutputs;
+
     float **p;
     cukConfigMeasurements_t *hwm;
     cukConfigSwMeasurements_t *swm;
@@ -221,6 +225,13 @@ int32_t cukControlEnergyMpcGetParams(void *buffer, uint32_t size){
 int32_t cukControlEnergyMpcFirstEntry(void *meas, int32_t nmeas,
     void *refs, int32_t nrefs,
     void *outputs, int32_t nmaxoutputs){
+
+    (void)meas;
+    (void)nmeas;
+    (void)refs;
+    (void)nrefs;
+    (void)outputs;
+    (void)nmaxoutputs;
 
     return 0;
 }

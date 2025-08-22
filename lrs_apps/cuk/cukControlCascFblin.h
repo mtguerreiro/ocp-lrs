@@ -23,7 +23,7 @@ int32_t cukControlCascFblinInitialize(void);
 //-----------------------------------------------------------------------------
 int32_t cukControlCascFblinRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs);
 //-----------------------------------------------------------------------------
-int32_t cukControlCascFblinSetParams(void *params, uint32_t n);
+int32_t cukControlCascFblinSetParams(void *buffer, uint32_t size);
 //-----------------------------------------------------------------------------
 int32_t cukControlCascFblinGetParams(void *buffer, uint32_t size);
 //-----------------------------------------------------------------------------

@@ -97,6 +97,10 @@ int32_t cukControlEnergyInitialize(void){
 //-----------------------------------------------------------------------------
 int32_t cukControlEnergyRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs){
 
+    (void)nmeas;
+    (void)nrefs;
+    (void)nmaxoutputs;
+
     float **p;
     cukConfigMeasurements_t *hwm;
     cukConfigSwMeasurements_t *swm;

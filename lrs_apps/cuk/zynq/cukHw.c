@@ -314,6 +314,8 @@ int32_t cukHwGetMeasurements(void *meas){
 //-----------------------------------------------------------------------------
 int32_t cukHwApplyOutputs(void *outputs, int32_t size){
 
+    (void)size;
+
     cukConfigControl_t *control;
 
     control = (cukConfigControl_t *)outputs;

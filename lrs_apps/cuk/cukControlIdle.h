@@ -20,11 +20,11 @@
 //-----------------------------------------------------------------------------
 int32_t cukControlIdleInitialize(void);
 //-----------------------------------------------------------------------------
-int32_t cukControlIdleSetParams(void *params, uint32_t n);
+int32_t cukControlIdleRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs);
+//-----------------------------------------------------------------------------
+int32_t cukControlIdleSetParams(void *buffer, uint32_t size);
 //-----------------------------------------------------------------------------
 int32_t cukControlIdleGetParams(void *buffer, uint32_t size);
-//-----------------------------------------------------------------------------
-int32_t cukControlIdleRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs);
 //-----------------------------------------------------------------------------
 void cukControlIdleReset(void);
 //-----------------------------------------------------------------------------

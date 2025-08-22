@@ -1,6 +1,4 @@
 
-
-
 //=============================================================================
 /*-------------------------------- Includes ---------------------------------*/
 //=============================================================================
@@ -52,6 +50,10 @@ int32_t cukControlCascFblinInitialize(void){
 //-----------------------------------------------------------------------------
 int32_t cukControlCascFblinRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs){
 
+    (void)nmeas;
+    (void)nrefs;
+    (void)nmaxoutputs;
+
     float **p;
     cukConfigMeasurements_t *hwm;
     cukConfigSwMeasurements_t *swm;
@@ -98,9 +100,11 @@ int32_t cukControlCascFblinRun(void *meas, int32_t nmeas, void *refs, int32_t nr
     return sizeof(cukConfigControl_t);
 }
 //-----------------------------------------------------------------------------
-int32_t cukControlCascFblinSetParams(void *params, uint32_t n){
+int32_t cukControlCascFblinSetParams(void *buffer, uint32_t size){
 
-    float *p = (float *)params;
+    (void)size;
+
+    float *p = (float *)buffer;
 
     ki = *p++;
     k_ei = *p++;
@@ -116,6 +120,8 @@ int32_t cukControlCascFblinSetParams(void *params, uint32_t n){
 }
 //-----------------------------------------------------------------------------
 int32_t cukControlCascFblinGetParams(void *buffer, uint32_t size){
+
+    (void)size;
 
     float *p = (float *)buffer;
 
