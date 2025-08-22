@@ -163,12 +163,15 @@ int32_t fsbuckboostControlBoostEnergyMpcRun(void *meas, int32_t nmeas,
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostControlBoostEnergyMpcSetParams(void *buffer, uint32_t size){
 
+    if( size != sizeof(ctlparams_t) ) return -1;
     memcpy((void *)&params, buffer, size);
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostControlBoostEnergyMpcGetParams(void *buffer, uint32_t size){
+
+    if( size < sizeof(ctlparams_t) ) return -1;
 
     memcpy(buffer, (void *)&params, sizeof(ctlparams_t));
 
