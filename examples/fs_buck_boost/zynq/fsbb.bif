@@ -1,0 +1,8 @@
+//arch = zynq; split = false; format = BIN
+the_ROM_image:
+{
+	[bootloader]/home/marco/projects/ocp-lrs/examples/fs_buck_boost/zynq/build/lrssoc/export/lrssoc/sw/boot/fsbl.elf
+	/home/marco/projects/ocp-lrs/examples/fs_buck_boost/zynq/build/cpu0_app/_ide/bitstream/pynq_lrssoc.bit
+	/home/marco/projects/ocp-lrs/examples/fs_buck_boost/zynq/build/cpu0_app/build/cpu0_app.elf
+	/home/marco/projects/ocp-lrs/examples/fs_buck_boost/zynq/build/cpu1_app/build/cpu1_app.elf
+}
