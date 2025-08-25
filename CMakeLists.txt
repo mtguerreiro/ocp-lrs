@@ -9,6 +9,3 @@ endif()
 if(CUK)
     add_subdirectory(lrs_apps/cuk)
 endif()
-
-
-add_subdirectory(target/posix/threads)

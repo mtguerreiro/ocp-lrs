@@ -64,7 +64,9 @@ static float texec_buck_boost = 0.0f;
 /*-------------------------------- Functions --------------------------------*/
 //=============================================================================
 //-----------------------------------------------------------------------------
-void fsbuckboostInit(void *intcInst){
+void fsbuckboostInit(void *params){
+
+    (void)params;
 
     fsbuckboostInitializeTrace();
 
@@ -182,6 +184,7 @@ static int32_t fsbuckboostInitializeControlSystem(void){
 //-----------------------------------------------------------------------------
 void fsbuckboostAdcIrq(void *callbackRef){
 
+    (void)callbackRef;
 
     ocpCSRun(FS_BUCK_BOOST_CONFIG_CS_ID);
     ocpTraceSave(FS_BUCK_BOOST_CONFIG_TRACE_ID);

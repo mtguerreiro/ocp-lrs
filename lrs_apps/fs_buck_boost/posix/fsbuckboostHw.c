@@ -13,7 +13,6 @@
 //=============================================================================
 /*------------------------------- Definitions -------------------------------*/
 //=============================================================================
-
 static stypesMeasurements_t xtMeasurements;
 static stypesSimData_t xtSimData;
 static stypesControl_t xtControl;
@@ -57,6 +56,7 @@ static fsbuckboostHwControl_t hwControl = {
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostHwInitialize(fsbuckboostHwInitConfig_t *config){
 
+    (void)config;
     return 0;
 }
 //-----------------------------------------------------------------------------
@@ -92,6 +92,7 @@ uint32_t fsbuckboostHwGetPwmOutputEnable(void){
 //-----------------------------------------------------------------------------
 void fsbuckboostHwSetPwmOvfTriggerEnable(uint32_t enable){
 
+    (void)enable;
 }
 //-----------------------------------------------------------------------------
 uint32_t fsbuckboostHwGetPwmOvfTriggerEnable(void){
@@ -101,6 +102,7 @@ uint32_t fsbuckboostHwGetPwmOvfTriggerEnable(void){
 //-----------------------------------------------------------------------------
 void fsbuckboostHwSetPwmInv(uint32_t enable){
 
+    (void)enable;
 }
 //-----------------------------------------------------------------------------
 uint32_t fsbuckboostHwGetPwmInv(void){
@@ -160,6 +162,7 @@ float fsbuckboostHwGetPwmDuty(void){
 //-----------------------------------------------------------------------------
 void fsbuckboostHwSetPwmDeadTime(float deadtime){
 
+    (void)deadtime;
 }
 //-----------------------------------------------------------------------------
 float fsbuckboostHwGetPwmDeadTime(void){
@@ -169,6 +172,7 @@ float fsbuckboostHwGetPwmDeadTime(void){
 //-----------------------------------------------------------------------------
 void fsbuckboostHwSetAdcEnable(uint32_t enable){
 
+    (void)enable;
 }
 //-----------------------------------------------------------------------------
 uint32_t fsbuckboostHwGetAdcEnable(void){
@@ -178,6 +182,7 @@ uint32_t fsbuckboostHwGetAdcEnable(void){
 //-----------------------------------------------------------------------------
 void fsbuckboostHwSetAdcManualTrigger(uint32_t trigger){
 
+    (void)trigger;
 }
 //-----------------------------------------------------------------------------
 uint32_t fsbuckboostHwGetAdcManualTrigger(void){
@@ -187,6 +192,7 @@ uint32_t fsbuckboostHwGetAdcManualTrigger(void){
 //-----------------------------------------------------------------------------
 void fsbuckboostHwSetAdcInterruptEnable(uint32_t enable){
 
+    (void)enable;
 }
 //-----------------------------------------------------------------------------
 uint32_t fsbuckboostHwGetAdcInterruptEnable(void){
@@ -196,6 +202,7 @@ uint32_t fsbuckboostHwGetAdcInterruptEnable(void){
 //-----------------------------------------------------------------------------
 void fsbuckboostHwSetAdcSpiFreq(uint32_t freq){
 
+    (void)freq;
 }
 //-----------------------------------------------------------------------------
 uint32_t fsbuckboostHwGetAdcSpiFreq(void){
@@ -296,9 +303,12 @@ uint32_t fsbuckboostHwGetLoadSwitch(void){
 //-----------------------------------------------------------------------------
 void fsbuckboostHwSetMeasGains(fsbuckboostConfigMeasGains_t *gains){
 
+    (void)gains;
 }
 //-----------------------------------------------------------------------------
 uint32_t fsbuckboostHwGetMeasGains(fsbuckboostConfigMeasGains_t *gains){
+
+    (void)gains;
 
     return 0;
 }
@@ -336,6 +346,8 @@ int32_t fsbuckboostHwOpilUpdateSimData(void *simData, int32_t size){
 }
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostHwOpilGetSimData(void **simData, int32_t size){
+
+    (void)size;
 
     *simData = (void *)( &xtSimData );
 
@@ -381,11 +393,3 @@ int32_t fsbuckboostHwOpilGetControllerData(void **controllerData){
 }
 //-----------------------------------------------------------------------------
 //=============================================================================
-
-//=============================================================================
-/*----------------------------- Static functions ----------------------------*/
-//=============================================================================
-
-//-----------------------------------------------------------------------------
-//=============================================================================
-

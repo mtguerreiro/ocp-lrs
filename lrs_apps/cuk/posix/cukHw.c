@@ -14,7 +14,6 @@
 //=============================================================================
 /*------------------------------- Definitions -------------------------------*/
 //=============================================================================
-
 static stypesMeasurements_t xtMeasurements;
 static stypesSimData_t xtSimData;
 static stypesControl_t xtControl;
@@ -57,6 +56,7 @@ static cukHwControl_t hwControl = {
 //-----------------------------------------------------------------------------
 int32_t cukHwInitialize(cukHwInitConfig_t *config){
 
+    (void)config;
 
     return 0;
 }
@@ -93,6 +93,7 @@ uint32_t cukHwGetPwmOutputEnable(void){
 //-----------------------------------------------------------------------------
 void cukHwSetPwmOvfTriggerEnable(uint32_t enable){
 
+    (void)enable;
 }
 //-----------------------------------------------------------------------------
 uint32_t cukHwGetPwmOvfTriggerEnable(void){
@@ -122,6 +123,7 @@ float cukHwGetPwmDuty(void){
 //-----------------------------------------------------------------------------
 void cukHwSetPwmDeadTime(float deadtime){
 
+    (void)deadtime;
 }
 //-----------------------------------------------------------------------------
 float cukHwGetPwmDeadTime(void){
@@ -131,6 +133,7 @@ float cukHwGetPwmDeadTime(void){
 //-----------------------------------------------------------------------------
 void cukHwSetAdcEnable(uint32_t enable){
 
+    (void)enable;
 }
 //-----------------------------------------------------------------------------
 uint32_t cukHwGetAdcEnable(void){
@@ -140,6 +143,7 @@ uint32_t cukHwGetAdcEnable(void){
 //-----------------------------------------------------------------------------
 void cukHwSetAdcManualTrigger(uint32_t trigger){
 
+    (void)trigger;
 }
 //-----------------------------------------------------------------------------
 uint32_t cukHwGetAdcManualTrigger(void){
@@ -149,6 +153,7 @@ uint32_t cukHwGetAdcManualTrigger(void){
 //-----------------------------------------------------------------------------
 void cukHwSetAdcInterruptEnable(uint32_t enable){
 
+    (void)enable;
 }
 //-----------------------------------------------------------------------------
 uint32_t cukHwGetAdcInterruptEnable(void){
@@ -158,6 +163,7 @@ uint32_t cukHwGetAdcInterruptEnable(void){
 //-----------------------------------------------------------------------------
 void cukHwSetAdcSpiFreq(uint32_t freq){
 
+    (void)freq;
 }
 //-----------------------------------------------------------------------------
 uint32_t cukHwGetAdcSpiFreq(void){
@@ -323,6 +329,8 @@ int32_t cukHwOpilUpdateSimData(void *simData, int32_t size){
 }
 //-----------------------------------------------------------------------------
 int32_t cukHwOpilGetSimData(void **simData, int32_t size){
+
+    (void)size;
 
     *simData = (void *)( &xtSimData );
 

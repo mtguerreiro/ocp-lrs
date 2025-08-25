@@ -67,7 +67,9 @@ static float texec = 0.0f;
 /*-------------------------------- Functions --------------------------------*/
 //=============================================================================
 //-----------------------------------------------------------------------------
-void cukInit(void *intcInst){
+void cukInit(void *params){
+
+    (void)params;
 
     cukInitializeTrace();
 
@@ -202,6 +204,8 @@ static int32_t cukInitializeControlSystem(void){
 //=============================================================================
 //-----------------------------------------------------------------------------
 void cukAdcIrq(void *callbackRef){
+
+    (void)callbackRef;
 
     ocpCSRun(CUK_CONFIG_CS_ID);
     ocpTraceSave(CUK_CONFIG_TRACE_ID);
