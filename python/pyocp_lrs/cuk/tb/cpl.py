@@ -7,12 +7,12 @@ from . import common
 
 def run_ref_step(
     src, src_model_params, src_exp_params, src_plat_params, src_ctl,
-    cpl, cpl_model_params, cpl_exp_params, cpl_plat_params, cpl_ctl,
+    cpl, cpl_model_params, cpl_exp_params, cpl_plat_params,
     save=False, k=1.0
     ):
 
-    common.init(src, src_model_params, src_exp_params, src_plat_params)
-    common.init(cpl, cpl_model_params, cpl_exp_params, cpl_plat_params)
+    common.init_cuk(src, src_model_params, src_exp_params, src_plat_params)
+    common.init_cpl(cpl, cpl_model_params, cpl_exp_params, cpl_plat_params)
     
     status = common.enable_cs(src)
     if status != 0:
@@ -27,36 +27,34 @@ def run_ref_step(
     cpl.trace.reset()
     src.trace.reset()
     
-    common.init_relays(src)
-    time.sleep(0.5 * k)
-    common.init_relays(cpl)
-    time.sleep(0.5 * k)
+    common.init_cpl_relays(cpl)
+    time.sleep(0.2 * k)
     
     common.ramp_duty_up(src)
     time.sleep(0.2 * k)
     common.ramp_duty_up(cpl)
     time.sleep(0.2 * k)
 
-    cpl.cpl.enable()
-    time.sleep(0.2 * k)
+    #cpl.cpl.enable()
+    #time.sleep(0.2 * k)
 
-    if src_ctl == 'energy':
-        src.boost_energy.enable()
-    elif src_ctl == 'energy_mpc':
-        src.boost_energy_mpc.enable()
-    time.sleep(0.1 * k)
+    #if src_ctl == 'energy':
+    #    src.boost_energy.enable()
+    #elif src_ctl == 'energy_mpc':
+    #    src.boost_energy_mpc.enable()
+    #time.sleep(0.1 * k)
 
-    cpl.set_ref(cpl_exp_params['v_ref_step_up'])
-    time.sleep(0.1 * k)
-
-    src.set_ref(src_exp_params['v_ref_step_up'])
-    time.sleep(0.1 * k)
-
-    src.set_ref(src_exp_params['v_ref'])
-    time.sleep(0.1 * k)
-    
-    cpl.set_ref(cpl_exp_params['v_ref'])
-    time.sleep(0.1 * k)
+##    cpl.set_ref(cpl_exp_params['v_ref_step_up'])
+##    time.sleep(0.1 * k)
+##
+##    src.set_ref(src_exp_params['v_ref_step_up'])
+##    time.sleep(0.1 * k)
+##
+##    src.set_ref(src_exp_params['v_ref'])
+##    time.sleep(0.1 * k)
+##    
+##    cpl.set_ref(cpl_exp_params['v_ref'])
+##    time.sleep(0.1 * k)
     
     common.ramp_duty_down(cpl)
     time.sleep(0.2 * k)

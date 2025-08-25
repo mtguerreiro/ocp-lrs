@@ -37,6 +37,40 @@ def init_cuk(cuk, model_params, exp_params, plat_params):
     cuk.trace.reset()
 
 
+def init_cpl(fsbb, model_params, exp_params, plat_params):
+
+    mode = 'buck'
+
+    fsbb.disable()
+    fsbb.idle.enable()
+    fsbb.set_ref(exp_params['v_ref'])
+
+    v_in = model_params['V_in']
+    v_ref_ini = exp_params['v_ref']
+    f_pwm = model_params['f_pwm']
+
+    fsbb.hw.set_pwm_frequency(f_pwm)
+        
+    fsbb.set_converter_mode(mode)
+    ramp_u_ref = v_ref_ini / v_in
+
+    plat_params['ramp_params']['u_ref'] = ramp_u_ref
+    config_ramp_controller(fsbb, plat_params['ramp_params'])
+    fsbb.ramp.reset()
+
+    controllers.config_cpl(fsbb, model_params, plat_params)
+
+    fsbb.hw.set_meas_gains(plat_params['meas_gains'])
+
+    fsbb.trace.set_n_pre_trig_samples(plat_params['trigger']['pretrig'])
+    fsbb.trace.set_size(plat_params['trigger']['size'])
+    fsbb.trace.set_trig_signal(plat_params['trigger']['signal'])
+    fsbb.trace.set_trig_level(plat_params['trigger']['level'])
+    
+    fsbb.trace.set_mode(1)
+    fsbb.trace.reset()
+
+
 def config_ramp_controller(cuk, ctl_params):
 
     cuk.ramp.set_params({
@@ -71,6 +105,20 @@ def disable_cs(controller):
 
     controller.idle.enable()
     controller.disable()
+
+
+def init_cpl_relays(fsbb):
+
+    fsbb.hw.set_input_relay(1)
+    time.sleep(0.25)
+    fsbb.hw.set_output_relay(1)
+
+
+def de_init_cpl_relays(fsbb):
+
+    fsbb.hw.set_input_relay(0)
+    time.sleep(0.25)
+    fsbb.hw.set_output_relay(0)
 
 
 def ramp_duty_up(controller):
