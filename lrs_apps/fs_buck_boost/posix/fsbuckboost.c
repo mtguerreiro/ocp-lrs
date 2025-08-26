@@ -49,7 +49,7 @@ void fsbuckboostAdcIrq(void *callbackRef);
 //=============================================================================
 /*--------------------------------- Globals ---------------------------------*/
 //=============================================================================
-static char traceRawData[10 * 1024 * 1024];
+static char traceRawData[16 * 1024 * 1024];
 
 static char traceNames[FS_BUCK_BOOST_CONFIG_TRACE_0_NAME_LEN];
 static size_t traceData[FS_BUCK_BOOST_CONFIG_TRACE_0_MAX_SIGNALS];

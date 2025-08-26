@@ -19,6 +19,7 @@ def init_cuk(cuk, model_params, exp_params, plat_params):
     nt = model_params['N2'] / model_params['N1']
 
     cuk.hw.set_pwm_frequency(f_pwm)
+    cuk.hw.set_low_pass_filt_coef(plat_params['low_pass_filt_coef'])
 
     plat_params['ramp_params']['u_ref'] = v_ref_ini / (v_ref_ini + nt * v_in)
     config_ramp_controller(cuk, plat_params['ramp_params'])

@@ -35,26 +35,38 @@ def run_ref_step(
     common.ramp_duty_up(cpl)
     time.sleep(0.2 * k)
 
-    #cpl.cpl.enable()
-    #time.sleep(0.2 * k)
+    cpl.cpl.enable()
+    time.sleep(0.2 * k)
 
-    #if src_ctl == 'energy':
-    #    src.boost_energy.enable()
-    #elif src_ctl == 'energy_mpc':
-    #    src.boost_energy_mpc.enable()
-    #time.sleep(0.1 * k)
+    if src_ctl == 'energy':
+        src.energy.enable()
+    elif src_ctl == 'energy_mpc':
+        src.energy_mpc.enable()
+    time.sleep(0.1 * k)
 
-##    cpl.set_ref(cpl_exp_params['v_ref_step_up'])
-##    time.sleep(0.1 * k)
-##
-##    src.set_ref(src_exp_params['v_ref_step_up'])
-##    time.sleep(0.1 * k)
-##
-##    src.set_ref(src_exp_params['v_ref'])
-##    time.sleep(0.1 * k)
-##    
-##    cpl.set_ref(cpl_exp_params['v_ref'])
-##    time.sleep(0.1 * k)
+    cpl.set_ref(cpl_exp_params['v_ref_step_up'])
+    time.sleep(0.1 * k)
+    
+    src.set_ref(src_exp_params['v_ref_step_up'])
+    time.sleep(0.1 * k)
+
+    src.set_ref(src_exp_params['v_ref'])
+    time.sleep(0.1 * k)
+
+    cpl.set_ref(cpl_exp_params['v_ref'])
+    time.sleep(0.1 * k)
+
+    cpl.set_ref(cpl_exp_params['v_ref_step_down'])
+    time.sleep(0.1 * k)
+
+    src.set_ref(src_exp_params['v_ref_step_up'])
+    time.sleep(0.1 * k)
+
+    src.set_ref(src_exp_params['v_ref'])
+    time.sleep(0.1 * k)
+    
+    src.ramp.enable()
+    time.sleep(0.2*k)
     
     common.ramp_duty_down(cpl)
     time.sleep(0.2 * k)
@@ -83,8 +95,7 @@ def run_ref_step(
         cpl_meta = {
             'model':cpl_model_params,
             'plat':cpl_plat_params,
-            'exp':cpl_exp_params,
-            'ctl':cpl_ctl
+            'exp':cpl_exp_params
         }
         common.save_data(cpl, save + '_cpl', cpl_data, cpl_meta)
         

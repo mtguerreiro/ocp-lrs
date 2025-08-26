@@ -50,7 +50,7 @@ void cukAdcIrq(void *callbackRef);
 //=============================================================================
 /*--------------------------------- Globals ---------------------------------*/
 //=============================================================================
-static char traceRawData[10 * 1024 * 1024];
+static char traceRawData[16 * 1024 * 1024];
 
 static char traceNames[CUK_CONFIG_TRACE_0_NAME_LEN];
 static size_t traceData[CUK_CONFIG_TRACE_0_MAX_SIGNALS];
