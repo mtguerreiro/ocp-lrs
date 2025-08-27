@@ -23,14 +23,11 @@ def run_ref_step(
     if status != 0:
         print('Failed to enable cpl...')
         return (-1, -1)
-
-    cpl.trace.reset()
-    src.trace.reset()
     
     common.init_relays(src)
-    time.sleep(0.5 * k)
+    time.sleep(0.2 * k)
     common.init_relays(cpl)
-    time.sleep(0.5 * k)
+    time.sleep(0.2 * k)
     
     common.ramp_duty_up(src)
     time.sleep(0.2 * k)
@@ -40,6 +37,9 @@ def run_ref_step(
     cpl.cpl.enable()
     time.sleep(0.2 * k)
 
+    cpl.trace.reset()
+    src.trace.reset()
+    
     if src_ctl == 'energy':
         src.boost_energy.enable()
     elif src_ctl == 'energy_mpc':
