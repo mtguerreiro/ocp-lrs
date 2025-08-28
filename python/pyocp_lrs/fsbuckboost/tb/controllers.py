@@ -96,7 +96,8 @@ def _config_boost_energy_mpc_controller(fsbb, model_params, ctl_params):
     
     f_pwm = model_params['f_pwm']
 
-    C = model_params['C_out']
+    #C = model_params['C_out']
+    C = ctl_params['Co']
     L = model_params['L']
     dt = 1 / f_pwm
 
