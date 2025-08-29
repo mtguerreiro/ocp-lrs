@@ -12,8 +12,8 @@
 
 #include "fsbuckboost.h"
 
-#include "target/posix/threads/ocpIfThread.h"
-#include "target/posix/threads/ocpOpilThread.h"
+#include "demo_threads/ocpIfThread.h"
+#include "demo_threads/ocpOpilThread.h"
 //=============================================================================
 
 //=============================================================================

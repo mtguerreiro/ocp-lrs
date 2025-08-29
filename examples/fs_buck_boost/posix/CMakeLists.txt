@@ -4,7 +4,9 @@ set(FS_BUCK_BOOST ON)
 
 set(OCP_LRS_PATH "../../../../ocp-lrs")
 set(OCP_PATH "../../../../ocp")
-set(OCP_IF_THREAD_SERVER_PORT 8080)
+set(OCP_IF_THREAD_SERVER_PORT 8080 CACHE STRING "Port for OCP interface")
+set(OCP_DEMO_THREADS_OCP  ON)
+set(OCP_DEMO_THREADS_OPIL ON)
 
 set(OPIL_PATH "../../../../opil")
 set(OPIL_TARGET_IP "127.0.0.1" CACHE STRING "IP of the OPiL target")
@@ -52,8 +54,14 @@ target_include_directories(
     "${OCP_CONFIG_DIR}"
 )
 
+target_compile_definitions(
+    ocp_demo_threads
+    PRIVATE
+    OCP_IF_THREAD_SERVER_PORT=${OCP_IF_THREAD_SERVER_PORT}
+)
+
 target_include_directories(
-    ocp_lrs_posix_threads
+    ocp_demo_threads
     PRIVATE
     ${OCP_CONFIG_DIR}
 )
@@ -65,7 +73,7 @@ target_link_libraries(
     PRIVATE
     opil
     ocp
-    ocp_lrs_posix_threads
+    ocp_demo_threads
     fs_buck_boost
 )
 
