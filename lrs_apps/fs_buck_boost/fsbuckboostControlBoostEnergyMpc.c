@@ -90,6 +90,7 @@ int32_t fsbuckboostControlBoostEnergyMpcRun(void *meas, int32_t nmeas,
     (void)nmaxoutputs;
 
     float duty;
+    float y_dot_comp;
 
     fsbuckboostConfigMeasurements_t *m = (fsbuckboostConfigMeasurements_t *)meas;
     fsbuckboostConfigControl_t *o = (fsbuckboostConfigControl_t *)outputs;
@@ -125,6 +126,7 @@ int32_t fsbuckboostControlBoostEnergyMpcRun(void *meas, int32_t nmeas,
     }
 
     /* Delay compensation */
+    y_dot_comp = y_dot;
     y = y + params.dt * y_dot + params.alpha * params.dt * params.dt / 2.0f * v_1;
     y_dot = y_dot + params.alpha * params.dt * v_1;
 
@@ -132,8 +134,8 @@ int32_t fsbuckboostControlBoostEnergyMpcRun(void *meas, int32_t nmeas,
     dv_min_v = m->v_in / params.L * (m->v_in - m->v_dc_out) / params.alpha - v_1;
     dv_max_v = m->v_in * m->v_in / params.L / params.alpha - v_1;
 
-    dv_min_z2 = (-params.il_lim * m->v_in - m->v_dc_out * io_filt - 2.0f * y_dot + y_dot_1) / (params.alpha * params.dt);
-    dv_max_z2 = ( params.il_lim * m->v_in - m->v_dc_out * io_filt - 2.0f * y_dot + y_dot_1) / (params.alpha * params.dt);
+    dv_min_z2 = (-params.il_lim * m->v_in - m->v_dc_out * io_filt - 2.0f * y_dot + y_dot_comp) / (params.alpha * params.dt);
+    dv_max_z2 = ( params.il_lim * m->v_in - m->v_dc_out * io_filt - 2.0f * y_dot + y_dot_comp) / (params.alpha * params.dt);
 
     dv_min = dv_min_v > dv_min_z2 ? dv_min_v : dv_min_z2;
     dv_max = dv_max_v < dv_max_z2 ? dv_max_v : dv_max_z2;
