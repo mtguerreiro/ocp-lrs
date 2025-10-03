@@ -1,12 +1,6 @@
-/*
- * buckControlDisabled.h
- *
- *  Created on: 30 de ago. de 2023
- *      Author: marco
- */
 
-#ifndef BUCK_CONTROL_DISABLED_H_
-#define BUCK_CONTROL_DISABLED_H_
+#ifndef BUCK_CONTROL_IDLE_H_
+#define BUCK_CONTROL_IDLE_H_
 
 //=============================================================================
 /*-------------------------------- Includes ---------------------------------*/
@@ -24,22 +18,22 @@
 /*-------------------------------- Functions --------------------------------*/
 //=============================================================================
 //-----------------------------------------------------------------------------
-int32_t buckControlDisabledInitialize(void);
+int32_t buckControlIdleInitialize(void);
 //-----------------------------------------------------------------------------
-int32_t buckControlDisabledSetParams(void *params, uint32_t n);
+int32_t buckControlIdleRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs);
 //-----------------------------------------------------------------------------
-int32_t buckControlDisabledGetParams(void *buffer, uint32_t size);
+int32_t buckControlIdleSetParams(void *buffer, uint32_t size);
 //-----------------------------------------------------------------------------
-int32_t buckControlDisabledRun(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs);
+int32_t buckControlIdleGetParams(void *buffer, uint32_t size);
 //-----------------------------------------------------------------------------
-void buckControlDisabledReset(void);
+void buckControlIdleReset(void);
 //-----------------------------------------------------------------------------
-int32_t buckControlDisabledFirstEntry(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs);
+int32_t buckControlIdleFirstEntry(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs);
 //-----------------------------------------------------------------------------
-int32_t buckControlDisabledLastExit(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs);
+int32_t buckControlIdleLastExit(void *meas, int32_t nmeas, void *refs, int32_t nrefs, void *outputs, int32_t nmaxoutputs);
 //-----------------------------------------------------------------------------
-void buckControlDisabledGetCallbacks(void *callbacksBuffer);
+void buckControlIdleGetCallbacks(void *callbacksBuffer);
 //-----------------------------------------------------------------------------
 //=============================================================================
 
-#endif /* BUCK_CONTROL_DISABLED_H_ */
+#endif /* BUCK_CONTROL_IDLE_H_ */

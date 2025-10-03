@@ -1,31 +1,18 @@
-/*
- * buckControlSfb.h
- *
- *  Created on: 30 de ago. de 2023
- *      Author: marco
- */
 
-#ifndef BUCK_CONTROL_SFB_H_
-#define BUCK_CONTROL_SFB_H_
+#ifndef BUCK_CONTROLLER_SFB_H_
+#define BUCK_CONTROLLER_SFB_H_
 
 //=============================================================================
 /*-------------------------------- Includes ---------------------------------*/
 //=============================================================================
 #include "stdint.h"
-//=============================================================================
+
+//============================================================================
 
 //=============================================================================
 /*------------------------------- Definitions -------------------------------*/
 //=============================================================================
-typedef struct{
 
-    float kr;
-    float k1;
-    float k2;
-
-    float r;
-
-}buckControlSfbParams_t;
 
 //=============================================================================
 
@@ -33,16 +20,28 @@ typedef struct{
 /*-------------------------------- Functions --------------------------------*/
 //=============================================================================
 //-----------------------------------------------------------------------------
-void buckControlSfbInitialize(void);
+int32_t buckControlSfbInit(void);
 //-----------------------------------------------------------------------------
-int32_t buckControlSfbSetParams(void *params, uint32_t n);
+int32_t buckControlSfbRun(void *meas, int32_t nmeas,
+    void *refs, int32_t nrefs,
+    void *outputs, int32_t nmaxoutputs);
 //-----------------------------------------------------------------------------
-int32_t buckControlSfbGetParams(void *in, uint32_t insize, void *out, uint32_t maxoutsize);
+int32_t buckControlSfbSetParams(void *buffer, uint32_t size);
 //-----------------------------------------------------------------------------
-int32_t buckControlSfbRun(void *inputs, int32_t ninputs, void *outputs, int32_t nmaxoutputs);
+int32_t buckControlSfbGetParams(void *buffer, uint32_t size);
 //-----------------------------------------------------------------------------
 void buckControlSfbReset(void);
 //-----------------------------------------------------------------------------
+int32_t buckControlSfbFirstEntry(void *meas, int32_t nmeas,
+    void *refs, int32_t nrefs,
+    void *outputs, int32_t nmaxoutputs);
+//-----------------------------------------------------------------------------
+int32_t buckControlSfbLastExit(void *meas, int32_t nmeas,
+    void *refs, int32_t nrefs,
+    void *outputs, int32_t nmaxoutputs);
+//-----------------------------------------------------------------------------
+void buckControlSfbGetCallbacks(void *callbacksBuffer);
+//-----------------------------------------------------------------------------
 //=============================================================================
 
-#endif /* BUCK_CONTROL_SFB_H_ */
+#endif /* BUCK_CONTROLLER_SFB_H_ */

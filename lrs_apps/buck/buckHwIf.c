@@ -2,21 +2,16 @@
  * buckHwIf.c
  *
  */
-#ifdef SOC_CPU1
 //=============================================================================
 /*-------------------------------- Includes ---------------------------------*/
 //=============================================================================
 #include "buckHwIf.h"
 
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-#include "buckHwOpil.h"
-#else
-#include "buckHw.h"
-#endif
+#include "c2000/buckHw.h"
 
 #include "buckConfig.h"
 
-#include "rp.h"
+#include "rp/rp.h"
 //=============================================================================
 
 //=============================================================================
@@ -38,17 +33,8 @@ static buckHwIfControl_t hwControl;
 //=============================================================================
 /*-------------------------------- Prototypes -------------------------------*/
 //=============================================================================
-static int32_t buckHwIfSetPwmReset(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
-static int32_t buckHwIfGetPwmReset(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
-
-static int32_t buckHwIfSetPwmOutputEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
-static int32_t buckHwIfGetPwmOutputEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
-
-static int32_t buckHwIfSetPwmOvfTriggerEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
-static int32_t buckHwIfGetPwmOvfTriggerEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
-
-static int32_t buckHwIfSetPwmInv(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
-static int32_t buckHwIfGetPwmInv(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
+static int32_t buckHwIfSetPwmEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
+static int32_t buckHwIfGetPwmEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
 
 static int32_t buckHwIfSetPwmFrequency(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
 static int32_t buckHwIfGetPwmFrequency(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
@@ -58,18 +44,6 @@ static int32_t buckHwIfGetPwmDutyCycle(void *in, uint32_t insize, void **out, ui
 
 static int32_t buckHwIfSetPwmDeadTime(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
 static int32_t buckHwIfGetPwmDeadTime(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
-
-static int32_t buckHwIfSetAdcEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
-static int32_t buckHwIfGetAdcEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
-
-static int32_t buckHwIfSetAdcManualTrig(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
-static int32_t buckHwIfGetAdcManualTrig(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
-
-static int32_t buckHwIfSetAdcInterruptEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
-static int32_t buckHwIfGetAdcInterruptEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
-
-static int32_t buckHwIfSetAdcSpiFreq(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
-static int32_t buckHwIfGetAdcSpiFreq(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
 
 static int32_t buckHwIfSetInputRelay(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
 static int32_t buckHwIfGetInputRelay(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
@@ -92,17 +66,8 @@ int32_t buckHwIfInitialize(void){
     /* Initializes the request processor */
     rpInitialize(&hwControl.interface.rp, BUCK_HW_IF_END, hwControl.interface.handles);
 
-    rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_SET_PWM_RESET, buckHwIfSetPwmReset);
-    rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_GET_PWM_RESET, buckHwIfGetPwmReset);
-
-    rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_SET_PWM_OUTPUT_ENABLE, buckHwIfSetPwmOutputEnable);
-    rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_GET_PWM_OUTPUT_ENABLE, buckHwIfGetPwmOutputEnable);
-
-    rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_SET_PWM_OVF_TRIGGER_ENABLE, buckHwIfSetPwmOvfTriggerEnable);
-    rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_GET_PWM_OVF_TRIGGER_ENABLE, buckHwIfGetPwmOvfTriggerEnable);
-
-    rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_SET_PWM_INV, buckHwIfSetPwmInv);
-    rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_GET_PWM_INV, buckHwIfGetPwmInv);
+    rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_SET_PWM_ENABLE, buckHwIfSetPwmEnable);
+    rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_GET_PWM_ENABLE, buckHwIfGetPwmEnable);
 
     rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_SET_PWM_FREQ, buckHwIfSetPwmFrequency);
     rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_GET_PWM_FREQ, buckHwIfGetPwmFrequency);
@@ -112,18 +77,6 @@ int32_t buckHwIfInitialize(void){
 
     rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_SET_PWM_DEAD_TIME, buckHwIfSetPwmDeadTime);
     rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_GET_PWM_DEAD_TIME, buckHwIfGetPwmDeadTime);
-
-    rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_SET_ADC_ENABLE, buckHwIfSetAdcEnable);
-    rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_GET_ADC_ENABLE, buckHwIfGetAdcEnable);
-
-    rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_SET_ADC_MANUAL_TRIG, buckHwIfSetAdcManualTrig);
-    rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_GET_ADC_MANUAL_TRIG, buckHwIfGetAdcManualTrig);
-
-    rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_SET_ADC_INT_ENABLE, buckHwIfSetAdcInterruptEnable);
-    rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_GET_ADC_INT_ENABLE, buckHwIfGetAdcInterruptEnable);
-
-    rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_SET_ADC_SPI_FREQ, buckHwIfSetAdcSpiFreq);
-    rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_GET_ADC_SPI_FREQ, buckHwIfGetAdcSpiFreq);
 
     rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_SET_INPUT_RELAY, buckHwIfSetInputRelay);
     rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_GET_INPUT_RELAY, buckHwIfGetInputRelay);
@@ -155,467 +108,244 @@ int32_t buckHwIf(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 /*----------------------------- Static functions ----------------------------*/
 //=============================================================================
 //-----------------------------------------------------------------------------
-static int32_t buckHwIfSetPwmReset(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
+static int32_t buckHwIfSetPwmEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t reset;
+    (void)out;
+    (void)maxoutsize;
+    uint32_t enable;
 
-    reset = *( (uint32_t *)in ) & 0x01;
+    if( insize != sizeof(enable) ) return -1;
 
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    buckHwOpilSetPwmReset(reset);
-#else
-    buckHwSetPwmReset(reset);
-#endif
+    memcpy( (void *)&enable, in, sizeof(enable) );
+
+    buckHwSetPwmEnable(enable & 0x01);
 
     return 0;
 }
 //-----------------------------------------------------------------------------
-static int32_t buckHwIfGetPwmReset(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
+static int32_t buckHwIfGetPwmEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
-    uint32_t reset;
-
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    reset = buckHwOpilGetPwmReset();
-#else
-    reset = buckHwGetPwmReset();
-#endif
-
-    *o = reset;
-
-    return 4;
-}
-//-----------------------------------------------------------------------------
-static int32_t buckHwIfSetPwmOutputEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
-
+    (void)in;
+    (void)insize;
     uint32_t enable;
 
-    enable = *( (uint32_t *)in ) & 0x01;
+    enable = buckHwGetPwmEnable();
 
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    buckHwOpilSetPwmOutputEnable(enable);
-#else
-    buckHwSetPwmOutputEnable(enable);
-#endif
+    if( maxoutsize < sizeof(enable) ) return -1;
 
-    return 0;
-}
-//-----------------------------------------------------------------------------
-static int32_t buckHwIfGetPwmOutputEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
+    memcpy( *out, (void *)&enable, sizeof(enable) );
 
-    uint32_t *o = (uint32_t *)*out;
-    uint32_t enable;
-
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    enable = buckHwOpilGetPwmOutputEnable();
-#else
-    enable = buckHwGetPwmOutputEnable();
-#endif
-
-    *o = enable;
-
-    return 4;
-}
-//-----------------------------------------------------------------------------
-static int32_t buckHwIfSetPwmOvfTriggerEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
-
-    uint32_t enable;
-
-    enable = *( (uint32_t *)in ) & 0x01;
-
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    buckHwOpilSetPwmOvfTriggerEnable(enable);
-#else
-    buckHwSetPwmOvfTriggerEnable(enable);
-#endif
-
-    return 0;
-}
-//-----------------------------------------------------------------------------
-static int32_t buckHwIfGetPwmOvfTriggerEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
-
-    uint32_t *o = (uint32_t *)*out;
-    uint32_t enable;
-
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    enable = buckHwOpilGetPwmOvfTriggerEnable();
-#else
-    enable = buckHwGetPwmOvfTriggerEnable();
-#endif
-
-    *o = enable;
-
-    return 4;
-}
-//-----------------------------------------------------------------------------
-static int32_t buckHwIfSetPwmInv(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
-
-    uint32_t enable;
-
-    enable = *( (uint32_t *)in ) & 0x01;
-
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    buckHwOpilSetPwmInv(enable);
-#else
-    buckHwSetPwmInv(enable);
-#endif
-
-    return 0;
-}
-//-----------------------------------------------------------------------------
-static int32_t buckHwIfGetPwmInv(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
-
-    uint32_t *o = (uint32_t *)*out;
-    uint32_t enable;
-
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    enable = buckHwOpilGetPwmInv();
-#else
-    enable = buckHwGetPwmInv();
-#endif
-
-    *o = enable;
-
-    return 4;
+    return sizeof(enable);
 }
 //-----------------------------------------------------------------------------
 static int32_t buckHwIfSetPwmFrequency(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t freq;
 
-    freq = *( (uint32_t *)in );
+    if( insize != sizeof(freq) ) return -1;
 
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    buckHwOpilSetPwmFrequency(freq);
-#else
+    memcpy( (void *)&freq, in, sizeof(freq) );
+
     buckHwSetPwmFrequency(freq);
-#endif
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t buckHwIfGetPwmFrequency(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t freq;
 
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    freq = buckHwOpilGetPwmFrequency();
-#else
     freq = buckHwGetPwmFrequency();
-#endif
 
-    *o = freq;
+    if( maxoutsize < sizeof(freq) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&freq, sizeof(freq) );
+
+    return sizeof(freq);
 }
 //-----------------------------------------------------------------------------
 static int32_t buckHwIfSetPwmDutyCycle(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     float duty;
 
-    duty = *( (float *)in );
+    if( insize != sizeof(duty) ) return -1;
 
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    buckHwOpilSetPwmDuty(duty);
-#else
+    memcpy( (void *)&duty, in, sizeof(duty) );
+
     buckHwSetPwmDuty(duty);
-#endif
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t buckHwIfGetPwmDutyCycle(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    float *o = (float *)*out;
+    (void)in;
+    (void)insize;
     float duty;
 
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    duty = buckHwOpilGetPwmDuty();
-#else
     duty = buckHwGetPwmDuty();
-#endif
 
-    *o = duty;
+    if( maxoutsize < sizeof(duty) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&duty, sizeof(duty) );
+
+    return sizeof(duty);
 }
 //-----------------------------------------------------------------------------
 static int32_t buckHwIfSetPwmDeadTime(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     float deadtime;
 
-    deadtime = *( (float *)in );
+    if( insize != sizeof(deadtime) ) return -1;
 
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    buckHwOpilSetPwmDeadTime(deadtime);
-#else
+    memcpy( (void *)&deadtime, in, sizeof(deadtime) );
+
     buckHwSetPwmDeadTime(deadtime);
-#endif
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t buckHwIfGetPwmDeadTime(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    float *o = (float *)*out;
+    (void)in;
+    (void)insize;
     float deadtime;
 
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    deadtime = buckHwOpilGetPwmDeadTime();
-#else
     deadtime = buckHwGetPwmDeadTime();
-#endif
 
-    *o = deadtime;
+    if( maxoutsize < sizeof(deadtime) ) return -1;
 
-    return 4;
-}
-//-----------------------------------------------------------------------------
-static int32_t buckHwIfSetAdcEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
+    memcpy( *out, (void *)&deadtime, sizeof(deadtime) );
 
-    uint32_t enable;
-
-    enable = *( (uint32_t *)in ) & 0x01;
-
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    buckHwOpilSetAdcEnable(enable);
-#else
-    buckHwSetAdcEnable(enable);
-#endif
-
-    return 0;
-}
-//-----------------------------------------------------------------------------
-static int32_t buckHwIfGetAdcEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
-
-    uint32_t *o = (uint32_t *)*out;
-    uint32_t enable;
-
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    enable = buckHwOpilGetAdcEnable();
-#else
-    enable = buckHwGetAdcEnable();
-#endif
-
-    *o = enable;
-
-    return 4;
-}
-//-----------------------------------------------------------------------------
-static int32_t buckHwIfSetAdcManualTrig(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
-
-    uint32_t trigger;
-
-    trigger = *( (uint32_t *)in ) & 0x01;
-
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    buckHwOpilSetAdcManualTrigger(trigger);
-#else
-    buckHwSetAdcManualTrigger(trigger);
-#endif
-
-    return 0;
-}
-//-----------------------------------------------------------------------------
-static int32_t buckHwIfGetAdcManualTrig(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
-
-    uint32_t *o = (uint32_t *)*out;
-    uint32_t trigger;
-
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    trigger = buckHwOpilGetAdcManualTrigger();
-#else
-    trigger = buckHwGetAdcManualTrigger();
-#endif
-
-    *o = trigger;
-
-    return 4;
-}
-//-----------------------------------------------------------------------------
-static int32_t buckHwIfSetAdcInterruptEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
-
-    uint32_t enable;
-
-    enable = *( (uint32_t *)in ) & 0x01;
-
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    buckHwOpilSetAdcInterruptEnable(enable);
-#else
-    buckHwSetAdcInterruptEnable(enable);
-#endif
-
-    return 0;
-}
-//-----------------------------------------------------------------------------
-static int32_t buckHwIfGetAdcInterruptEnable(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
-
-    uint32_t *o = (uint32_t *)*out;
-    uint32_t enable;
-
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    enable = buckHwOpilGetAdcInterruptEnable();
-#else
-    enable = buckHwGetAdcInterruptEnable();
-#endif
-
-    *o = enable;
-
-    return 4;
-}
-//-----------------------------------------------------------------------------
-static int32_t buckHwIfSetAdcSpiFreq(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
-
-    uint32_t freq;
-
-    freq = *( (uint32_t *)in );
-
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    buckHwOpilSetAdcSpiFreq(freq);
-#else
-    buckHwSetAdcSpiFreq(freq);
-#endif
-
-    return 0;
-}
-//-----------------------------------------------------------------------------
-static int32_t buckHwIfGetAdcSpiFreq(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
-
-    uint32_t *o = (uint32_t *)*out;
-    uint32_t freq;
-
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    freq = buckHwOpilGetAdcSpiFreq();
-#else
-    freq = buckHwGetAdcSpiFreq();
-#endif
-
-    *o = freq;
-
-    return 4;
+    return sizeof(deadtime);
 }
 //-----------------------------------------------------------------------------
 static int32_t buckHwIfSetInputRelay(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t state;
 
-    state = *( (uint32_t *)in );
+    if( insize != sizeof(state) ) return -1;
 
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    buckHwOpilSetInputRelay(state);
-#else
+    memcpy( (void *)&state, in, sizeof(state) );
+
     buckHwSetInputRelay(state);
-#endif
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t buckHwIfGetInputRelay(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t state;
 
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    state = buckHwOpilGetInputRelay();
-#else
     state = buckHwGetInputRelay();
-#endif
 
-    *o = state;
+    if( maxoutsize < sizeof(state) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&state, sizeof(state) );
+
+    return sizeof(state);
 }
 //-----------------------------------------------------------------------------
 static int32_t buckHwIfSetOutputRelay(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)out;
+    (void)maxoutsize;
     uint32_t state;
 
-    state = *( (uint32_t *)in );
+    if( insize != sizeof(state) ) return -1;
 
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    buckHwOpilSetOutputRelay(state);
-#else
+    memcpy( (void *)&state, in, sizeof(state) );
+
     buckHwSetOutputRelay(state);
-#endif
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t buckHwIfGetOutputRelay(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    uint32_t *o = (uint32_t *)*out;
+    (void)in;
+    (void)insize;
     uint32_t state;
 
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    state = buckHwOpilGetOutputRelay();
-#else
     state = buckHwGetOutputRelay();
-#endif
 
-    *o = state;
+    if( maxoutsize < sizeof(state) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&state, sizeof(state) );
+
+    return sizeof(state);
 }
 //-----------------------------------------------------------------------------
 static int32_t buckHwIfSetMeasGains(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    buckConfigMeasGains_t *gains;
+    (void)out;
+    (void)maxoutsize;
+    buckConfigMeasGains_t gains;
 
-    gains = ( (buckConfigMeasGains_t *)in );
+    if( insize != sizeof(gains) ) return -1;
 
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    buckHwOpilSetMeasGains(gains);
-#else
-    buckHwSetMeasGains(gains);
-#endif
+    memcpy( (void* )&gains, in, sizeof(gains) );
+
+    buckHwSetMeasGains(&gains);
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t buckHwIfGetMeasGains(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-    buckConfigMeasGains_t *o = (buckConfigMeasGains_t *)*out;
+    (void)in;
+    (void)insize;
     buckConfigMeasGains_t gains;
-    uint32_t size;
 
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    size = buckHwOpilGetMeasGains(&gains);
-#else
-    size = buckHwGetMeasGains(&gains);
-#endif
+    buckHwGetMeasGains(&gains);
 
-    *o = gains;
+    if( maxoutsize < sizeof(gains) ) return -1;
 
-    return size;
+    memcpy( *out, (void *)&gains, sizeof(gains) );
+
+    return sizeof(gains);
 }
 //-----------------------------------------------------------------------------
 static int32_t buckHwIfClearStatus(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    buckHwOpilStatusClear();
-#else
+    (void)in;
+    (void)insize;
+    (void)out;
+    (void)maxoutsize;
+
     buckHwStatusClear();
-#endif
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 static int32_t buckHwIfGetStatus(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
 
+    (void)in;
+    (void)insize;
+    (void)out;
+    (void)maxoutsize;
+
     uint32_t status;
-    uint32_t *o = (uint32_t *)*out;
 
-#ifdef BUCK_HW_IF_CONFIG_OPIL
-    status = buckHwOpilStatus();
-#else
     status = buckHwStatus();
-#endif
 
-    *o = status;
+    if( maxoutsize < sizeof(status) ) return -1;
 
-    return 4;
+    memcpy( *out, (void *)&status, sizeof(status) );
+
+    return sizeof(status);
 }
 //-----------------------------------------------------------------------------
 //=============================================================================
-#endif /* SOC_CPU1 */

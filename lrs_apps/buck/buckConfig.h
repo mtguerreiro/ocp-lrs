@@ -10,6 +10,8 @@
 /*-------------------------------- Includes ---------------------------------*/
 //=============================================================================
 #include "stdint.h"
+
+#include "ocpConfig.h"
 //=============================================================================
 
 //=============================================================================
@@ -17,8 +19,8 @@
 //=============================================================================
 typedef struct{
     
-    float i_o;
-    float i_l;
+    float io;
+    float il;
     
     float v_dc_out;
     float v_out;
@@ -33,16 +35,16 @@ typedef struct{
 }buckConfigControl_t;
 
 typedef struct{
-    float v_o;
+    float v_out;
 }buckConfigReferences_t;
 
 typedef struct{
 
-    float i_o_gain;
-    float i_o_ofs;
+    float io_gain;
+    float io_ofs;
     
-    float i_l_gain;
-    float i_l_ofs;
+    float il_gain;
+    float il_ofs;
 
     float v_dc_out_gain;
     float v_dc_out_ofs;
@@ -56,8 +58,8 @@ typedef struct{
     float v_in_gain;
     float v_in_ofs;
     
-    float i_l_avg_gain;
-    float i_l_avg_ofs;
+    float il_avg_gain;
+    float il_avg_ofs;
 
 }buckConfigMeasGains_t;
 
@@ -86,6 +88,9 @@ typedef struct{
 #define BUCK_CONFIG_V_LIM             (55.0f)
 
 #define BUCK_CONFIG_SHUTDOWN_U_DEC     0.005
+
+#define BUCK_CONFIG_OCP_CS_ID           OCP_CS_1
+#define BUCK_CONFIG_OCP_TRACE_ID        OCP_TRACE_1
 //=============================================================================
 
 #endif /* BUCK_CONFIG_H_ */

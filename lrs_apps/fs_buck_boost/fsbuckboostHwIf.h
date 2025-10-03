@@ -295,7 +295,7 @@ typedef enum{
      * No response
      *
      * Notes
-     * - DEAD TIME is given in nanoseconds, as a floating point value.
+     * - DEAD TIME is given in seconds, as a floating point value.
      *   Internally, the PWM counter is set according to the following
      *   relation:
      *
@@ -321,7 +321,7 @@ typedef enum{
      *  ---------------------
      *
      * Notes
-     * - PWM dead time, in nanoseconds.
+     * - PWM dead time, in seconds.
      */
     FS_BUCK_BOOST_HW_IF_GET_PWM_DEAD_TIME,
 

@@ -8,28 +8,26 @@
 
 /* OCP */
 #include "ocpConfig.h"
-#include "ocpTrace.h"
-#include "rp.h"
+#include "ocp/ocpTrace.h"
+#include "rp/rp.h"
 
 /* Controller lib */
-#include "controller.h"
-#include "controllerIf.h"
+#include "controller/controller.h"
+#include "controller/controllerIf.h"
 
 /* Controllers */
-#include "buckControlDisabled.h"
-#include "buckControlStartup.h"
-#include "buckControlSfbInt.h"
-//#include "appControllerCascaded.h"
+#include "buckControlIdle.h"
+#include "buckControlRamp.h"
+#include "buckControlSfb.h"
 //============================================================================
 
 //=============================================================================
 /*------------------------------- Definitions -------------------------------*/
 //=============================================================================
 typedef enum{
-    BUCK_CONTROLLER_DISABLED,
-    BUCK_CONTROLLER_STARTUP,
-    BUCK_CONTROLLER_SFB_INT,
-    //BUCK_CONTROLLER_CASCADED,
+    BUCK_CONTROLLER_IDLE,
+    BUCK_CONTROLLER_RAMP,
+    BUCK_CONTROLLER_SFB,
     BUCK_CONTROLLER_END
 }appControllersEnum_t;
 
@@ -56,10 +54,9 @@ int32_t buckControllerInit(void){
     controllerConfig_t config;
 
     controllerGetCbs_t ctlGetCbs[BUCK_CONTROLLER_END] = {0};
-    ctlGetCbs[BUCK_CONTROLLER_DISABLED] = buckControlDisabledGetCallbacks;
-    ctlGetCbs[BUCK_CONTROLLER_STARTUP] = buckControlStartupGetCallbacks;
-    ctlGetCbs[BUCK_CONTROLLER_SFB_INT] = buckControlSfbIntGetCallbacks;
-    //ctlGetCbs[BUCK_CONTROLLER_CASCADED] = appControlCascadedGetCallbacks;
+    ctlGetCbs[BUCK_CONTROLLER_IDLE] = buckControlIdleGetCallbacks;
+    ctlGetCbs[BUCK_CONTROLLER_RAMP] = buckControlRampGetCallbacks;
+    ctlGetCbs[BUCK_CONTROLLER_SFB] = buckControlSfbGetCallbacks;
 
     config.refBuffer = (void *)&xbuckControler.refs;
     config.refSize = sizeof(xbuckControler.refs);
@@ -71,10 +68,12 @@ int32_t buckControllerInit(void){
     controllerInit(&xbuckControler.controller, &config);
 
     controllerIfInit();
-    controllerIfRegister(&xbuckControler.controller, OCP_CS_2); //OCP_CS_2 should be BUCK_CS
+    controllerIfRegister(&xbuckControler.controller, BUCK_CONFIG_OCP_CS_ID);
 
-    //OCP_TRACE_2 should be BUCK_TRACE
-    ocpTraceAddSignal(OCP_TRACE_2, (void *)&xbuckControler.refs.v_o, "Voltage reference");
+    ocpTraceAddSignal(
+        BUCK_CONFIG_OCP_TRACE_ID,
+        (void *)&xbuckControler.refs.v_out, "Voltage reference"
+    );
 
     return 0;
 }
