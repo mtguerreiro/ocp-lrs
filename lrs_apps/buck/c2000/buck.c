@@ -6,6 +6,7 @@
 
 #include "driverlib.h"
 #include "device.h"
+#include "c2000Config.h"
 
 #include "stdio.h"
 
@@ -40,19 +41,18 @@ void buckAdcIrq(void);
 //=============================================================================
 /*------------------------------- Definitions -------------------------------*/
 //=============================================================================
-// #define BUCK_OCP_CONFIG_TRACE_0_NAME_LEN         800
-// #define BUCK_OCP_CONFIG_TRACE_0_MAX_SIGNALS      20
+#define BUCK_OCP_CONFIG_TRACE_NAME_LEN          128
+#define BUCK_OCP_CONFIG_TRACE_MAX_SIGNALS       32
 
-#define BUCK_OCP_CONFIG_INPUT_BUF_SIZE           50
-#define BUCK_OCP_CONFIG_OUTPUT_BUF_SIZE          20
+#define BUCK_OCP_CONFIG_INPUT_BUF_SIZE           16
+#define BUCK_OCP_CONFIG_OUTPUT_BUF_SIZE          8
 //=============================================================================
 
 //=============================================================================
 /*--------------------------------- Globals ---------------------------------*/
 //=============================================================================
-// static char trace0Names[BUCK_OCP_CONFIG_TRACE_0_NAME_LEN];
-// static size_t trace0Data[BUCK_OCP_CONFIG_TRACE_0_MAX_SIGNALS];
-// static uint8_t traceBuffer[BUCK_CONFIG_OCP_TRACE_0_SIZE_BYTES];
+static char trace0Names[BUCK_OCP_CONFIG_TRACE_NAME_LEN];
+static size_t trace0Data[BUCK_OCP_CONFIG_TRACE_MAX_SIGNALS];
 
 static float bInputs[BUCK_OCP_CONFIG_INPUT_BUF_SIZE];
 static float bOutputs[BUCK_OCP_CONFIG_OUTPUT_BUF_SIZE];
@@ -65,7 +65,7 @@ static float bOutputs[BUCK_OCP_CONFIG_OUTPUT_BUF_SIZE];
 //-----------------------------------------------------------------------------
 int32_t buckInit(void){
 
-    // buckOcpTracesInit();
+    buckOcpTracesInit();
 
     buckHwInit(0);
     buckHwIfInitialize();
@@ -84,24 +84,24 @@ int32_t buckInit(void){
 //-----------------------------------------------------------------------------
 static int32_t buckOcpTracesInit(void){
 
-    // ocpTraceConfig_t config;
-    // stypesMeasurements_t *meas;
-    // stypesControl_t *control;
-    //
-    // /* Initializes buck's trace */
-    // config.mem = (void *)traceBuffer;
-    // config.size = BUCK_CONFIG_OCP_TRACE_0_SIZE_BYTES;
-    // config.data = (void **)trace0Data;
-    // config.names = trace0Names;
-    //
-    // ocpTraceInitialize(BUCK_CONFIG_OCP_TRACE_ID, &config, "App trace");
-    //
-    // /* Adds measurements and controls to trace */
-    // meas = (stypesMeasurements_t *)(bInputs);
-    // control = (stypesControl_t *)(bOutputs);
-    // ocpTraceAddSignal(BUCK_CONFIG_OCP_TRACE_ID, (void *)&meas->i, "Inductor current");
-    // ocpTraceAddSignal(BUCK_CONFIG_OCP_TRACE_ID, (void *)&meas->v_out, "Output voltage");
-    // ocpTraceAddSignal(BUCK_CONFIG_OCP_TRACE_ID, (void *)&control->u, "Duty-cycle");
+    ocpTraceConfig_t config;
+    buckConfigMeasurements_t *meas;
+    buckConfigControl_t *control;
+    
+    /* Initializes buck's trace */
+    config.mem = (void *)C2000_CONFIG_MEM_TRACE_ADR;
+    config.size = C2000_CONFIG_MEM_TRACE_SIZE_MAX;
+    config.data = (void **)trace0Data;
+    config.names = trace0Names;
+    
+    ocpTraceInitialize(BUCK_CONFIG_OCP_TRACE_ID, &config, "Buck trace");
+    
+    /* Adds measurements and controls to trace */
+    meas = (buckConfigMeasurements_t *)(bInputs);
+    control = (buckConfigControl_t *)(bOutputs);
+    ocpTraceAddSignal(BUCK_CONFIG_OCP_TRACE_ID, (void *)&meas->il, "Inductor current");
+    ocpTraceAddSignal(BUCK_CONFIG_OCP_TRACE_ID, (void *)&meas->v_out, "Output voltage");
+    ocpTraceAddSignal(BUCK_CONFIG_OCP_TRACE_ID, (void *)&control->u, "Duty-cycle");
 
     return 0;
 }
