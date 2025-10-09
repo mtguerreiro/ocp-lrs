@@ -5,7 +5,7 @@
 //=============================================================================
 /*-------------------------------- Logging ----------------------------------*/
 //=============================================================================
-#include "logging/logging_levels.h"
+#include "clogging/logging_levels.h"
 
 #ifndef LIBRARY_LOG_NAME
 #define LIBRARY_LOG_NAME    "OCP"
@@ -15,7 +15,7 @@
 #define LIBRARY_LOG_LEVEL    LOG_INFO
 #endif
 
-#include "logging/logging_stack.h"
+#include "clogging/logging_stack.h"
 //=============================================================================
 
 //=============================================================================

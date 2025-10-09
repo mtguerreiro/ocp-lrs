@@ -9,9 +9,15 @@ target_sources(fs_buck_boost
     fsbuckboostControlRamp.c
     fsbuckboostControlCpl.c
     fsbuckboostControlBuckSfb.c
+    fsbuckboostControlBuckPlecs.c
     fsbuckboostControlBoostEnergy.c
     fsbuckboostControlBoostEnergyMpc.c
     fsbuckboostHwIf.c
+)
+
+target_sources(fs_buck_boost
+    PRIVATE
+    plecs/Buck_controller.c
 )
 
 target_sources(fs_buck_boost

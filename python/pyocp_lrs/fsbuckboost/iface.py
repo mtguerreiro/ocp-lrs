@@ -1,4 +1,5 @@
 import struct
+import time
 
 import pyocp
 from .controllers import Controllers, Reference
@@ -20,6 +21,58 @@ class Interface(Controllers, Reference):
         self.trace = Trace(tr_id=self._tr_id, ocp_if=self._ocp)
 
         self.hw = Hw(self._ocp, cs_id)
+
+
+    def init_buck_plecs_controller(self, vo_ref=0):
+
+        self.disable()
+        self.hw.clear_status()
+        self.hw.set_load_switch(0)
+        self.hw.set_input_relay(1)
+        self.hw.set_output_relay(1)
+        self.set_converter_mode('buck')
+
+        if( self._run_enable_procedure() != 0 ): return -1
+        
+        self.set_ref(vo_ref)
+        self.buck_plecs.reset()
+        self.buck_plecs.enable()
+
+        return 0
+
+
+    def shutdown(self):
+
+        self.ramp.set_params({'u_step': 0.001, 'u_ref': 0.0})
+        self.ramp.enable()
+        time.sleep(0.5)
+        self.disable()
+        self.hw.set_load_switch(0)
+        self.hw.set_output_relay(0)
+        self.hw.set_input_relay(0)
+
+
+    def _run_enable_procedure(self):
+        
+        # Procedure to enable the controller. If the hardware is run for the first
+        # time, the adc will give an invalid measurement that will trigger an error.
+        # This procedure enables/disables/enables the controller as a work-around.
+        self.idle.enable()
+
+        self.enable()
+        self.disable()
+        self.hw.clear_status()
+
+        self.idle.enable()
+        self.enable()
+        time.sleep(0.1)
+        status, hw_status = self.hw.get_status()
+        if hw_status != 0:
+            self.disable()
+            print('Failed to enable the controller...')
+            return -1
+
+        return 0
 
 
     def enable(self):
