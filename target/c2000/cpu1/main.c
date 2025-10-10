@@ -114,7 +114,55 @@ void mainC2000InitCpu2(void){
         MEMCFG_SECT_GS7 | MEMCFG_SECT_GS8 | MEMCFG_SECT_GS9 | MEMCFG_SECT_GS10 | MEMCFG_SECT_GS11 | MEMCFG_SECT_GS12,
         MEMCFG_GSRAMMASTER_CPU2
     );
+    // ---------- Give EPWM2 and EPWM4 to CPU2 ----------
+    SysCtl_selectCPUForPeripheral(SYSCTL_CPUSEL0_EPWM, 2U, SYSCTL_CPUSEL_CPU2); // EPWM2
+    SysCtl_selectCPUForPeripheral(SYSCTL_CPUSEL0_EPWM, 4U, SYSCTL_CPUSEL_CPU2); // EPWM4
 
+    // ---------- Pin-mux for EPWM2/EPWM4 ----------
+    // EPWM2A/B on GPIO2/3
+    GPIO_setPinConfig(GPIO_2_EPWM2A);
+    GPIO_setPinConfig(GPIO_3_EPWM2B);
+    GPIO_setPadConfig(2, GPIO_PIN_TYPE_STD);
+    GPIO_setPadConfig(3, GPIO_PIN_TYPE_STD);
+    GPIO_setQualificationMode(2, GPIO_QUAL_SYNC);
+    GPIO_setQualificationMode(3, GPIO_QUAL_SYNC);
+    GPIO_setMasterCore(2, GPIO_CORE_CPU2);
+    GPIO_setMasterCore(3, GPIO_CORE_CPU2);
+
+    // EPWM4A/B on GPIO6/7
+    GPIO_setPinConfig(GPIO_6_EPWM4A);
+    GPIO_setPinConfig(GPIO_7_EPWM4B);
+    GPIO_setPadConfig(6, GPIO_PIN_TYPE_STD);
+    GPIO_setPadConfig(7, GPIO_PIN_TYPE_STD);
+    GPIO_setQualificationMode(6, GPIO_QUAL_SYNC);
+    GPIO_setQualificationMode(7, GPIO_QUAL_SYNC);
+    GPIO_setMasterCore(6, GPIO_CORE_CPU2);
+    GPIO_setMasterCore(7, GPIO_CORE_CPU2);
+
+    // Relays GPIO8/9 assigned to CPU2 as GPIO
+    GPIO_setPinConfig(GPIO_8_GPIO8);
+    GPIO_setPadConfig(8, GPIO_PIN_TYPE_STD);
+    GPIO_setQualificationMode(8, GPIO_QUAL_SYNC);
+    GPIO_setMasterCore(8, GPIO_CORE_CPU2);
+
+    GPIO_setPinConfig(GPIO_9_GPIO9);
+    GPIO_setPadConfig(9, GPIO_PIN_TYPE_STD);
+    GPIO_setQualificationMode(9, GPIO_QUAL_SYNC);
+    GPIO_setMasterCore(9, GPIO_CORE_CPU2);
+
+    // ---------- Enable clocks for EPWM2 and EPWM4 (by CPU1) ----------
+    SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_EPWM2);
+    SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_EPWM4);
+    SysCtl_resetPeripheral(SYSCTL_PERIPH_RES_EPWM2);
+    SysCtl_resetPeripheral(SYSCTL_PERIPH_RES_EPWM4);
+
+    // Restart global TBCLKs (freeze → enable)
+    SysCtl_disablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
+    SysCtl_disablePeripheral(SYSCTL_PERIPH_CLK_GTBCLKSYNC);
+    SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_GTBCLKSYNC);
+    SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
+
+    // ---------- IPC handshake with CPU2 ----------
     /* Acks and clears CPU2->CPU1 data IPC flag */
     HWREG(IPC_BASE + IPC_O_ACK) = 1UL << C2000_CONFIG_CPU2_CPU1_FLAG;
     HWREG(IPC_BASE + IPC_O_CLR) = 1UL << C2000_CONFIG_CPU2_CPU1_FLAG;
