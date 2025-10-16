@@ -3,10 +3,23 @@
 cmake_minimum_required(VERSION 3.16)
 
 ###    USER SETTINGS  START    ###
-# Below settings can be customized
-# User needs to edit it manually as per their needs.
-set(OCP_PATH "/home/marco/projects/ocp")
-set(OCP_LRS_PATH "/home/marco/projects/ocp-lrs")
+### Automaticlly fetching the path ###
+# The directory must be like this:
+# PE_LAB/
+#        ocp/
+#        ocp_lrs/
+# Go up three directories to reach PE_LAB/
+get_filename_component(ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../../../.." ABSOLUTE)
+
+# Set paths relative to the repo root
+set(OCP_LRS_PATH "${ROOT_DIR}")
+set(OCP_PATH "${ROOT_DIR}/../ocp")
+
+
+message(STATUS "OCP_LRS_PATH = ${OCP_LRS_PATH}")
+message(STATUS "CMAKE_CURRENT_LIST_DIR = ${CMAKE_CURRENT_LIST_DIR}")
+
+
 ###    DO NOT ADD OR REMOVE VARIABLES FROM THIS SECTION    ###
 # -----------------------------------------
 # Add any compiler definitions, they will be added as extra definitions

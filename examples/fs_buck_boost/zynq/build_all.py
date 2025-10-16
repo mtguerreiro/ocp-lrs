@@ -7,7 +7,12 @@ import zipfile
 # --- Input ---
 ws_path = './build'
 
-ocp_lrs = '/home/marco/projects/ocp-lrs'
+# --- Fetching the ocp_lrs ---
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
+
+ocp_lrs = os.path.abspath(os.path.join(SCRIPT_DIR, '..', '..','..'))
+
 lrs_app = 'fs_buck_boost'
 
 hw_file_name = 'pynq_lrssoc'
