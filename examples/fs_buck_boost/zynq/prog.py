@@ -1,6 +1,7 @@
 import xsdb
 import time
 import subprocess
+import platform
 
 # --- Input ---
 ws_path = './build'
@@ -21,10 +22,11 @@ cpu0_elf = f'{ws_path}/{cpu0_app_name}/build/{cpu0_app_name}.elf'
 cpu1_elf = f'{ws_path}/{cpu1_app_name}/build/{cpu1_app_name}.elf'
 
 # --- Launch hw_server via xsdb CLI ---
-xsdb_path = r"C:\Xilinx\Vitis\2024.2\bin\xsdb.bat"  # <- Update if needed
-subprocess.run([xsdb_path, "-eval", "connect; exit"], check=True)
-time.sleep(3)  
-
+# Only required on Windows
+if platform.system() == 'Windows':
+    xsdb_path = r"C:\Xilinx\Vitis\2024.2\bin\xsdb.bat"
+    subprocess.run([xsdb_path, "-eval", "connect; exit"], check=True)
+    time.sleep(3)  
 
 # --- Program ---
 s = xsdb.start_debug_session()
