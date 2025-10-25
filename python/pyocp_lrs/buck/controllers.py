@@ -8,7 +8,6 @@ import pyocp
 import struct
 import numpy as np
 import scipy.signal
-import control
 
 from dataclasses import dataclass
 
