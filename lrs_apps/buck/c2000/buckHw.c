@@ -12,7 +12,6 @@
 #include "device.h"
 
 #include "c2000Config.h"
-
 #include "buckConfig.h"
 
 #include <stdint.h>
@@ -23,42 +22,39 @@
 /*------------------------------- Definitions -------------------------------*/
 //=============================================================================
 
-// ePWM modules used
-#define EPWM_TRIG_BASE      EPWM2_BASE   // EPWM2 → SOCA trigger for ADC (+ visible on EPWM2A)
-#define EPWM_PWR_BASE       EPWM4_BASE   // EPWM4 → visible PWM output
+// ePWM bases
+#define EPWM_TRIG_BASE   EPWM2_BASE   
+#define EPWM_PWR_BASE    EPWM4_BASE   
 
-// Time-base (UP-count). TBCLK = DEVICE_SYSCLK_FREQ / (HSPCLKDIV*CLKDIV) = /1,/1 here.
-#define EPWM2_TBPRD         ((uint16_t)500)     // ADC trigger period (adjust as needed)
-#define EPWM4_TBPRD         ((uint16_t)2000)    // PWM period (e.g., ~100 kHz @ 200 MHz TBCLK)
+// Relay GPIOs
+#define GPIO_RELAY1_PIN  8U
+#define GPIO_RELAY2_PIN  9U
 
-// ADC acquisition window (~75 ns @ 200 MHz). Tune to your analog front-end.
-#define ADC_ACQPS           (14U)
+// Time-base (UP-count)
+#define EPWM2_TBPRD      ((uint16_t)500)     // ADC trigger period
+#define EPWM4_TBPRD      ((uint16_t)2000)    // Power PWM period
 
-// Status bits
-#define HW_STATUS_ENABLED   (1UL << 0)
+// ADC acquisition
+#define ADC_ACQPS        (63U)               
 
-// Small helpers
-#define CLAMPF(x,lo,hi)     ((x) < (lo) ? (lo) : ((x) > (hi) ? (hi) : (x)))
+// Forward for ISR
+static __interrupt void buckHwAdcA_ISR(void);
+static __interrupt void buckHwAdcB_ISR(void);
+static __interrupt void buckHwAdcC_ISR(void);
 
 //=============================================================================
 
 //=============================================================================
-/*------------------------------- Types -------------------------------------*/
+/*------------------------------- Structures --------------------------------*/
 //=============================================================================
 typedef struct{
-
-    uint32_t status;                // HW status flags (bit0 = PWM enabled)
-
-    uint32_t pwmPeriod;             // Cached TBPRD (ticks) for EPWM4
-
-    buckConfigMeasurements_t meas;  // Latest filtered/scaled measurements (optional)
-    buckConfigControl_t      control;// Last applied control (u, etc.)
-
-    buckConfigMeasGains_t gains;    // Measurement gains/offsets
-
-    float alpha;                    // Low-pass filter coefficient [0..1]
-
-}buckHwControl_t;
+    uint32_t status;                 
+    uint32_t pwmPeriod;              
+    buckConfigMeasurements_t meas;   
+    buckConfigControl_t      control;
+    buckConfigMeasGains_t    gains;
+    float alpha;                    
+} buckHwControl_t;
 //=============================================================================
 
 //=============================================================================
@@ -68,105 +64,104 @@ static void buckHwInitializeAdc(void);
 static void buckHwInitializePwm(void);
 static void buckHwInitializeGpio(void);
 static void buckHwInitializeMeasGains(void);
-
-// Internal helpers
-static inline uint32_t get_tbclk_hz(void);
-static inline uint16_t duty_to_cmpa(uint16_t tbprd, float d);
-static inline uint32_t freq_from_tbprd(uint16_t tbprd);
-
-// Minimal ADC ISR (optional placeholder)
-static __interrupt void buckHwAdcEocISR(void);
 //=============================================================================
 
 //=============================================================================
 /*--------------------------------- Globals ---------------------------------*/
 //=============================================================================
 static buckHwControl_t hwControl = {.pwmPeriod = 0, .status = 0, .alpha = 0.2f};
-
-// Software cache for a user-requested deadtime (no hardware dead-band in this build)
-static uint16_t s_deadtimeTicks = 0U;
+static uint16_t s_deadtimeTicks = 0U;   
 //=============================================================================
 
 //=============================================================================
 /*-------------------------------- Functions --------------------------------*/
 //=============================================================================
 //-----------------------------------------------------------------------------
-int32_t buckHwInit(void *param){
-
+int32_t buckHwInit(void *param)
+{
     (void)param;
 
-    buckHwInitializeGpio();
-    buckHwInitializePwm();
     buckHwInitializeAdc();
+    buckHwInitializePwm();
+    buckHwInitializeGpio();
     buckHwInitializeMeasGains();
+
+    hwControl.pwmPeriod = EPWM_getTimeBasePeriod(EPWM_PWR_BASE);
+    hwControl.control.u = 0.5f;  // start at 50%
 
     return 0;
 }
 //-----------------------------------------------------------------------------
-int32_t buckHwStatus(void){
-
+int32_t buckHwStatus(void)
+{
+    
     return (int32_t)hwControl.status;
 }
 //-----------------------------------------------------------------------------
-void buckHwStatusClear(void){
-
+void buckHwStatusClear(void)
+{
     hwControl.status = 0;
 }
 //-----------------------------------------------------------------------------
-void buckHwSetPwmEnable(uint32_t enable){
+void buckHwSetPwmEnable(uint32_t enable)
+{
+    if(enable)
+    {
+        EPWM_enableADCTrigger(EPWM_TRIG_BASE, EPWM_SOC_A);
 
-    if(enable){
-        // Start both EPWM counters (ADC trigger + power PWM)
         EPWM_setTimeBaseCounter(EPWM_TRIG_BASE, 0);
         EPWM_setTimeBaseCounter(EPWM_PWR_BASE,  0);
 
-        EPWM_enableADCTrigger(EPWM_TRIG_BASE, EPWM_SOC_A);
-
         EPWM_setTimeBaseCounterMode(EPWM_TRIG_BASE, EPWM_COUNTER_MODE_UP);
         EPWM_setTimeBaseCounterMode(EPWM_PWR_BASE,  EPWM_COUNTER_MODE_UP);
-
-        hwControl.status |= HW_STATUS_ENABLED;
-    }else{
-        // Stop counters and disable SOCA
+    }
+    else
+    {
         EPWM_disableADCTrigger(EPWM_TRIG_BASE, EPWM_SOC_A);
 
         EPWM_setTimeBaseCounterMode(EPWM_TRIG_BASE, EPWM_COUNTER_MODE_STOP_FREEZE);
         EPWM_setTimeBaseCounterMode(EPWM_PWR_BASE,  EPWM_COUNTER_MODE_STOP_FREEZE);
-
-        hwControl.status &= ~HW_STATUS_ENABLED;
     }
 }
 //-----------------------------------------------------------------------------
-uint32_t buckHwGetPwmEnable(void){
+uint32_t buckHwGetPwmEnable(void)
+{
+    uint16_t tbctl = HWREGH(EPWM_PWR_BASE + EPWM_O_TBCTL);
+    uint16_t mode = tbctl & 0x3U;
 
-    return ( (hwControl.status & HW_STATUS_ENABLED) ? 1U : 0U );
+    return ((mode == 0U) || (mode == 2U)) ? 1U : 0U;
 }
 
 //-----------------------------------------------------------------------------
-void buckHwSetPwmFrequency(uint32_t freq){
-
+void buckHwSetPwmFrequency(uint32_t freq)
+{
     if(freq == 0U) freq = 1U;
 
-    // Compute new TBPRD from desired frequency (UP-count mode approximation)
-    uint32_t tbclk = get_tbclk_hz();
+    uint32_t tbclk = DEVICE_SYSCLK_FREQ;
     uint32_t prd   = tbclk / freq;
-    if(prd < 2U) prd = 2U;
+    if(prd < 2U)     prd = 2U;
     if(prd > 65535U) prd = 65535U;
 
+    
     EPWM_setTimeBaseCounterMode(EPWM_PWR_BASE, EPWM_COUNTER_MODE_STOP_FREEZE);
     EPWM_setTimeBasePeriod(EPWM_PWR_BASE, (uint16_t)prd);
 
-    // Keep the same duty ratio: recompute CMPA from current duty estimate
+    
     uint16_t newPrd = (uint16_t)prd;
-    uint16_t oldPrd = hwControl.pwmPeriod ? (uint16_t)hwControl.pwmPeriod : EPWM4_TBPRD;
+    uint16_t oldPrd = (hwControl.pwmPeriod ? (uint16_t)hwControl.pwmPeriod : EPWM4_TBPRD);
     uint16_t oldCmp = EPWM_getCounterCompareValue(EPWM_PWR_BASE, EPWM_COUNTER_COMPARE_A);
-    float    duty   = (oldPrd > 0U) ? ((float)oldCmp / (float)oldPrd) : 0.0f;
-           duty   = CLAMPF(duty, 0.0f, 0.95f);
+    float    duty   = (oldPrd ? ((float)oldCmp/(float)oldPrd) : 0.5f);
+    if(duty < 0.0f) duty = 0.0f;
+    
+    float maxDuty = (newPrd > 0U) ? ((float)(newPrd - 1U) / (float)newPrd) : 0.0f;
+    if(duty > maxDuty) duty = maxDuty;
 
     EPWM_setCounterCompareValue(EPWM_PWR_BASE, EPWM_COUNTER_COMPARE_A,
-                                duty_to_cmpa(newPrd, duty));
+                                (uint16_t)(duty * (float)newPrd + 0.5f));
 
-    if( hwControl.status & HW_STATUS_ENABLED ){
+    
+    if(buckHwGetPwmEnable())
+    {
         EPWM_setTimeBaseCounter(EPWM_PWR_BASE, 0);
         EPWM_setTimeBaseCounterMode(EPWM_PWR_BASE, EPWM_COUNTER_MODE_UP);
     }
@@ -174,80 +169,91 @@ void buckHwSetPwmFrequency(uint32_t freq){
     hwControl.pwmPeriod = newPrd;
 }
 //-----------------------------------------------------------------------------
-uint32_t buckHwGetPwmFrequency(void){
-
+uint32_t buckHwGetPwmFrequency(void)
+{
     uint16_t prd = EPWM_getTimeBasePeriod(EPWM_PWR_BASE);
     if(prd == 0U) prd = (uint16_t)hwControl.pwmPeriod;
-    if(prd == 0U) return 0U;
 
-    return freq_from_tbprd(prd);
+    return (prd ? (DEVICE_SYSCLK_FREQ/(uint32_t)prd) : 0U);
 }
 //-----------------------------------------------------------------------------
-void buckHwSetPwmDuty(float duty){
-
-    duty = CLAMPF(duty, 0.0f, 0.95f);
+void buckHwSetPwmDuty(float duty)
+{
+    if(duty < 0.0f) duty = 0.0f;
 
     uint16_t prd = EPWM_getTimeBasePeriod(EPWM_PWR_BASE);
     if(prd == 0U) prd = (uint16_t)(hwControl.pwmPeriod ? hwControl.pwmPeriod : EPWM4_TBPRD);
 
-    uint16_t cmpa = duty_to_cmpa(prd, duty);
+    
+    float maxDuty = (prd > 0U) ? ((float)(prd - 1U) / (float)prd) : 0.0f;
+    if(duty > maxDuty) duty = maxDuty;
+
+    uint16_t cmpa = (uint16_t)(duty * (float)prd + 0.5f);
     if(cmpa >= prd) cmpa = prd - 1U;
 
-    // Shadowed update at CTR=ZERO already set in init
     EPWM_setCounterCompareValue(EPWM_PWR_BASE, EPWM_COUNTER_COMPARE_A, cmpa);
 
-    // Keep last command available for upper layers
     hwControl.control.u = duty;
 }
 //-----------------------------------------------------------------------------
-float buckHwGetPwmDuty(void){
-
-    // Prefer reading back hardware to reflect the real output
+float buckHwGetPwmDuty(void)
+{
     uint16_t prd = EPWM_getTimeBasePeriod(EPWM_PWR_BASE);
-    uint16_t cmp = EPWM_getCounterCompareValue(EPWM_PWR_BASE, EPWM_COUNTER_COMPARE_A);
-
     if(prd == 0U) prd = (uint16_t)(hwControl.pwmPeriod ? hwControl.pwmPeriod : EPWM4_TBPRD);
-    if(prd == 0U) return 0.0f;
 
-    float duty = (float)cmp / (float)prd;
-    return CLAMPF(duty, 0.0f, 0.999f);
+    uint16_t cmp = EPWM_getCounterCompareValue(EPWM_PWR_BASE, EPWM_COUNTER_COMPARE_A);
+    return (prd ? ((float)cmp / (float)prd) : 0.0f);
 }
 //-----------------------------------------------------------------------------
-void buckHwSetPwmDeadTime(float deadtime){
+void buckHwSetPwmDeadTime(float deadtime_us)
+{
+    if(deadtime_us < 0.0f) deadtime_us = 0.0f;
 
-    // This build does not configure hardware dead-band; keep the software cache.
-    if(deadtime < 0.0f) deadtime = 0.0f;
-    double ticks = (double)get_tbclk_hz() * (deadtime * 1e-6);
-    if(ticks < 0.0) ticks = 0.0;
-    if(ticks > 65535.0) ticks = 65535.0;
-    s_deadtimeTicks = (uint16_t)(ticks + 0.5);
+    
+    double   ticks_d = (double)DEVICE_SYSCLK_FREQ * (deadtime_us * 1e-6);
+    if(ticks_d > 65535.0) ticks_d = 65535.0;
+    uint16_t ticks   = (uint16_t)(ticks_d + 0.5);
+
+    if(ticks == 0U)
+    {
+       
+        EPWM_setDeadBandDelayMode(EPWM_PWR_BASE, EPWM_DB_RED, false);
+        EPWM_setDeadBandDelayMode(EPWM_PWR_BASE, EPWM_DB_FED, false);
+        EPWM_setRisingEdgeDelayCount (EPWM_PWR_BASE, 0U);
+        EPWM_setFallingEdgeDelayCount(EPWM_PWR_BASE, 0U);
+    }
+    else
+    {
+        
+        EPWM_setRisingEdgeDelayCount (EPWM_PWR_BASE, ticks);
+        EPWM_setFallingEdgeDelayCount(EPWM_PWR_BASE, ticks);
+        EPWM_setDeadBandDelayMode(EPWM_PWR_BASE, EPWM_DB_RED, true);
+        EPWM_setDeadBandDelayMode(EPWM_PWR_BASE, EPWM_DB_FED, true);
+        
+    }
+
+    s_deadtimeTicks = ticks; 
 }
 //-----------------------------------------------------------------------------
-float buckHwGetPwmDeadTime(void){
-
-    return (float)s_deadtimeTicks / (float)get_tbclk_hz() * 1e6f;
+float buckHwGetPwmDeadTime(void)
+{
+    return (float)s_deadtimeTicks / (float)DEVICE_SYSCLK_FREQ * 1e6f;
 }
 //-----------------------------------------------------------------------------
-int32_t buckHwGetMeasurements(void *meas){
-
+int32_t buckHwGetMeasurements(void *meas)
+{
     if(!meas) return -1;
 
-    // Copy last filtered & scaled values (ISR placeholder currently not updating)
     memcpy(meas, (const void *)&hwControl.meas, sizeof(buckConfigMeasurements_t));
-
-    return (int32_t)sizeof(buckConfigMeasurements_t);
+    return sizeof(buckConfigMeasurements_t);
 }
 //-----------------------------------------------------------------------------
-int32_t buckHwApplyOutputs(void *outputs, int32_t size){
-
+int32_t buckHwApplyOutputs(void *outputs, int32_t size)
+{
     if(!outputs || size < (int32_t)sizeof(buckConfigControl_t)) return -1;
 
     buckConfigControl_t *control = (buckConfigControl_t *)outputs;
-
-    // Apply duty command (0..1)
     buckHwSetPwmDuty(control->u);
-
-    // Keep the whole command structure for traceability
     hwControl.control = *control;
 
     return 0;
@@ -265,142 +271,133 @@ void buckHwEnable(void){
 //-----------------------------------------------------------------------------
 void buckHwControllerDisable(void){
 
-    // Optional: add controller-related status bits if needed
+    // No controller-specific hardware gating here (placeholder)
 }
 //-----------------------------------------------------------------------------
 void buckHwControllerEnable(void){
 
-    // Optional: add controller-related status bits if needed
+    // No controller-specific hardware gating here (placeholder)
 }
 //-----------------------------------------------------------------------------
-void buckHwSetInputRelay(uint32_t state){
-
-    GPIO_setDirectionMode(8, GPIO_DIR_MODE_OUT);
-    GPIO_writePin(8, (state ? 1U : 0U));
+void buckHwSetInputRelay(uint32_t state)
+{
+    GPIO_writePin(GPIO_RELAY1_PIN, (state ? 1U : 0U));
 }
 //-----------------------------------------------------------------------------
-uint32_t buckHwGetInputRelay(void){
-
-    // Read actual pin level
-    return (uint32_t)GPIO_readPin(8);
+uint32_t buckHwGetInputRelay(void)
+{
+    return (uint32_t)GPIO_readPin(GPIO_RELAY1_PIN);
 }
 //-----------------------------------------------------------------------------
-void buckHwSetOutputRelay(uint32_t state){
-
-    GPIO_setDirectionMode(9, GPIO_DIR_MODE_OUT);
-    GPIO_writePin(9, (state ? 1U : 0U));
+void buckHwSetOutputRelay(uint32_t state)
+{
+    GPIO_writePin(GPIO_RELAY2_PIN, (state ? 1U : 0U));
 }
 //-----------------------------------------------------------------------------
-uint32_t buckHwGetOutputRelay(void){
-
-    // Read actual pin level
-    return (uint32_t)GPIO_readPin(9);
+uint32_t buckHwGetOutputRelay(void)
+{
+    return (uint32_t)GPIO_readPin(GPIO_RELAY2_PIN);
 }
 //-----------------------------------------------------------------------------
-void buckHwSetMeasGains(buckConfigMeasGains_t *gains){
-
+void buckHwSetMeasGains(buckConfigMeasGains_t *gains)
+{
     if(!gains) return;
     hwControl.gains = *gains;
 }
 //-----------------------------------------------------------------------------
-uint32_t buckHwGetMeasGains(buckConfigMeasGains_t *gains){
-
+uint32_t buckHwGetMeasGains(buckConfigMeasGains_t *gains)
+{
     if(!gains) return 0U;
     *gains = hwControl.gains;
-
-    return (uint32_t)sizeof(buckConfigMeasGains_t);
+    return sizeof(buckConfigMeasGains_t);
 }
 //-----------------------------------------------------------------------------
-void buckHwShutDown(void){
-
-    // Safe shutdown: set duty to zero and disable PWM engines
+void buckHwShutDown(void)
+{
     buckHwSetPwmDuty(0.0f);
     buckHwDisable();
 }
-//-----------------------------------------------------------------------------
 //=============================================================================
 
 //=============================================================================
 /*----------------------------- Static functions ----------------------------*/
 //=============================================================================
-static inline uint32_t get_tbclk_hz(void)
+
+static void buckHwInitializeAdc(void)
 {
-    // System clock (e.g., 200 MHz) from device.h
-    return DEVICE_SYSCLK_FREQ;
-}
-
-static inline uint16_t duty_to_cmpa(uint16_t tbprd, float d)
-{
-    float dlim = CLAMPF(d, 0.0f, 0.95f);
-    float raw  = dlim * (float)tbprd;
-    if(raw > (float)(tbprd - 1U)) raw = (float)(tbprd - 1U);
-    return (uint16_t)(raw + 0.5f);
-}
-
-static inline uint32_t freq_from_tbprd(uint16_t tbprd)
-{
-    uint32_t tbclk = get_tbclk_hz();
-    if(tbprd == 0U) return 0U;
-    return tbclk / (uint32_t)tbprd;   // UP-count approx
-}
-
-//-----------------------------------------------------------------------------
-static void buckHwInitializeAdc(void){
-
-    // Minimal ADC setup: ADCA 12-bit, single-ended, triggered by EPWM2 SOCA
+    //  ADCA / ADCB / ADCC 
     ADC_setPrescaler(ADCA_BASE, ADC_CLK_DIV_4_0);
-    ADC_setMode(ADCA_BASE, ADC_RESOLUTION_12BIT, ADC_MODE_SINGLE_ENDED);
+    ADC_setMode     (ADCA_BASE, ADC_RESOLUTION_12BIT, ADC_MODE_SINGLE_ENDED);
     ADC_setInterruptPulseMode(ADCA_BASE, ADC_PULSE_END_OF_CONV);
     ADC_enableConverter(ADCA_BASE);
+    DEVICE_DELAY_US(1000);
 
-    // (Optional) Configure additional ADC modules if needed:
     ADC_setPrescaler(ADCB_BASE, ADC_CLK_DIV_4_0);
-    ADC_setMode(ADCB_BASE, ADC_RESOLUTION_12BIT, ADC_MODE_SINGLE_ENDED);
+    ADC_setMode     (ADCB_BASE, ADC_RESOLUTION_12BIT, ADC_MODE_SINGLE_ENDED);
+    ADC_setInterruptPulseMode(ADCB_BASE, ADC_PULSE_END_OF_CONV);
     ADC_enableConverter(ADCB_BASE);
+    DEVICE_DELAY_US(1000);
 
     ADC_setPrescaler(ADCC_BASE, ADC_CLK_DIV_4_0);
-    ADC_setMode(ADCC_BASE, ADC_RESOLUTION_12BIT, ADC_MODE_SINGLE_ENDED);
+    ADC_setMode     (ADCC_BASE, ADC_RESOLUTION_12BIT, ADC_MODE_SINGLE_ENDED);
+    ADC_setInterruptPulseMode(ADCC_BASE, ADC_PULSE_END_OF_CONV);
     ADC_enableConverter(ADCC_BASE);
 
     DEVICE_DELAY_US(1000);
 
-    // SOCs on EPWM2 SOCA (example channels — adapt to your board)
-    ADC_setupSOC(ADCA_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM2_SOCA, ADC_CH_ADCIN0, ADC_ACQPS);
-    ADC_setupSOC(ADCA_BASE, ADC_SOC_NUMBER1, ADC_TRIGGER_EPWM2_SOCA, ADC_CH_ADCIN1, ADC_ACQPS);
-    ADC_setupSOC(ADCA_BASE, ADC_SOC_NUMBER2, ADC_TRIGGER_EPWM2_SOCA, ADC_CH_ADCIN2, ADC_ACQPS);
-
-    // Optionally enable an interrupt if you want to process data each cycle
-    ADC_setInterruptSource(ADCA_BASE, ADC_INT_NUMBER1, ADC_SOC_NUMBER2);
+    // SOC mapping (triggered by EPWM2 SOCA)
+    //  ADCIN_A5  -> ADCA_SOC0  (Buffer 0) : IL
+    //  ADCIN_A4  -> ADCA_SOC1  (Buffer 1) : V_in_buck
+    //  ADCIN_A1  -> ADCA_SOC2  (Buffer 2) : V_in
+    ADC_setupSOC(ADCA_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM2_SOCA, ADC_CH_ADCIN5, ADC_ACQPS); 
+    ADC_setupSOC(ADCA_BASE, ADC_SOC_NUMBER1, ADC_TRIGGER_EPWM2_SOCA, ADC_CH_ADCIN4, ADC_ACQPS);
+    ADC_setupSOC(ADCA_BASE, ADC_SOC_NUMBER2, ADC_TRIGGER_EPWM2_SOCA, ADC_CH_ADCIN1, ADC_ACQPS); 
+    ADC_setInterruptSource(ADCA_BASE, ADC_INT_NUMBER1, ADC_SOC_NUMBER2); 
     ADC_clearInterruptStatus(ADCA_BASE, ADC_INT_NUMBER1);
     ADC_enableInterrupt(ADCA_BASE, ADC_INT_NUMBER1);
 
-    Interrupt_register(INT_ADCA1, buckHwAdcEocISR);
+    //  ADCIN_B4  -> ADCB_SOC0  : V_out
+    //  ADCIN_B5  -> ADCB_SOC1  : IL_avg
+    ADC_setupSOC(ADCB_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM2_SOCA, ADC_CH_ADCIN4, ADC_ACQPS); 
+    ADC_setupSOC(ADCB_BASE, ADC_SOC_NUMBER1, ADC_TRIGGER_EPWM2_SOCA, ADC_CH_ADCIN5, ADC_ACQPS); 
+    ADC_setInterruptSource(ADCB_BASE, ADC_INT_NUMBER1, ADC_SOC_NUMBER1); 
+    ADC_clearInterruptStatus(ADCB_BASE, ADC_INT_NUMBER1);
+    ADC_enableInterrupt(ADCB_BASE, ADC_INT_NUMBER1);
+
+    //  ADCIN_C4  -> ADCC_SOC0  : V_out_buck
+    ADC_setupSOC(ADCC_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM2_SOCA, ADC_CH_ADCIN4, ADC_ACQPS); 
+    ADC_setInterruptSource(ADCC_BASE, ADC_INT_NUMBER1, ADC_SOC_NUMBER0); 
+    ADC_clearInterruptStatus(ADCC_BASE, ADC_INT_NUMBER1);
+    ADC_enableInterrupt(ADCC_BASE, ADC_INT_NUMBER1);
+
+   
+    // ---------- ISR registration ----------
+    Interrupt_register(INT_ADCA1, buckHwAdcA_ISR);
+    Interrupt_register(INT_ADCB1, buckHwAdcB_ISR);
+    Interrupt_register(INT_ADCC1, buckHwAdcC_ISR);
     Interrupt_enable  (INT_ADCA1);
+    Interrupt_enable  (INT_ADCB1);
+    Interrupt_enable  (INT_ADCC1);
+
+    
+    Interrupt_enable  (INTERRUPT_CPU_INT1);
 }
+
 //-----------------------------------------------------------------------------
-static void buckHwInitializePwm(void){
-
-    // Freeze TBCLK while configuring both ePWMs
-    SysCtl_disablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
-    SysCtl_disablePeripheral(SYSCTL_PERIPH_CLK_GTBCLKSYNC);
-
-    // ---------- EPWM2: SOCA trigger + visible waveform on EPWM2A ----------
-    SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_EPWM2);
-
+static void buckHwInitializePwm(void)
+{
+    // ---------- EPWM2: SOCA trigger + visible EPWM2A ----------
     EPWM_setClockPrescaler(EPWM_TRIG_BASE, EPWM_CLOCK_DIVIDER_1, EPWM_HSCLOCK_DIVIDER_1);
     EPWM_setTimeBaseCounter(EPWM_TRIG_BASE, 0);
     EPWM_setTimeBaseCounterMode(EPWM_TRIG_BASE, EPWM_COUNTER_MODE_STOP_FREEZE);
     EPWM_setTimeBasePeriod(EPWM_TRIG_BASE, EPWM2_TBPRD);
 
-    // SOCA on period, every period
     EPWM_setADCTriggerSource(EPWM_TRIG_BASE, EPWM_SOC_A, EPWM_SOC_TBCTR_PERIOD);
+    EPWM_setADCTriggerEventPrescale(EPWM_TRIG_BASE, EPWM_SOC_A, 1U);
     EPWM_enableADCTrigger(EPWM_TRIG_BASE, EPWM_SOC_A);
 
-    // Make EPWM2A visible on the pin (50% duty, same style as EPWM4A)
-    EPWM_setCounterCompareShadowLoadMode(EPWM_TRIG_BASE, EPWM_COUNTER_COMPARE_A,
-                                         EPWM_COMP_LOAD_ON_CNTR_ZERO);
+    EPWM_setCounterCompareShadowLoadMode(EPWM_TRIG_BASE, EPWM_COUNTER_COMPARE_A, EPWM_COMP_LOAD_ON_CNTR_ZERO);
     EPWM_setCounterCompareValue(EPWM_TRIG_BASE, EPWM_COUNTER_COMPARE_A, EPWM2_TBPRD/2);
-
     EPWM_setActionQualifierAction(EPWM_TRIG_BASE, EPWM_AQ_OUTPUT_A,
                                   EPWM_AQ_OUTPUT_HIGH, EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
     EPWM_setActionQualifierAction(EPWM_TRIG_BASE, EPWM_AQ_OUTPUT_A,
@@ -409,85 +406,84 @@ static void buckHwInitializePwm(void){
     EPWM_setTimeBaseCounterMode(EPWM_TRIG_BASE, EPWM_COUNTER_MODE_UP);
 
     // ---------- EPWM4: visible PWM ----------
-    SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_EPWM4);
-
     EPWM_setClockPrescaler(EPWM_PWR_BASE, EPWM_CLOCK_DIVIDER_1, EPWM_HSCLOCK_DIVIDER_1);
     EPWM_setTimeBaseCounter(EPWM_PWR_BASE, 0);
     EPWM_setTimeBaseCounterMode(EPWM_PWR_BASE, EPWM_COUNTER_MODE_STOP_FREEZE);
     EPWM_setTimeBasePeriod(EPWM_PWR_BASE, EPWM4_TBPRD);
 
-    // Shadow CMPA @ ZERO and start at 50% duty (visible right away)
     EPWM_setCounterCompareShadowLoadMode(EPWM_PWR_BASE, EPWM_COUNTER_COMPARE_A, EPWM_COMP_LOAD_ON_CNTR_ZERO);
     EPWM_setCounterCompareValue(EPWM_PWR_BASE, EPWM_COUNTER_COMPARE_A, EPWM4_TBPRD/2);
-
-    // TI-style AQ: HIGH at ZERO, LOW at UP_CMPA → clean pulse on A
     EPWM_setActionQualifierAction(EPWM_PWR_BASE, EPWM_AQ_OUTPUT_A,
                                   EPWM_AQ_OUTPUT_HIGH, EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
     EPWM_setActionQualifierAction(EPWM_PWR_BASE, EPWM_AQ_OUTPUT_A,
                                   EPWM_AQ_OUTPUT_LOW,  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
 
-    // Optional complementary output on B (inverse AQ)
-    EPWM_setActionQualifierAction(EPWM_PWR_BASE, EPWM_AQ_OUTPUT_B,
-                                  EPWM_AQ_OUTPUT_LOW,  EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
-    EPWM_setActionQualifierAction(EPWM_PWR_BASE, EPWM_AQ_OUTPUT_B,
-                                  EPWM_AQ_OUTPUT_HIGH, EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
-
-    // Unfreeze TBCLK
-    SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_GTBCLKSYNC);
-    SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
-
-    // Start counters now so both waveforms are visible immediately
-    EPWM_setTimeBaseCounter(EPWM_TRIG_BASE, 0);
-    EPWM_setTimeBaseCounterMode(EPWM_TRIG_BASE, EPWM_COUNTER_MODE_UP);
-
-    EPWM_setTimeBaseCounter(EPWM_PWR_BASE, 0);
     EPWM_setTimeBaseCounterMode(EPWM_PWR_BASE, EPWM_COUNTER_MODE_UP);
-
-    // Cache TBPRD (EPWM4 is the power PWM we modify later)
-    hwControl.pwmPeriod = EPWM_getTimeBasePeriod(EPWM_PWR_BASE);
-
-    // Set "enabled" status since we start running by default
-    hwControl.status |= HW_STATUS_ENABLED;
 }
 //-----------------------------------------------------------------------------
-static void buckHwInitializeGpio(void){
-
-    // GPIO8/9: relay outputs (CPU1 must assign ownership to CPU2 beforehand)
-    GPIO_setDirectionMode(8, GPIO_DIR_MODE_OUT);
-    GPIO_writePin(8, 0);
-    GPIO_setDirectionMode(9, GPIO_DIR_MODE_OUT);
-    GPIO_writePin(9, 0);
+static void buckHwInitializeGpio(void)
+{
+    GPIO_setDirectionMode(GPIO_RELAY1_PIN, GPIO_DIR_MODE_OUT);
+    GPIO_writePin(GPIO_RELAY1_PIN, 0);
+    GPIO_setDirectionMode(GPIO_RELAY2_PIN, GPIO_DIR_MODE_OUT);
+    GPIO_writePin(GPIO_RELAY2_PIN, 0);
 }
 //-----------------------------------------------------------------------------
-static void buckHwInitializeMeasGains(void){
-
-    // Default gains/offsets from your config header
+static void buckHwInitializeMeasGains(void)
+{
     hwControl.gains.io_gain       = BUCK_CONFIG_IO_AVG_GAIN;
     hwControl.gains.io_ofs        = BUCK_CONFIG_IO_AVG_OFFS;
-
     hwControl.gains.il_gain       = BUCK_CONFIG_IL_GAIN;
     hwControl.gains.il_ofs        = BUCK_CONFIG_IL_OFFS;
-   
     hwControl.gains.v_dc_out_gain = BUCK_CONFIG_V_DC_OUT_GAIN;
     hwControl.gains.v_dc_out_ofs  = BUCK_CONFIG_V_DC_OUT_OFFS;
-
     hwControl.gains.v_out_gain    = BUCK_CONFIG_V_OUT_GAIN;
     hwControl.gains.v_out_ofs     = BUCK_CONFIG_V_OUT_OFFS;
-    
     hwControl.gains.v_dc_in_gain  = BUCK_CONFIG_V_DC_IN_GAIN;
     hwControl.gains.v_dc_in_ofs   = BUCK_CONFIG_V_DC_IN_OFFS;
-
     hwControl.gains.v_in_gain     = BUCK_CONFIG_V_IN_GAIN;
     hwControl.gains.v_in_ofs      = BUCK_CONFIG_V_IN_OFFS;
 }
 //-----------------------------------------------------------------------------
-
-// Minimal ADC ISR (placeholder: clears flags only; add filtering if needed)
-static __interrupt void buckHwAdcEocISR(void)
+__interrupt void buckHwAdcA_ISR(void)
 {
-    // Touch last conversion result if you want to ensure EOC path is serviced
-    (void)ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER2);
+    // Raw 12-bit
+    uint16_t rA5 = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER0) & 0x0FFF; // IL 
+    uint16_t rA4 = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER1) & 0x0FFF; // V_in_buck
+    uint16_t rA1 = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER2) & 0x0FFF; // V_in 
 
+    // Volts 
+    float vIL        = (float)rA5 * 3.3f / 4095.0f; 
+    float vVinBuck   = (float)rA4 * 3.3f / 4095.0f; 
+    float vVin       = (float)rA1 * 3.3f / 4095.0f; 
+
+    ADC_clearInterruptOverflowStatus(ADCA_BASE, ADC_INT_NUMBER1);
     ADC_clearInterruptStatus(ADCA_BASE, ADC_INT_NUMBER1);
     Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP1);
 }
+//-----------------------------------------------------------------------------
+__interrupt void buckHwAdcB_ISR(void)
+{
+    uint16_t rB4 = ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER0) & 0x0FFF; // V_out 
+    uint16_t rB5 = ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER1) & 0x0FFF; // IL_avg
+
+    float vVout  = (float)rB4 * 3.3f / 4095.0f; 
+    float vILavg = (float)rB5 * 3.3f / 4095.0f; 
+
+    ADC_clearInterruptOverflowStatus(ADCB_BASE, ADC_INT_NUMBER1);
+    ADC_clearInterruptStatus(ADCB_BASE, ADC_INT_NUMBER1);
+    Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP1);
+}
+//-----------------------------------------------------------------------------
+__interrupt void buckHwAdcC_ISR(void)
+{
+    uint16_t rC4 = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER0) & 0x0FFF; // V_out_buck -> Buffer 5
+    float    vVoutBuck = (float)rC4 * 3.3f / 4095.0f;
+
+    ADC_clearInterruptOverflowStatus(ADCC_BASE, ADC_INT_NUMBER1);
+    ADC_clearInterruptStatus(ADCC_BASE, ADC_INT_NUMBER1);
+    Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP1);
+}
+
+//-----------------------------------------------------------------------------
+//=============================================================================

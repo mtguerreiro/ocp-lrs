@@ -1,4 +1,4 @@
-/*
+                                                /*
  * buckHwIf.c
  *
  */
@@ -118,7 +118,7 @@ static int32_t buckHwIfSetPwmEnable(void *in, uint32_t insize, void **out, uint3
 
     memcpy( (void *)&enable, in, sizeof(enable) );
 
-    buckHwSetPwmEnable(enable & 0x01);
+ buckHwSetPwmEnable(enable & 0x01);
 
     return 0;
 }

@@ -17,23 +17,23 @@
 //=============================================================================
 /*------------------------------- Definitions -------------------------------*/
 //=============================================================================
-#define C2000_W5500_CONFIG_SPI                      SPIB_BASE
+#define C2000_W5500_CONFIG_SPI                      SPIA_BASE
 #define C2000_W5500_CONFIG_SPI_DATA_LENGTH          8
 
-#define C2000_W5500_CONFIG_SPI_GPIO_SIMO_PIN        63U
-#define C2000_W5500_CONFIG_SPI_GPIO_SIMO_CFG        GPIO_63_SPISIMOB
+#define C2000_W5500_CONFIG_SPI_GPIO_SIMO_PIN        58U
+#define C2000_W5500_CONFIG_SPI_GPIO_SIMO_CFG        GPIO_58_SPISIMOA
 
-#define C2000_W5500_CONFIG_SPI_GPIO_SOMI_PIN        64U
-#define C2000_W5500_CONFIG_SPI_GPIO_SOMI_CFG        GPIO_64_SPISOMIB
+#define C2000_W5500_CONFIG_SPI_GPIO_SOMI_PIN        59U
+#define C2000_W5500_CONFIG_SPI_GPIO_SOMI_CFG        GPIO_59_SPISOMIA
 
-#define C2000_W5500_CONFIG_SPI_GPIO_CLK_PIN         65U
-#define C2000_W5500_CONFIG_SPI_GPIO_CLK_CFG         GPIO_65_SPICLKB
+#define C2000_W5500_CONFIG_SPI_GPIO_CLK_PIN         60U
+#define C2000_W5500_CONFIG_SPI_GPIO_CLK_CFG         GPIO_60_SPICLKA
 
-#define C2000_W5500_CONFIG_SPI_GPIO_CS_PIN          66U
-#define C2000_W5500_CONFIG_SPI_GPIO_CS_CFG          GPIO_66_GPIO66
+#define C2000_W5500_CONFIG_SPI_GPIO_CS_PIN          61U
+#define C2000_W5500_CONFIG_SPI_GPIO_CS_CFG          GPIO_61_GPIO61
 
-#define C2000_W5500_CONFIG_SPI_GPIO_RST_PIN         27U
-#define C2000_W5500_CONFIG_SPI_GPIO_RST_CFG         GPIO_27_GPIO27
+#define C2000_W5500_CONFIG_SPI_GPIO_RST_PIN         29U
+#define C2000_W5500_CONFIG_SPI_GPIO_RST_CFG         GPIO_29_GPIO29
 //=============================================================================
 
 //=============================================================================
