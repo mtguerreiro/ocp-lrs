@@ -1,6 +1,8 @@
 import struct
 import time
 
+import numpy as np
+
 import pyocp
 from .controllers import Controllers, Reference
 from .trace import Trace
@@ -41,6 +43,38 @@ class Interface(Controllers, Reference):
         return 0
 
 
+    def set_output_voltage_trigger(self, voltage, size=1000, pre_trig=100):
+
+        self.trace.set_n_pre_trig_samples(int(pre_trig))
+        self.trace.set_size(int(size))
+
+        self.trace.set_trig_level(float(voltage))
+        self.trace.set_trig_signal(8)
+
+        self.trace.set_mode(1)
+
+        self.trace.reset()
+        
+        return 0
+
+    
+    def get_transient_data(self):
+
+        status, data = self.trace.read()
+        if status != 0:
+            print('Error reading trace data')
+            return (-1, status)
+
+        status, f_pwm = self.hw.get_pwm_frequency()
+        if status != 0:
+            print('Error reading trace data')
+            return (-1, status)
+
+        t = 1 / f_pwm * np.arange(data.shape[0]) / 1e-3
+
+        return t, data
+
+    
     def shutdown(self):
 
         self.ramp.set_params({'u_step': 0.001, 'u_ref': 0.0})
