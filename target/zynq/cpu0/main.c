@@ -138,7 +138,7 @@ static int mainSysInit(void){
     MAIN_SYNC_FLAG = 0;
 
     /*
-     * Writes start address for CPU0, waits until it has been written (dmb)
+     * Writes start address for CPU1, waits until it has been written (dmb)
      * and wakes CPU1 up.
      */
     xil_printf("%s: Waking up CPU1...\r\n", __FUNCTION__);
