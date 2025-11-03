@@ -49,9 +49,9 @@ class Interface(Controllers, Reference):
         return self._set_trace_trigger(b'Voltage reference', voltage, size=size, pre_trig=pre_trig)
 
 
-    def set_output_load_trigger(self, current, size=1000, pre_trig=100):
+    def set_output_load_trigger(self, size=1000, pre_trig=100):
 
-        return self._set_trace_trigger(b'Load switch', current, size=size, pre_trig=pre_trig)
+        return self._set_trace_trigger(b'Load switch', 0.5, size=size, pre_trig=pre_trig)
 
 
     def _set_trace_trigger(self, signal_label, level, size=1000, pre_trig=100):
