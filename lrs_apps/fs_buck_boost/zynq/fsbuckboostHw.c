@@ -13,6 +13,10 @@
 #include "zynqConfig.h"
 
 #include "xgpio.h"
+
+/* Open controller project */
+#include "ocpConfig.h"
+#include "ocp/ocpTrace.h"
 //=============================================================================
 
 //=============================================================================
@@ -35,8 +39,8 @@
 #define FS_BUCK_BOOST_HW_CONFIG_GPIO_IN_RLY          (1 << FS_BUCK_BOOST_HW_CONFIG_GPIO_IN_RLY_OFFS)
 #define FS_BUCK_BOOST_HW_CONFIG_GPIO_OUT_RLY_OFFS    (0U)
 #define FS_BUCK_BOOST_HW_CONFIG_GPIO_OUT_RLY         (1 << FS_BUCK_BOOST_HW_CONFIG_GPIO_OUT_RLY_OFFS)
-//#define FS_BUCK_BOOST_HW_CONFIG_GPIO_LOAD_SW_OFFS    (1U)
-//#define FS_BUCK_BOOST_HW_CONFIG_GPIO_LOAD_SW         (1 << FS_BUCK_BOOST_HW_CONFIG_GPIO_LOAD_SW_OFFS)
+#define FS_BUCK_BOOST_HW_CONFIG_GPIO_LOAD_SW_OFFS    (1U)
+#define FS_BUCK_BOOST_HW_CONFIG_GPIO_LOAD_SW         (1 << FS_BUCK_BOOST_HW_CONFIG_GPIO_LOAD_SW_OFFS)
 
 /* PWM peripheral clock, in Hz */
 #define FS_BUCK_BOOST_HW_PWM_CLK                      100000000
@@ -47,6 +51,8 @@ typedef struct{
     uint32_t status;
 
     uint32_t pwmPeriod;
+
+    float loadSwitch;
 
     fsbuckboostConfigMeasurements_t meas;
     fsbuckboostConfigControl_t control;
@@ -72,7 +78,7 @@ static void fsbuckboostHwInitializeMeasGains(void);
 //=============================================================================
 /*--------------------------------- Globals ---------------------------------*/
 //=============================================================================
-static fsbuckboostHwControl_t hwControl = {.pwmPeriod = 0, .status = 0, .alpha = 0.2f};
+static fsbuckboostHwControl_t hwControl = {.pwmPeriod = 0, .status = 0, .alpha = 0.2f, .loadSwitch=0.0f};
 //=============================================================================
 
 //=============================================================================
@@ -85,6 +91,9 @@ int32_t fsbuckboostHwInitialize(fsbuckboostHwInitConfig_t *config){
     fsbuckboostHwInitializePwm();
     fsbuckboostHwInitializeGpio();
     fsbuckboostHwInitializeMeasGains();
+
+    /* Add load switch to trace so we can trigger on it */
+    ocpTraceAddSignal(FS_BUCK_BOOST_CONFIG_TRACE_ID, &hwControl.loadSwitch, "Load switch");
 
     return 0;
 }
@@ -402,27 +411,28 @@ uint32_t fsbuckboostHwGetOutputRelay(void){
 //-----------------------------------------------------------------------------
 void fsbuckboostHwSetLoadSwitch(uint32_t state){
 
-    (void)state;
-//    uint32_t gpio;
-//
-//    state = (state & 0x01) << FS_BUCK_BOOST_HW_CONFIG_GPIO_LOAD_SW_OFFS;
-//
-//    gpio = XGpio_DiscreteRead(&hwControl.gpio, FS_BUCK_BOOST_HW_CONFIG_GPIO_CHANNEL) & (~FS_BUCK_BOOST_HW_CONFIG_GPIO_LOAD_SW);
-//
-//    gpio = gpio | state;
-//
-//    XGpio_DiscreteWrite(&hwControl.gpio, FS_BUCK_BOOST_HW_CONFIG_GPIO_CHANNEL, gpio);
+   uint32_t gpio;
+
+   hwControl.loadSwitch = (float)( state & 0x01 );
+
+   state = (state & 0x01) << FS_BUCK_BOOST_HW_CONFIG_GPIO_LOAD_SW_OFFS;
+
+   gpio = XGpio_DiscreteRead(&hwControl.gpio, FS_BUCK_BOOST_HW_CONFIG_GPIO_CHANNEL) & (~FS_BUCK_BOOST_HW_CONFIG_GPIO_LOAD_SW);
+
+   gpio = gpio | state;
+
+   XGpio_DiscreteWrite(&hwControl.gpio, FS_BUCK_BOOST_HW_CONFIG_GPIO_CHANNEL, gpio);
 }
 //-----------------------------------------------------------------------------
 uint32_t fsbuckboostHwGetLoadSwitch(void){
 
-//    uint32_t gpio;
-//
-//    gpio = XGpio_DiscreteRead(&hwControl.gpio, FS_BUCK_BOOST_HW_CONFIG_GPIO_CHANNEL) & (FS_BUCK_BOOST_HW_CONFIG_GPIO_LOAD_SW);
-//
-//    gpio = gpio >> FS_BUCK_BOOST_HW_CONFIG_GPIO_LOAD_SW_OFFS;
-//
-//    return gpio;
+   uint32_t gpio;
+
+   gpio = XGpio_DiscreteRead(&hwControl.gpio, FS_BUCK_BOOST_HW_CONFIG_GPIO_CHANNEL) & (FS_BUCK_BOOST_HW_CONFIG_GPIO_LOAD_SW);
+
+   gpio = gpio >> FS_BUCK_BOOST_HW_CONFIG_GPIO_LOAD_SW_OFFS;
+
+   return gpio;
     return 0;
 }
 //-----------------------------------------------------------------------------

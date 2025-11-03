@@ -65,10 +65,16 @@ int32_t fsbuckboostControlBuckPlecsRun(void *meas, int32_t nmeas,
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostControlBuckPlecsSetParams(void *buffer, uint32_t size){
 
+    (void)buffer;
+    (void)size;
+
     return 0;
 }
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostControlBuckPlecsGetParams(void *buffer, uint32_t size){
+
+    (void)buffer;
+    (void)size;
 
     return 0;
 }

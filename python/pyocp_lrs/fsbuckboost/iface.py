@@ -30,9 +30,10 @@ class Interface(Controllers, Reference):
         self.disable()
         self.hw.clear_status()
         self.hw.set_load_switch(0)
-        self.hw.set_input_relay(1)
+        #self.hw.set_input_relay(1)
         self.hw.set_output_relay(1)
         self.set_converter_mode('buck')
+        time.sleep(0.2)
 
         if( self._run_enable_procedure() != 0 ): return -1
         
@@ -45,18 +46,39 @@ class Interface(Controllers, Reference):
 
     def set_output_voltage_trigger(self, voltage, size=1000, pre_trig=100):
 
+        return self._set_trace_trigger(b'Voltage reference', voltage, size=size, pre_trig=pre_trig)
+
+
+    def set_output_load_trigger(self, current, size=1000, pre_trig=100):
+
+        return self._set_trace_trigger(b'Load switch', current, size=size, pre_trig=pre_trig)
+
+
+    def _set_trace_trigger(self, signal_label, level, size=1000, pre_trig=100):
+
+        status, traces = self.trace.get_signals()
+        if( status != 0 ):
+            print('Failed to set trigger: unable to read the trace signals.')
+            return -1
+
+        try:
+            idx = traces.index(signal_label)
+        except:
+            print('Failed to set trigger: voltage reference not in signal list.')
+            return -1
+        
         self.trace.set_n_pre_trig_samples(int(pre_trig))
         self.trace.set_size(int(size))
 
-        self.trace.set_trig_level(float(voltage))
-        self.trace.set_trig_signal(8)
+        self.trace.set_trig_level(float(level))
+        self.trace.set_trig_signal(idx)
 
         self.trace.set_mode(1)
 
         self.trace.reset()
-        
-        return 0
 
+        return 0
+        
     
     def get_transient_data(self):
 
