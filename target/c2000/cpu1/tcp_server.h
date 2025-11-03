@@ -2,6 +2,7 @@
 #define TCP_SERVER_H_
 
 #include <stdint.h>
+#include "inc/hw_types.h"
 
 int32_t mainTcpServerOcpIf(uint8_t sn, uint8_t* buf, uint32_t size, uint16_t port);
 

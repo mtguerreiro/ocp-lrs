@@ -422,10 +422,11 @@ static void buckHwInitializePwm(void)
 }
 //-----------------------------------------------------------------------------
 static void buckHwInitializeGpio(void)
-{
-    GPIO_setDirectionMode(GPIO_RELAY1_PIN, GPIO_DIR_MODE_OUT);
+{   GPIO_setPinConfig(GPIO_9_GPIO9);
+    GPIO_setPinConfig(GPIO_8_GPIO8);
+    
     GPIO_writePin(GPIO_RELAY1_PIN, 0);
-    GPIO_setDirectionMode(GPIO_RELAY2_PIN, GPIO_DIR_MODE_OUT);
+   
     GPIO_writePin(GPIO_RELAY2_PIN, 0);
 }
 //-----------------------------------------------------------------------------
@@ -487,3 +488,4 @@ __interrupt void buckHwAdcC_ISR(void)
 
 //-----------------------------------------------------------------------------
 //=============================================================================
+

@@ -40,13 +40,12 @@ wiz_NetInfo gWIZNETINFO = { .mac = {0x0800, 0x00DC, 0xCDAB},
  *   - .ip: 0xFEA9, 0xC8B1
  */
 wiz_NetInfo gWIZNETINFO = { 
-    .mac = {0x0800, 0x00DC, 0xCDAB},         
-    .ip  = {0xFEA9, 0xC8B1},                  // 169.254.177.200
-    .sn  = {0xFFFF, 0x0000},                  // 255.255.0.0
-    .gw  = {0xFEA9, 0x8275},                  // 169.254.117.130
-    .dns = {0x0000, 0x0000},                  // 0.0.0.0
-    .dhcp = NETINFO_DHCP
-    
+    .mac = {0x0800, 0x00DC, 0xCDAB},   
+    .ip  = {0xFEA9, 0x64C0},                       // 169.254.192.100
+    .sn  = {0xFFFF, 0x0000},                       // 255.255.0.0
+    .gw  = {0xFEA9, 0xF2C2},                       // 169.254.192.242 
+    .dns = {0x0000, 0x0000},                       // 0.0.0.0
+    .dhcp = NETINFO_STATIC                         // Pas de DHCP
 };
 //=============================================================================
 

@@ -134,10 +134,11 @@ void mainC2000InitCpu2(void)
     //------------------------------------------------------------------------
     SysCtl_selectCPUForPeripheral(SYSCTL_CPUSEL0_EPWM, 2U, SYSCTL_CPUSEL_CPU2);
     SysCtl_selectCPUForPeripheral(SYSCTL_CPUSEL0_EPWM, 4U, SYSCTL_CPUSEL_CPU2);
+    
     SysCtl_selectCPUForPeripheral(SYSCTL_CPUSEL11_ADC, 1U, SYSCTL_CPUSEL_CPU2);
     SysCtl_selectCPUForPeripheral(SYSCTL_CPUSEL11_ADC, 2U, SYSCTL_CPUSEL_CPU2);
     SysCtl_selectCPUForPeripheral(SYSCTL_CPUSEL11_ADC, 3U, SYSCTL_CPUSEL_CPU2);
-
+     
     //------------------------------------------------------------------------
     // (4) Configure EPWM2A/B GPIOs
     //------------------------------------------------------------------------
@@ -165,16 +166,14 @@ void mainC2000InitCpu2(void)
     //------------------------------------------------------------------------
     // (6) Configure relay GPIOs
     //------------------------------------------------------------------------
-    GPIO_setPinConfig(GPIO_8_GPIO8);
+    
     GPIO_setPadConfig(GPIO_RELAY1_PIN, GPIO_PIN_TYPE_STD);
-    GPIO_setQualificationMode(GPIO_RELAY1_PIN, GPIO_QUAL_SYNC);
     GPIO_setMasterCore(GPIO_RELAY1_PIN, GPIO_CORE_CPU2);
-
-    GPIO_setPinConfig(GPIO_9_GPIO9);
+    GPIO_setDirectionMode(GPIO_RELAY1_PIN, GPIO_DIR_MODE_OUT);
+   
     GPIO_setPadConfig(GPIO_RELAY2_PIN, GPIO_PIN_TYPE_STD);
-    GPIO_setQualificationMode(GPIO_RELAY2_PIN, GPIO_QUAL_SYNC);
     GPIO_setMasterCore(GPIO_RELAY2_PIN, GPIO_CORE_CPU2);
-
+    GPIO_setDirectionMode(GPIO_RELAY2_PIN, GPIO_DIR_MODE_OUT);
     //------------------------------------------------------------------------
     // (7) Enable/reset clocks for EPWM and ADC modules
     //------------------------------------------------------------------------
