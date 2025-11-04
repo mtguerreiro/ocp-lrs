@@ -2,7 +2,7 @@
 //=============================================================================
 /*-------------------------------- Includes ---------------------------------*/
 //=============================================================================
-#include "fsbuckboostControlBuckPlecs.h"
+#include "fsbuckboostControlPlecs.h"
 #include "fsbuckboostConfig.h"
 
 #include "controller/controller.h"
@@ -28,14 +28,14 @@
 /*-------------------------------- Functions --------------------------------*/
 //=============================================================================
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControlBuckPlecsInit(void){
+int32_t fsbuckboostControlPlecsInit(void){
 
     Buck_controller_initialize(0);
 
     return 0;
 }
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControlBuckPlecsRun(void *meas, int32_t nmeas,
+int32_t fsbuckboostControlPlecsRun(void *meas, int32_t nmeas,
     void *refs, int32_t nrefs,
     void *outputs, int32_t nmaxoutputs){
 
@@ -63,30 +63,30 @@ int32_t fsbuckboostControlBuckPlecsRun(void *meas, int32_t nmeas,
     return sizeof(fsbuckboostConfigControl_t);
 }
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControlBuckPlecsSetParams(void *buffer, uint32_t size){
+int32_t fsbuckboostControlPlecsSetParams(void *buffer, uint32_t size){
 
     return 0;
 }
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControlBuckPlecsGetParams(void *buffer, uint32_t size){
+int32_t fsbuckboostControlPlecsGetParams(void *buffer, uint32_t size){
 
     return 0;
 }
 //-----------------------------------------------------------------------------
-void fsbuckboostControlBuckPlecsReset(void){
+void fsbuckboostControlPlecsReset(void){
 
     Buck_controller_initialize(0);
 }
 //-----------------------------------------------------------------------------
-void fsbuckboostControlBuckPlecsGetCallbacks(void *callbacksBuffer){
+void fsbuckboostControlPlecsGetCallbacks(void *callbacksBuffer){
 
     controllerCallbacks_t *cbs = (controllerCallbacks_t * )callbacksBuffer;
 
-    cbs->init = fsbuckboostControlBuckPlecsInit;
-    cbs->run = fsbuckboostControlBuckPlecsRun;
-    cbs->setParams = fsbuckboostControlBuckPlecsSetParams;
-    cbs->getParams = fsbuckboostControlBuckPlecsGetParams;
-    cbs->reset = fsbuckboostControlBuckPlecsReset;
+    cbs->init = fsbuckboostControlPlecsInit;
+    cbs->run = fsbuckboostControlPlecsRun;
+    cbs->setParams = fsbuckboostControlPlecsSetParams;
+    cbs->getParams = fsbuckboostControlPlecsGetParams;
+    cbs->reset = fsbuckboostControlPlecsReset;
     cbs->firstEntry = 0;
     cbs->lastExit = 0;
 }

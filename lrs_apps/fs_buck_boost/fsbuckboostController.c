@@ -20,7 +20,7 @@
 #include "fsbuckboostControlRamp.h"
 #include "fsbuckboostControlCpl.h"
 #include "fsbuckboostControlBuckSfb.h"
-#include "fsbuckboostControlBuckPlecs.h"
+#include "fsbuckboostControlPlecs.h"
 #include "fsbuckboostControlBoostEnergy.h"
 #include "fsbuckboostControlBoostEnergyMpc.h"
 
@@ -34,7 +34,7 @@ typedef enum{
     FS_BUCK_BOOST_CONTROLLER_RAMP,
     FS_BUCK_BOOST_CONTROLLER_CPL,
     FS_BUCK_BOOST_CONTROLLER_BUCK_SFB,
-    FS_BUCK_BOOST_CONTROLLER_BUCK_PLECS,
+    FS_BUCK_BOOST_CONTROLLER_PLECS,
     FS_BUCK_BOOST_CONTROLLER_BOOST_ENERGY,
     FS_BUCK_BOOST_CONTROLLER_BOOST_ENERGY_MPC,
     FS_BUCK_BOOST_CONTROLLER_END
@@ -70,7 +70,7 @@ int32_t fsbuckboostControllerInit(void){
 
     ctlGetCbs[FS_BUCK_BOOST_CONTROLLER_CPL] = fsbuckboostControlCplGetCallbacks;
     ctlGetCbs[FS_BUCK_BOOST_CONTROLLER_BUCK_SFB] = fsbuckboostControlBuckSfbGetCallbacks;
-    ctlGetCbs[FS_BUCK_BOOST_CONTROLLER_BUCK_PLECS] = fsbuckboostControlBuckPlecsGetCallbacks;
+    ctlGetCbs[FS_BUCK_BOOST_CONTROLLER_PLECS] = fsbuckboostControlPlecsGetCallbacks;
 
     ctlGetCbs[FS_BUCK_BOOST_CONTROLLER_BOOST_ENERGY] = fsbuckboostControlBoostEnergyGetCallbacks;
     ctlGetCbs[FS_BUCK_BOOST_CONTROLLER_BOOST_ENERGY_MPC] = fsbuckboostControlBoostEnergyMpcGetCallbacks;
