@@ -386,6 +386,11 @@ static void buckHwInitializeAdc(void)
 //-----------------------------------------------------------------------------
 static void buckHwInitializePwm(void)
 {
+    /*
+     * TODO:
+     * - Add trip zone
+     * - Define state of outputs when disabled/tripped
+     */
     // ---------- EPWM2: SOCA trigger + visible EPWM2A ----------
     EPWM_setClockPrescaler(EPWM_TRIG_BASE, EPWM_CLOCK_DIVIDER_1, EPWM_HSCLOCK_DIVIDER_1);
     EPWM_setTimeBaseCounter(EPWM_TRIG_BASE, 0);
@@ -413,10 +418,28 @@ static void buckHwInitializePwm(void)
 
     EPWM_setCounterCompareShadowLoadMode(EPWM_PWR_BASE, EPWM_COUNTER_COMPARE_A, EPWM_COMP_LOAD_ON_CNTR_ZERO);
     EPWM_setCounterCompareValue(EPWM_PWR_BASE, EPWM_COUNTER_COMPARE_A, EPWM4_TBPRD/2);
+
     EPWM_setActionQualifierAction(EPWM_PWR_BASE, EPWM_AQ_OUTPUT_A,
+                                  EPWM_AQ_OUTPUT_LOW, EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
+    EPWM_setActionQualifierAction(EPWM_PWR_BASE, EPWM_AQ_OUTPUT_A,
+                                  EPWM_AQ_OUTPUT_HIGH,  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
+
+    EPWM_setActionQualifierAction(EPWM_PWR_BASE, EPWM_AQ_OUTPUT_B,
                                   EPWM_AQ_OUTPUT_HIGH, EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
-    EPWM_setActionQualifierAction(EPWM_PWR_BASE, EPWM_AQ_OUTPUT_A,
+    EPWM_setActionQualifierAction(EPWM_PWR_BASE, EPWM_AQ_OUTPUT_B,
                                   EPWM_AQ_OUTPUT_LOW,  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
+
+    EPWM_setDeadBandDelayMode(EPWM4_BASE, EPWM_DB_RED, true);
+    EPWM_setDeadBandDelayMode(EPWM4_BASE, EPWM_DB_FED, true);
+
+    EPWM_setRisingEdgeDeadBandDelayInput(EPWM4_BASE, EPWM_DB_INPUT_EPWMA); 
+    EPWM_setFallingEdgeDeadBandDelayInput(EPWM4_BASE, EPWM_DB_INPUT_EPWMA);
+
+    EPWM_setDeadBandDelayPolarity(EPWM4_BASE, EPWM_DB_RED, EPWM_DB_POLARITY_ACTIVE_HIGH);
+    EPWM_setDeadBandDelayPolarity(EPWM4_BASE, EPWM_DB_FED, EPWM_DB_POLARITY_ACTIVE_LOW);
+    
+    EPWM_setRisingEdgeDelayCount(EPWM4_BASE, 20);
+    EPWM_setFallingEdgeDelayCount(EPWM4_BASE, 20);
 
     EPWM_setTimeBaseCounterMode(EPWM_PWR_BASE, EPWM_COUNTER_MODE_UP);
 }
