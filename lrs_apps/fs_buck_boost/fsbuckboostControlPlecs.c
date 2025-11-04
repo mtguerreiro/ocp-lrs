@@ -7,7 +7,7 @@
 
 #include "controller/controller.h"
 
-#include "plecs/Buck_controller.h"
+#include "plecs/Plecs_controller.h"
 
 //============================================================================
 
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostControlPlecsInit(void){
 
-    Buck_controller_initialize(0);
+    Plecs_controller_initialize(0);
 
     return 0;
 }
@@ -47,18 +47,18 @@ int32_t fsbuckboostControlPlecsRun(void *meas, int32_t nmeas,
     fsbuckboostConfigControl_t *o = (fsbuckboostConfigControl_t *)outputs;
     fsbuckboostConfigReferences_t *r = (fsbuckboostConfigReferences_t *)refs;
 
-    Buck_controller_U.hw_inputs[0] = m->ii;
-    Buck_controller_U.hw_inputs[1] = m->il;
-    Buck_controller_U.hw_inputs[2] = m->io;
-    Buck_controller_U.hw_inputs[3] = m->v_in;
-    Buck_controller_U.hw_inputs[4] = m->v_dc_out;
-    Buck_controller_U.hw_inputs[5] = m->v_out;
+    Plecs_controller_U.hw_inputs[0] = m->ii;
+    Plecs_controller_U.hw_inputs[1] = m->il;
+    Plecs_controller_U.hw_inputs[2] = m->io;
+    Plecs_controller_U.hw_inputs[3] = m->v_in;
+    Plecs_controller_U.hw_inputs[4] = m->v_dc_out;
+    Plecs_controller_U.hw_inputs[5] = m->v_out;
 
-    Buck_controller_U.ref = r->v_out;
+    Plecs_controller_U.ref = r->v_out;
 
-    Buck_controller_step();
+    Plecs_controller_step();
 
-    o->u = Buck_controller_Y.hw_outputs[0];
+    o->u = Plecs_controller_Y.hw_outputs[0];
 
     return sizeof(fsbuckboostConfigControl_t);
 }
@@ -75,7 +75,7 @@ int32_t fsbuckboostControlPlecsGetParams(void *buffer, uint32_t size){
 //-----------------------------------------------------------------------------
 void fsbuckboostControlPlecsReset(void){
 
-    Buck_controller_initialize(0);
+    Plecs_controller_initialize(0);
 }
 //-----------------------------------------------------------------------------
 void fsbuckboostControlPlecsGetCallbacks(void *callbacksBuffer){
