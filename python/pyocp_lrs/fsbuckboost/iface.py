@@ -43,12 +43,13 @@ class Interface(Controllers, Reference):
 
         return 0
 
+    
     def init_boost_plecs_controller(self, vo_ref=0):
 
         self.disable()
         self.hw.clear_status()
         self.hw.set_load_switch(0)
-        self.hw.set_input_relay(1)
+        #self.hw.set_input_relay(1)
         self.hw.set_output_relay(1)
         self.set_converter_mode('boost')
 
