@@ -19,14 +19,14 @@
  *   - .ip: 0xA8C0, 0x6400
  *
  */
- /*
+
 wiz_NetInfo gWIZNETINFO = { .mac = {0x0800, 0x00DC, 0xCDAB},
                             .ip = {0xF683, 0xAB4B}, //131, 246, 75, 171
                             .sn = {0xFFFF, 0x00FF},
                             .gw = {0xF683, 0xFE4B}, //131, 246, 75, 254
                             .dns = {0, 0},
                             .dhcp = NETINFO_DHCP };
-*/
+
 //=============================================================================
 
 
@@ -39,14 +39,14 @@ wiz_NetInfo gWIZNETINFO = { .mac = {0x0800, 0x00DC, 0xCDAB},
  *   - hex: 0xA9, 0xFE, 0xB1, 0xC8
  *   - .ip: 0xFEA9, 0xC8B1
  */
-wiz_NetInfo gWIZNETINFO = { 
-    .mac = {0x0800, 0x00DC, 0xCDAB},   
-    .ip  = {0xFEA9, 0x64C0},                       // 169.254.192.100
-    .sn  = {0xFFFF, 0x0000},                       // 255.255.0.0
-    .gw  = {0xFEA9, 0xF2C2},                       // 169.254.192.242 
-    .dns = {0x0000, 0x0000},                       // 0.0.0.0
-    .dhcp = NETINFO_STATIC                         // Pas de DHCP
-};
+// wiz_NetInfo gWIZNETINFO = { 
+//     .mac = {0x0800, 0x00DC, 0xCDAB},   
+//     .ip  = {0xFEA9, 0x64C0},                       // 169.254.192.100
+//     .sn  = {0xFFFF, 0x0000},                       // 255.255.0.0
+//     .gw  = {0xFEA9, 0xF2C2},                       // 169.254.192.242 
+//     .dns = {0x0000, 0x0000},                       // 0.0.0.0
+//     .dhcp = NETINFO_STATIC                         // Pas de DHCP
+// };
 //=============================================================================
 
 //=============================================================================
