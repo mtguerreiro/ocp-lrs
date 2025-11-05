@@ -67,7 +67,7 @@ int32_t buckInit(void){
 
     buckOcpTracesInit();
 
-    buckHwInit(0);
+    buckHwInit(buckAdcIrq);
     buckHwIfInitialize();
 
     buckControllerInit();
@@ -100,6 +100,9 @@ static int32_t buckOcpTracesInit(void){
     meas = (buckConfigMeasurements_t *)(bInputs);
     control = (buckConfigControl_t *)(bOutputs);
     ocpTraceAddSignal(BUCK_CONFIG_OCP_TRACE_ID, (void *)&meas->il, "Inductor current");
+    ocpTraceAddSignal(BUCK_CONFIG_OCP_TRACE_ID, (void *)&meas->v_in, "Input voltage");
+    ocpTraceAddSignal(BUCK_CONFIG_OCP_TRACE_ID, (void *)&meas->v_dc_in, "Input dc link voltage");
+    ocpTraceAddSignal(BUCK_CONFIG_OCP_TRACE_ID, (void *)&meas->v_dc_out, "Output dc link voltage");
     ocpTraceAddSignal(BUCK_CONFIG_OCP_TRACE_ID, (void *)&meas->v_out, "Output voltage");
     ocpTraceAddSignal(BUCK_CONFIG_OCP_TRACE_ID, (void *)&control->u, "Duty-cycle");
 
@@ -115,13 +118,16 @@ static int32_t buckOcpControlSystemInit(void){
 
     config.fhwInterface = buckHwIf;
     config.fhwStatus = buckHwStatus;
+    config.fhwDisable = buckHwShutDown;
+    config.fapplyOutputs = buckHwApplyOutputs;
+    config.fgetInputs = buckHwGetMeasurements;
 
     config.frun = buckControllerRun;
     config.fcontrollerInterface = buckControllerIf;
     config.fcontrollerStatus = buckControllerStatus;
 
-    config.fenable = 0;
-    config.fdisable = 0;
+    config.fenable = buckHwEnable;
+    config.fdisable = buckHwDisable;
 
     config.fonEntry = 0;
     config.fonExit = 0;
@@ -139,10 +145,8 @@ static int32_t buckOcpControlSystemInit(void){
 //-----------------------------------------------------------------------------
 void buckAdcIrq(void){
 
-    // (void)callbackRef;
-    //
-    // ocpCSRun(BUCK_CONFIG_OCP_CS_ID);
-    // ocpTraceSave(BUCK_CONFIG_OCP_TRACE_ID);
+    ocpCSRun(BUCK_CONFIG_OCP_CS_ID);
+    ocpTraceSave(BUCK_CONFIG_OCP_TRACE_ID);
 }
 //-----------------------------------------------------------------------------
 //=============================================================================

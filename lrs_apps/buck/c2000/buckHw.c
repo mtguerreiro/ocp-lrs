@@ -31,16 +31,14 @@
 #define GPIO_RELAY2_PIN  9U
 
 // Time-base (UP-count)
-#define EPWM2_TBPRD      ((uint16_t)500)     // ADC trigger period
-#define EPWM4_TBPRD      ((uint16_t)2000)    // Power PWM period
+#define EPWM2_TBPRD      ((uint16_t)1000 - 1)     // ADC trigger period
+#define EPWM4_TBPRD      ((uint16_t)1000 - 1)    // Power PWM period
 
 // ADC acquisition
 #define ADC_ACQPS        (63U)               
 
 // Forward for ISR
 static __interrupt void buckHwAdcA_ISR(void);
-static __interrupt void buckHwAdcB_ISR(void);
-static __interrupt void buckHwAdcC_ISR(void);
 
 //=============================================================================
 
@@ -53,14 +51,15 @@ typedef struct{
     buckConfigMeasurements_t meas;   
     buckConfigControl_t      control;
     buckConfigMeasGains_t    gains;
-    float alpha;                    
+    float alpha;
+    void (*adcCallback)(void);
 } buckHwControl_t;
 //=============================================================================
 
 //=============================================================================
 /*-------------------------------- Prototypes -------------------------------*/
 //=============================================================================
-static void buckHwInitializeAdc(void);
+static void buckHwInitializeAdc(void *adcCallback);
 static void buckHwInitializePwm(void);
 static void buckHwInitializeGpio(void);
 static void buckHwInitializeMeasGains(void);
@@ -77,11 +76,10 @@ static uint16_t s_deadtimeTicks = 0U;
 /*-------------------------------- Functions --------------------------------*/
 //=============================================================================
 //-----------------------------------------------------------------------------
-int32_t buckHwInit(void *param)
+int32_t buckHwInit(void *adcCallback)
 {
-    (void)param;
 
-    buckHwInitializeAdc();
+    buckHwInitializeAdc(adcCallback);
     buckHwInitializePwm();
     buckHwInitializeGpio();
     buckHwInitializeMeasGains();
@@ -105,10 +103,10 @@ void buckHwStatusClear(void)
 //-----------------------------------------------------------------------------
 void buckHwSetPwmEnable(uint32_t enable)
 {
+
+    SysCtl_disablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
     if(enable)
     {
-        EPWM_enableADCTrigger(EPWM_TRIG_BASE, EPWM_SOC_A);
-
         EPWM_setTimeBaseCounter(EPWM_TRIG_BASE, 0);
         EPWM_setTimeBaseCounter(EPWM_PWR_BASE,  0);
 
@@ -117,11 +115,9 @@ void buckHwSetPwmEnable(uint32_t enable)
     }
     else
     {
-        EPWM_disableADCTrigger(EPWM_TRIG_BASE, EPWM_SOC_A);
-
-        EPWM_setTimeBaseCounterMode(EPWM_TRIG_BASE, EPWM_COUNTER_MODE_STOP_FREEZE);
         EPWM_setTimeBaseCounterMode(EPWM_PWR_BASE,  EPWM_COUNTER_MODE_STOP_FREEZE);
     }
+    SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
 }
 //-----------------------------------------------------------------------------
 uint32_t buckHwGetPwmEnable(void)
@@ -131,7 +127,6 @@ uint32_t buckHwGetPwmEnable(void)
 
     return ((mode == 0U) || (mode == 2U)) ? 1U : 0U;
 }
-
 //-----------------------------------------------------------------------------
 void buckHwSetPwmFrequency(uint32_t freq)
 {
@@ -242,9 +237,29 @@ float buckHwGetPwmDeadTime(void)
 //-----------------------------------------------------------------------------
 int32_t buckHwGetMeasurements(void *meas)
 {
-    if(!meas) return -1;
+    /*
+     * TODO: add protection as trip, not here
+     */
 
-    memcpy(meas, (const void *)&hwControl.meas, sizeof(buckConfigMeasurements_t));
+    buckConfigMeasurements_t *dst;
+    dst = (buckConfigMeasurements_t *)meas;
+
+    uint16_t il_raw = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER0) & 0x0FFF; // IL 
+    uint16_t v_in_buck_raw = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER1) & 0x0FFF; // V_in_buck
+    uint16_t v_in_raw = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER2) & 0x0FFF; // V_in
+
+    uint16_t v_out_raw = ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER0) & 0x0FFF; // V_out 
+    uint16_t il_avg_raw = ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER1) & 0x0FFF; // IL_avg
+
+    uint16_t v_out_buck_raw = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER0) & 0x0FFF; // V_out_buck
+
+    dst->il = hwControl.gains.il_gain * il_raw + hwControl.gains.il_ofs;
+    dst->io = 0;
+    dst->v_dc_in = hwControl.gains.v_dc_in_gain * v_in_raw + hwControl.gains.v_dc_in_ofs;
+    dst->v_in = hwControl.gains.v_in_gain * v_in_buck_raw + hwControl.gains.v_in_ofs;
+    dst->v_dc_out = hwControl.gains.v_dc_out_gain * v_out_buck_raw + hwControl.gains.v_dc_out_ofs;
+    dst->v_out = hwControl.gains.v_out_gain * v_out_raw + hwControl.gains.v_out_ofs;
+
     return sizeof(buckConfigMeasurements_t);
 }
 //-----------------------------------------------------------------------------
@@ -254,19 +269,30 @@ int32_t buckHwApplyOutputs(void *outputs, int32_t size)
 
     buckConfigControl_t *control = (buckConfigControl_t *)outputs;
     buckHwSetPwmDuty(control->u);
-    hwControl.control = *control;
 
     return 0;
 }
 //-----------------------------------------------------------------------------
 void buckHwDisable(void){
 
-    buckHwSetPwmEnable(0U);
+    SysCtl_disablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
+
+    EPWM_disableADCTrigger(EPWM_TRIG_BASE, EPWM_SOC_A);
+
+    EPWM_setTimeBaseCounterMode(EPWM_TRIG_BASE, EPWM_COUNTER_MODE_STOP_FREEZE);
 }
 //-----------------------------------------------------------------------------
 void buckHwEnable(void){
 
-    buckHwSetPwmEnable(1U);
+    SysCtl_disablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
+
+    EPWM_enableADCTrigger(EPWM_TRIG_BASE, EPWM_SOC_A);
+
+    EPWM_setTimeBaseCounter(EPWM_TRIG_BASE, 0);
+
+    EPWM_setTimeBaseCounterMode(EPWM_TRIG_BASE, EPWM_COUNTER_MODE_UP);
+
+    SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
 }
 //-----------------------------------------------------------------------------
 void buckHwControllerDisable(void){
@@ -317,14 +343,18 @@ void buckHwShutDown(void)
     buckHwSetPwmDuty(0.0f);
     buckHwDisable();
 }
+//-----------------------------------------------------------------------------
 //=============================================================================
 
 //=============================================================================
 /*----------------------------- Static functions ----------------------------*/
 //=============================================================================
 
-static void buckHwInitializeAdc(void)
+static void buckHwInitializeAdc(void *adcCallback)
 {
+
+    hwControl.adcCallback = (void (*)(void))adcCallback;
+
     //  ADCA / ADCB / ADCC 
     ADC_setPrescaler(ADCA_BASE, ADC_CLK_DIV_4_0);
     ADC_setMode     (ADCA_BASE, ADC_RESOLUTION_12BIT, ADC_MODE_SINGLE_ENDED);
@@ -342,7 +372,6 @@ static void buckHwInitializeAdc(void)
     ADC_setMode     (ADCC_BASE, ADC_RESOLUTION_12BIT, ADC_MODE_SINGLE_ENDED);
     ADC_setInterruptPulseMode(ADCC_BASE, ADC_PULSE_END_OF_CONV);
     ADC_enableConverter(ADCC_BASE);
-
     DEVICE_DELAY_US(1000);
 
     // SOC mapping (triggered by EPWM2 SOCA)
@@ -351,38 +380,25 @@ static void buckHwInitializeAdc(void)
     //  ADCIN_A1  -> ADCA_SOC2  (Buffer 2) : V_in
     ADC_setupSOC(ADCA_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM2_SOCA, ADC_CH_ADCIN5, ADC_ACQPS); 
     ADC_setupSOC(ADCA_BASE, ADC_SOC_NUMBER1, ADC_TRIGGER_EPWM2_SOCA, ADC_CH_ADCIN4, ADC_ACQPS);
-    ADC_setupSOC(ADCA_BASE, ADC_SOC_NUMBER2, ADC_TRIGGER_EPWM2_SOCA, ADC_CH_ADCIN1, ADC_ACQPS); 
-    ADC_setInterruptSource(ADCA_BASE, ADC_INT_NUMBER1, ADC_SOC_NUMBER2); 
+    ADC_setupSOC(ADCA_BASE, ADC_SOC_NUMBER2, ADC_TRIGGER_EPWM2_SOCA, ADC_CH_ADCIN1, ADC_ACQPS);
+    ADC_setInterruptSource(ADCA_BASE, ADC_INT_NUMBER1, ADC_SOC_NUMBER2);
     ADC_clearInterruptStatus(ADCA_BASE, ADC_INT_NUMBER1);
     ADC_enableInterrupt(ADCA_BASE, ADC_INT_NUMBER1);
 
     //  ADCIN_B4  -> ADCB_SOC0  : V_out
     //  ADCIN_B5  -> ADCB_SOC1  : IL_avg
-    ADC_setupSOC(ADCB_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM2_SOCA, ADC_CH_ADCIN4, ADC_ACQPS); 
-    ADC_setupSOC(ADCB_BASE, ADC_SOC_NUMBER1, ADC_TRIGGER_EPWM2_SOCA, ADC_CH_ADCIN5, ADC_ACQPS); 
-    ADC_setInterruptSource(ADCB_BASE, ADC_INT_NUMBER1, ADC_SOC_NUMBER1); 
-    ADC_clearInterruptStatus(ADCB_BASE, ADC_INT_NUMBER1);
-    ADC_enableInterrupt(ADCB_BASE, ADC_INT_NUMBER1);
+    ADC_setupSOC(ADCB_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM2_SOCA, ADC_CH_ADCIN4, ADC_ACQPS);
+    ADC_setupSOC(ADCB_BASE, ADC_SOC_NUMBER1, ADC_TRIGGER_EPWM2_SOCA, ADC_CH_ADCIN5, ADC_ACQPS);
 
     //  ADCIN_C4  -> ADCC_SOC0  : V_out_buck
-    ADC_setupSOC(ADCC_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM2_SOCA, ADC_CH_ADCIN4, ADC_ACQPS); 
-    ADC_setInterruptSource(ADCC_BASE, ADC_INT_NUMBER1, ADC_SOC_NUMBER0); 
-    ADC_clearInterruptStatus(ADCC_BASE, ADC_INT_NUMBER1);
-    ADC_enableInterrupt(ADCC_BASE, ADC_INT_NUMBER1);
+    ADC_setupSOC(ADCC_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM2_SOCA, ADC_CH_ADCIN4, ADC_ACQPS);
 
-   
     // ---------- ISR registration ----------
     Interrupt_register(INT_ADCA1, buckHwAdcA_ISR);
-    Interrupt_register(INT_ADCB1, buckHwAdcB_ISR);
-    Interrupt_register(INT_ADCC1, buckHwAdcC_ISR);
     Interrupt_enable  (INT_ADCA1);
-    Interrupt_enable  (INT_ADCB1);
-    Interrupt_enable  (INT_ADCC1);
-
     
     Interrupt_enable  (INTERRUPT_CPU_INT1);
 }
-
 //-----------------------------------------------------------------------------
 static void buckHwInitializePwm(void)
 {
@@ -408,7 +424,7 @@ static void buckHwInitializePwm(void)
     EPWM_setActionQualifierAction(EPWM_TRIG_BASE, EPWM_AQ_OUTPUT_A,
                                   EPWM_AQ_OUTPUT_LOW,  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
 
-    EPWM_setTimeBaseCounterMode(EPWM_TRIG_BASE, EPWM_COUNTER_MODE_UP);
+    //EPWM_setTimeBaseCounterMode(EPWM_TRIG_BASE, EPWM_COUNTER_MODE_UP);
 
     // ---------- EPWM4: visible PWM ----------
     EPWM_setClockPrescaler(EPWM_PWR_BASE, EPWM_CLOCK_DIVIDER_1, EPWM_HSCLOCK_DIVIDER_1);
@@ -416,32 +432,33 @@ static void buckHwInitializePwm(void)
     EPWM_setTimeBaseCounterMode(EPWM_PWR_BASE, EPWM_COUNTER_MODE_STOP_FREEZE);
     EPWM_setTimeBasePeriod(EPWM_PWR_BASE, EPWM4_TBPRD);
 
+    EPWM_setSyncPulseSource(EPWM_PWR_BASE, HRPWM_PWMSYNC_SOURCE_ZERO);
+
     EPWM_setCounterCompareShadowLoadMode(EPWM_PWR_BASE, EPWM_COUNTER_COMPARE_A, EPWM_COMP_LOAD_ON_CNTR_ZERO);
-    EPWM_setCounterCompareValue(EPWM_PWR_BASE, EPWM_COUNTER_COMPARE_A, EPWM4_TBPRD/2);
+    EPWM_setCounterCompareValue(EPWM_PWR_BASE, EPWM_COUNTER_COMPARE_A, 0);
 
     EPWM_setActionQualifierAction(EPWM_PWR_BASE, EPWM_AQ_OUTPUT_A,
-                                  EPWM_AQ_OUTPUT_LOW, EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
-    EPWM_setActionQualifierAction(EPWM_PWR_BASE, EPWM_AQ_OUTPUT_A,
-                                  EPWM_AQ_OUTPUT_HIGH,  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
-
-    EPWM_setActionQualifierAction(EPWM_PWR_BASE, EPWM_AQ_OUTPUT_B,
                                   EPWM_AQ_OUTPUT_HIGH, EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
-    EPWM_setActionQualifierAction(EPWM_PWR_BASE, EPWM_AQ_OUTPUT_B,
+    EPWM_setActionQualifierAction(EPWM_PWR_BASE, EPWM_AQ_OUTPUT_A,
                                   EPWM_AQ_OUTPUT_LOW,  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
 
-    EPWM_setDeadBandDelayMode(EPWM4_BASE, EPWM_DB_RED, true);
-    EPWM_setDeadBandDelayMode(EPWM4_BASE, EPWM_DB_FED, true);
+    EPWM_setActionQualifierAction(EPWM_PWR_BASE, EPWM_AQ_OUTPUT_B,
+                                  EPWM_AQ_OUTPUT_LOW, EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
+    EPWM_setActionQualifierAction(EPWM_PWR_BASE, EPWM_AQ_OUTPUT_B,
+                                  EPWM_AQ_OUTPUT_HIGH,  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
 
-    EPWM_setRisingEdgeDeadBandDelayInput(EPWM4_BASE, EPWM_DB_INPUT_EPWMA); 
-    EPWM_setFallingEdgeDeadBandDelayInput(EPWM4_BASE, EPWM_DB_INPUT_EPWMA);
+    EPWM_setDeadBandDelayMode(EPWM_PWR_BASE, EPWM_DB_RED, true);
+    EPWM_setDeadBandDelayMode(EPWM_PWR_BASE, EPWM_DB_FED, true);
 
-    EPWM_setDeadBandDelayPolarity(EPWM4_BASE, EPWM_DB_RED, EPWM_DB_POLARITY_ACTIVE_HIGH);
-    EPWM_setDeadBandDelayPolarity(EPWM4_BASE, EPWM_DB_FED, EPWM_DB_POLARITY_ACTIVE_LOW);
+    EPWM_setDeadBandDelayPolarity(EPWM_PWR_BASE, EPWM_DB_RED, EPWM_DB_POLARITY_ACTIVE_LOW);
+
+    EPWM_setRisingEdgeDeadBandDelayInput(EPWM_PWR_BASE, EPWM_DB_INPUT_EPWMA); 
+    EPWM_setFallingEdgeDeadBandDelayInput(EPWM_PWR_BASE, EPWM_DB_INPUT_EPWMA);
     
-    EPWM_setRisingEdgeDelayCount(EPWM4_BASE, 20);
-    EPWM_setFallingEdgeDelayCount(EPWM4_BASE, 20);
+    EPWM_setRisingEdgeDelayCount(EPWM_PWR_BASE, 20);
+    EPWM_setFallingEdgeDelayCount(EPWM_PWR_BASE, 50);
 
-    EPWM_setTimeBaseCounterMode(EPWM_PWR_BASE, EPWM_COUNTER_MODE_UP);
+    //EPWM_setTimeBaseCounterMode(EPWM_PWR_BASE, EPWM_COUNTER_MODE_UP);
 }
 //-----------------------------------------------------------------------------
 static void buckHwInitializeGpio(void)
@@ -471,44 +488,13 @@ static void buckHwInitializeMeasGains(void)
 //-----------------------------------------------------------------------------
 __interrupt void buckHwAdcA_ISR(void)
 {
-    // Raw 12-bit
-    uint16_t rA5 = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER0) & 0x0FFF; // IL 
-    uint16_t rA4 = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER1) & 0x0FFF; // V_in_buck
-    uint16_t rA1 = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER2) & 0x0FFF; // V_in 
 
-    // Volts 
-    float vIL        = (float)rA5 * 3.3f / 4095.0f; 
-    float vVinBuck   = (float)rA4 * 3.3f / 4095.0f; 
-    float vVin       = (float)rA1 * 3.3f / 4095.0f; 
+    hwControl.adcCallback();
 
     ADC_clearInterruptOverflowStatus(ADCA_BASE, ADC_INT_NUMBER1);
     ADC_clearInterruptStatus(ADCA_BASE, ADC_INT_NUMBER1);
     Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP1);
 }
-//-----------------------------------------------------------------------------
-__interrupt void buckHwAdcB_ISR(void)
-{
-    uint16_t rB4 = ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER0) & 0x0FFF; // V_out 
-    uint16_t rB5 = ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER1) & 0x0FFF; // IL_avg
-
-    float vVout  = (float)rB4 * 3.3f / 4095.0f; 
-    float vILavg = (float)rB5 * 3.3f / 4095.0f; 
-
-    ADC_clearInterruptOverflowStatus(ADCB_BASE, ADC_INT_NUMBER1);
-    ADC_clearInterruptStatus(ADCB_BASE, ADC_INT_NUMBER1);
-    Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP1);
-}
-//-----------------------------------------------------------------------------
-__interrupt void buckHwAdcC_ISR(void)
-{
-    uint16_t rC4 = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER0) & 0x0FFF; // V_out_buck -> Buffer 5
-    float    vVoutBuck = (float)rC4 * 3.3f / 4095.0f;
-
-    ADC_clearInterruptOverflowStatus(ADCC_BASE, ADC_INT_NUMBER1);
-    ADC_clearInterruptStatus(ADCC_BASE, ADC_INT_NUMBER1);
-    Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP1);
-}
-
 //-----------------------------------------------------------------------------
 //=============================================================================
 
