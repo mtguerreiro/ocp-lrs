@@ -51,7 +51,7 @@ class Controllers:
         self.ramp = _Ramp(1, ctl_if)
         self.cpl = _CPL(2, ctl_if)
         self.buck_sfb = _BuckSFB(3, ctl_if)
-        self.buck_plecs = _BuckPlecs(4, ctl_if)
+        self.plecs = _Plecs(4, ctl_if)
         self.boost_energy = _BoostEnergy(5, ctl_if)
         self.boost_energy_mpc = _BoostEnergyMpc(6, ctl_if)
 
@@ -214,7 +214,7 @@ class _BuckSFB(pyocp.controller.ControllerTemplate):
         return params_bin
 
 
-class _BuckPlecs(pyocp.controller.ControllerTemplate):
+class _Plecs(pyocp.controller.ControllerTemplate):
     
     def __init__(self, ctl_id, ctl_if):
         super().__init__(ctl_id, ctl_if)

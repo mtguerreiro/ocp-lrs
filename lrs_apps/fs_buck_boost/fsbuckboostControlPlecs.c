@@ -2,12 +2,12 @@
 //=============================================================================
 /*-------------------------------- Includes ---------------------------------*/
 //=============================================================================
-#include "fsbuckboostControlBuckPlecs.h"
+#include "fsbuckboostControlPlecs.h"
 #include "fsbuckboostConfig.h"
 
 #include "controller/controller.h"
 
-#include "plecs/Buck_controller.h"
+#include "plecs/Plecs_controller.h"
 
 //============================================================================
 
@@ -28,14 +28,14 @@
 /*-------------------------------- Functions --------------------------------*/
 //=============================================================================
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControlBuckPlecsInit(void){
+int32_t fsbuckboostControlPlecsInit(void){
 
-    Buck_controller_initialize(0);
+    Plecs_controller_initialize(0);
 
     return 0;
 }
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControlBuckPlecsRun(void *meas, int32_t nmeas,
+int32_t fsbuckboostControlPlecsRun(void *meas, int32_t nmeas,
     void *refs, int32_t nrefs,
     void *outputs, int32_t nmaxoutputs){
 
@@ -47,23 +47,23 @@ int32_t fsbuckboostControlBuckPlecsRun(void *meas, int32_t nmeas,
     fsbuckboostConfigControl_t *o = (fsbuckboostConfigControl_t *)outputs;
     fsbuckboostConfigReferences_t *r = (fsbuckboostConfigReferences_t *)refs;
 
-    Buck_controller_U.hw_inputs[0] = m->ii;
-    Buck_controller_U.hw_inputs[1] = m->il;
-    Buck_controller_U.hw_inputs[2] = m->io;
-    Buck_controller_U.hw_inputs[3] = m->v_in;
-    Buck_controller_U.hw_inputs[4] = m->v_dc_out;
-    Buck_controller_U.hw_inputs[5] = m->v_out;
+    Plecs_controller_U.hw_inputs[0] = m->ii;
+    Plecs_controller_U.hw_inputs[1] = m->il;
+    Plecs_controller_U.hw_inputs[2] = m->io;
+    Plecs_controller_U.hw_inputs[3] = m->v_in;
+    Plecs_controller_U.hw_inputs[4] = m->v_dc_out;
+    Plecs_controller_U.hw_inputs[5] = m->v_out;
 
-    Buck_controller_U.ref = r->v_out;
+    Plecs_controller_U.ref = r->v_out;
 
-    Buck_controller_step();
+    Plecs_controller_step();
 
-    o->u = Buck_controller_Y.hw_outputs[0];
+    o->u = Plecs_controller_Y.hw_outputs[0];
 
     return sizeof(fsbuckboostConfigControl_t);
 }
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControlBuckPlecsSetParams(void *buffer, uint32_t size){
+int32_t fsbuckboostControlPlecsSetParams(void *buffer, uint32_t size){
 
     (void)buffer;
     (void)size;
@@ -71,7 +71,7 @@ int32_t fsbuckboostControlBuckPlecsSetParams(void *buffer, uint32_t size){
     return 0;
 }
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControlBuckPlecsGetParams(void *buffer, uint32_t size){
+int32_t fsbuckboostControlPlecsGetParams(void *buffer, uint32_t size){
 
     (void)buffer;
     (void)size;
@@ -79,20 +79,20 @@ int32_t fsbuckboostControlBuckPlecsGetParams(void *buffer, uint32_t size){
     return 0;
 }
 //-----------------------------------------------------------------------------
-void fsbuckboostControlBuckPlecsReset(void){
+void fsbuckboostControlPlecsReset(void){
 
-    Buck_controller_initialize(0);
+    Plecs_controller_initialize(0);
 }
 //-----------------------------------------------------------------------------
-void fsbuckboostControlBuckPlecsGetCallbacks(void *callbacksBuffer){
+void fsbuckboostControlPlecsGetCallbacks(void *callbacksBuffer){
 
     controllerCallbacks_t *cbs = (controllerCallbacks_t * )callbacksBuffer;
 
-    cbs->init = fsbuckboostControlBuckPlecsInit;
-    cbs->run = fsbuckboostControlBuckPlecsRun;
-    cbs->setParams = fsbuckboostControlBuckPlecsSetParams;
-    cbs->getParams = fsbuckboostControlBuckPlecsGetParams;
-    cbs->reset = fsbuckboostControlBuckPlecsReset;
+    cbs->init = fsbuckboostControlPlecsInit;
+    cbs->run = fsbuckboostControlPlecsRun;
+    cbs->setParams = fsbuckboostControlPlecsSetParams;
+    cbs->getParams = fsbuckboostControlPlecsGetParams;
+    cbs->reset = fsbuckboostControlPlecsReset;
     cbs->firstEntry = 0;
     cbs->lastExit = 0;
 }

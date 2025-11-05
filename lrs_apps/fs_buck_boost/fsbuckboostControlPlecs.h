@@ -1,6 +1,6 @@
 
-#ifndef FS_BUCK_BOOST_CONTROLLER_BUCK_PLECS_H_
-#define FS_BUCK_BOOST_CONTROLLER_BUCK_PLECS_H_
+#ifndef FS_BUCK_BOOST_CONTROLLER_PLECS_H_
+#define FS_BUCK_BOOST_CONTROLLER_PLECS_H_
 
 //=============================================================================
 /*-------------------------------- Includes ---------------------------------*/
@@ -20,28 +20,28 @@
 /*-------------------------------- Functions --------------------------------*/
 //=============================================================================
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControlBuckPlecsInit(void);
+int32_t fsbuckboostControlPlecsInit(void);
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControlBuckPlecsRun(void *meas, int32_t nmeas,
+int32_t fsbuckboostControlPlecsRun(void *meas, int32_t nmeas,
     void *refs, int32_t nrefs,
     void *outputs, int32_t nmaxoutputs);
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControlBuckPlecsSetParams(void *buffer, uint32_t size);
+int32_t fsbuckboostControlPlecsSetParams(void *buffer, uint32_t size);
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControlBuckPlecsGetParams(void *buffer, uint32_t size);
+int32_t fsbuckboostControlPlecsGetParams(void *buffer, uint32_t size);
 //-----------------------------------------------------------------------------
-void fsbuckboostControlBuckPlecsReset(void);
+void fsbuckboostControlPlecsReset(void);
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControlBuckPlecsFirstEntry(void *meas, int32_t nmeas,
+int32_t fsbuckboostControlPlecsFirstEntry(void *meas, int32_t nmeas,
     void *refs, int32_t nrefs,
     void *outputs, int32_t nmaxoutputs);
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControlBuckPlecsLastExit(void *meas, int32_t nmeas,
+int32_t fsbuckboostControlPlecsLastExit(void *meas, int32_t nmeas,
     void *refs, int32_t nrefs,
     void *outputs, int32_t nmaxoutputs);
 //-----------------------------------------------------------------------------
-void fsbuckboostControlBuckPlecsGetCallbacks(void *callbacksBuffer);
+void fsbuckboostControlPlecsGetCallbacks(void *callbacksBuffer);
 //-----------------------------------------------------------------------------
 //=============================================================================
 
-#endif /* FS_BUCK_BOOST_CONTROLLER_BUCK_PLECS_H_ */
+#endif /* FS_BUCK_BOOST_CONTROLLER_PLECS_H_ */
