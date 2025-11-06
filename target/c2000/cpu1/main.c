@@ -103,6 +103,7 @@ void mainC2000Init(void)
 //=============================================================================
 // GPIO pin definitions for CPU2 peripherals
 //=============================================================================
+#define GPIO_DEBUG_PIN         0U
 #define GPIO_EPWM2A_PIN        2U
 #define GPIO_EPWM2B_PIN        3U
 #define GPIO_EPWM4A_PIN        6U
@@ -174,6 +175,10 @@ void mainC2000InitCpu2(void)
     GPIO_setPadConfig(GPIO_RELAY2_PIN, GPIO_PIN_TYPE_STD);
     GPIO_setMasterCore(GPIO_RELAY2_PIN, GPIO_CORE_CPU2);
     GPIO_setDirectionMode(GPIO_RELAY2_PIN, GPIO_DIR_MODE_OUT);
+
+    GPIO_setPadConfig(GPIO_DEBUG_PIN, GPIO_PIN_TYPE_STD);
+    GPIO_setMasterCore(GPIO_DEBUG_PIN, GPIO_CORE_CPU2);
+    GPIO_setDirectionMode(GPIO_DEBUG_PIN, GPIO_DIR_MODE_OUT);
     //------------------------------------------------------------------------
     // (7) Enable/reset clocks for EPWM and ADC modules
     //------------------------------------------------------------------------

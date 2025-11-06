@@ -26,6 +26,8 @@
 #define EPWM_TRIG_BASE   EPWM2_BASE   
 #define EPWM_PWR_BASE    EPWM4_BASE   
 
+#define GPIO_DEBUG_PIN   0
+
 // Relay GPIOs
 #define GPIO_RELAY1_PIN  8U
 #define GPIO_RELAY2_PIN  9U
@@ -35,7 +37,7 @@
 #define EPWM4_TBPRD      ((uint16_t)1000 - 1)    // Power PWM period
 
 // ADC acquisition
-#define ADC_ACQPS        (63U)               
+#define ADC_ACQPS        (25U)               
 
 // Forward for ISR
 static __interrupt void buckHwAdcA_ISR(void);
@@ -105,6 +107,7 @@ void buckHwSetPwmEnable(uint32_t enable)
 {
     if(enable)
     {
+        // EPWM_clearTripZoneFlag(EPWM_PWR_BASE, EPWM_TZ_FLAG_OST);
         EPWM_setActionQualifierContSWForceAction(EPWM_PWR_BASE,
                                                  EPWM_AQ_OUTPUT_A,
                                                  EPWM_AQ_SW_DISABLED);
@@ -114,6 +117,7 @@ void buckHwSetPwmEnable(uint32_t enable)
     }
     else
     {
+        // EPWM_forceTripZoneEvent(EPWM_PWR_BASE, EPWM_TZ_FORCE_EVENT_OST);
         EPWM_setActionQualifierContSWForceAction(EPWM_PWR_BASE,
                                                  EPWM_AQ_OUTPUT_A,
                                                  EPWM_AQ_SW_OUTPUT_LOW);
@@ -173,6 +177,8 @@ uint32_t buckHwGetPwmFrequency(void)
     // if(prd == 0U) prd = (uint16_t)hwControl.pwmPeriod;
 
     // return (prd ? (DEVICE_SYSCLK_FREQ/(uint32_t)prd) : 0U);
+
+    return 0;
 }
 //-----------------------------------------------------------------------------
 void buckHwSetPwmDuty(float duty)
@@ -199,6 +205,8 @@ float buckHwGetPwmDuty(void)
 
     // uint16_t cmp = EPWM_getCounterCompareValue(EPWM_PWR_BASE, EPWM_COUNTER_COMPARE_A);
     // return (prd ? ((float)cmp / (float)prd) : 0.0f);
+
+    return 0;
 }
 //-----------------------------------------------------------------------------
 void buckHwSetPwmDeadTime(float deadtime_us)
@@ -234,6 +242,8 @@ void buckHwSetPwmDeadTime(float deadtime_us)
 float buckHwGetPwmDeadTime(void)
 {
     // return (float)s_deadtimeTicks / (float)DEVICE_SYSCLK_FREQ * 1e6f;
+
+    return 0;
 }
 //-----------------------------------------------------------------------------
 int32_t buckHwGetMeasurements(void *meas)
@@ -276,18 +286,15 @@ int32_t buckHwApplyOutputs(void *outputs, int32_t size)
 //-----------------------------------------------------------------------------
 void buckHwDisable(void){
 
-    SysCtl_disablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
-
     EPWM_disableADCTrigger(EPWM_TRIG_BASE, EPWM_SOC_A);
 
     EPWM_setTimeBaseCounterMode(EPWM_TRIG_BASE, EPWM_COUNTER_MODE_STOP_FREEZE);
+    EPWM_setTimeBaseCounterMode(EPWM_PWR_BASE, EPWM_COUNTER_MODE_STOP_FREEZE);
 
     buckHwSetPwmEnable(0);
 }
 //-----------------------------------------------------------------------------
 void buckHwEnable(void){
-
-    SysCtl_disablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
 
     EPWM_enableADCTrigger(EPWM_TRIG_BASE, EPWM_SOC_A);
 
@@ -296,18 +303,16 @@ void buckHwEnable(void){
 
     EPWM_setTimeBaseCounter(EPWM_PWR_BASE, 0);
     EPWM_setTimeBaseCounterMode(EPWM_PWR_BASE, EPWM_COUNTER_MODE_UP);
-
-    SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
 }
 //-----------------------------------------------------------------------------
 void buckHwControllerDisable(void){
 
-    // No controller-specific hardware gating here (placeholder)
+    buckHwSetPwmEnable(0);
 }
 //-----------------------------------------------------------------------------
 void buckHwControllerEnable(void){
 
-    // No controller-specific hardware gating here (placeholder)
+    buckHwSetPwmEnable(1);
 }
 //-----------------------------------------------------------------------------
 void buckHwSetInputRelay(uint32_t state)
@@ -407,6 +412,8 @@ static void buckHwInitializeAdc(void *adcCallback)
 //-----------------------------------------------------------------------------
 static void buckHwInitializePwm(void)
 {
+
+    SysCtl_disablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
     /*
      * TODO:
      * - Add trip zone
@@ -439,6 +446,11 @@ static void buckHwInitializePwm(void)
 
     EPWM_setSyncPulseSource(EPWM_PWR_BASE, HRPWM_PWMSYNC_SOURCE_ZERO);
 
+    // EPWM_enableTripZoneSignals(EPWM_PWR_BASE, EPWM_TZ_SIGNAL_OSHT1);
+    // EPWM_setTripZoneAction(EPWM_PWR_BASE, EPWM_TZ_ACTION_EVENT_TZA, EPWM_TZ_ACTION_HIGH);
+    // EPWM_setTripZoneAction(EPWM_PWR_BASE, EPWM_TZ_ACTION_EVENT_TZB, EPWM_TZ_ACTION_HIGH);
+    // EPWM_forceTripZoneEvent(EPWM_PWR_BASE, EPWM_TZ_FORCE_EVENT_OST);
+
     EPWM_setCounterCompareShadowLoadMode(EPWM_PWR_BASE, EPWM_COUNTER_COMPARE_A, EPWM_COMP_LOAD_ON_CNTR_ZERO);
     EPWM_setCounterCompareValue(EPWM_PWR_BASE, EPWM_COUNTER_COMPARE_A, 0);
 
@@ -463,15 +475,19 @@ static void buckHwInitializePwm(void)
     EPWM_setRisingEdgeDelayCount(EPWM_PWR_BASE, 20);
     EPWM_setFallingEdgeDelayCount(EPWM_PWR_BASE, 50);
 
+    SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
+
     //EPWM_setTimeBaseCounterMode(EPWM_PWR_BASE, EPWM_COUNTER_MODE_UP);
 }
 //-----------------------------------------------------------------------------
 static void buckHwInitializeGpio(void)
-{   GPIO_setPinConfig(GPIO_9_GPIO9);
+{
+    GPIO_setPinConfig(GPIO_0_GPIO0);
+    GPIO_setPinConfig(GPIO_9_GPIO9);
     GPIO_setPinConfig(GPIO_8_GPIO8);
     
+    GPIO_writePin(GPIO_DEBUG_PIN, 0);
     GPIO_writePin(GPIO_RELAY1_PIN, 0);
-   
     GPIO_writePin(GPIO_RELAY2_PIN, 0);
 }
 //-----------------------------------------------------------------------------
@@ -494,11 +510,14 @@ static void buckHwInitializeMeasGains(void)
 __interrupt void buckHwAdcA_ISR(void)
 {
 
+    GPIO_writePin(GPIO_DEBUG_PIN, 1);
     hwControl.adcCallback();
 
     ADC_clearInterruptOverflowStatus(ADCA_BASE, ADC_INT_NUMBER1);
     ADC_clearInterruptStatus(ADCA_BASE, ADC_INT_NUMBER1);
     Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP1);
+
+    GPIO_writePin(GPIO_DEBUG_PIN, 0);
 }
 //-----------------------------------------------------------------------------
 //=============================================================================
