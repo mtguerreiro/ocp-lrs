@@ -103,21 +103,24 @@ void buckHwStatusClear(void)
 //-----------------------------------------------------------------------------
 void buckHwSetPwmEnable(uint32_t enable)
 {
-
-    SysCtl_disablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
     if(enable)
     {
-        EPWM_setTimeBaseCounter(EPWM_TRIG_BASE, 0);
-        EPWM_setTimeBaseCounter(EPWM_PWR_BASE,  0);
-
-        EPWM_setTimeBaseCounterMode(EPWM_TRIG_BASE, EPWM_COUNTER_MODE_UP);
-        EPWM_setTimeBaseCounterMode(EPWM_PWR_BASE,  EPWM_COUNTER_MODE_UP);
+        EPWM_setActionQualifierContSWForceAction(EPWM_PWR_BASE,
+                                                 EPWM_AQ_OUTPUT_A,
+                                                 EPWM_AQ_SW_DISABLED);
+        EPWM_setActionQualifierContSWForceAction(EPWM_PWR_BASE,
+                                                 EPWM_AQ_OUTPUT_B,
+                                                 EPWM_AQ_SW_DISABLED);
     }
     else
     {
-        EPWM_setTimeBaseCounterMode(EPWM_PWR_BASE,  EPWM_COUNTER_MODE_STOP_FREEZE);
+        EPWM_setActionQualifierContSWForceAction(EPWM_PWR_BASE,
+                                                 EPWM_AQ_OUTPUT_A,
+                                                 EPWM_AQ_SW_OUTPUT_LOW);
+        EPWM_setActionQualifierContSWForceAction(EPWM_PWR_BASE,
+                                                 EPWM_AQ_OUTPUT_B,
+                                                 EPWM_AQ_SW_OUTPUT_HIGH);
     }
-    SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
 }
 //-----------------------------------------------------------------------------
 uint32_t buckHwGetPwmEnable(void)
@@ -130,46 +133,46 @@ uint32_t buckHwGetPwmEnable(void)
 //-----------------------------------------------------------------------------
 void buckHwSetPwmFrequency(uint32_t freq)
 {
-    if(freq == 0U) freq = 1U;
+    // if(freq == 0U) freq = 1U;
 
-    uint32_t tbclk = DEVICE_SYSCLK_FREQ;
-    uint32_t prd   = tbclk / freq;
-    if(prd < 2U)     prd = 2U;
-    if(prd > 65535U) prd = 65535U;
-
-    
-    EPWM_setTimeBaseCounterMode(EPWM_PWR_BASE, EPWM_COUNTER_MODE_STOP_FREEZE);
-    EPWM_setTimeBasePeriod(EPWM_PWR_BASE, (uint16_t)prd);
+    // uint32_t tbclk = DEVICE_SYSCLK_FREQ;
+    // uint32_t prd   = tbclk / freq;
+    // if(prd < 2U)     prd = 2U;
+    // if(prd > 65535U) prd = 65535U;
 
     
-    uint16_t newPrd = (uint16_t)prd;
-    uint16_t oldPrd = (hwControl.pwmPeriod ? (uint16_t)hwControl.pwmPeriod : EPWM4_TBPRD);
-    uint16_t oldCmp = EPWM_getCounterCompareValue(EPWM_PWR_BASE, EPWM_COUNTER_COMPARE_A);
-    float    duty   = (oldPrd ? ((float)oldCmp/(float)oldPrd) : 0.5f);
-    if(duty < 0.0f) duty = 0.0f;
-    
-    float maxDuty = (newPrd > 0U) ? ((float)(newPrd - 1U) / (float)newPrd) : 0.0f;
-    if(duty > maxDuty) duty = maxDuty;
-
-    EPWM_setCounterCompareValue(EPWM_PWR_BASE, EPWM_COUNTER_COMPARE_A,
-                                (uint16_t)(duty * (float)newPrd + 0.5f));
+    // EPWM_setTimeBaseCounterMode(EPWM_PWR_BASE, EPWM_COUNTER_MODE_STOP_FREEZE);
+    // EPWM_setTimeBasePeriod(EPWM_PWR_BASE, (uint16_t)prd);
 
     
-    if(buckHwGetPwmEnable())
-    {
-        EPWM_setTimeBaseCounter(EPWM_PWR_BASE, 0);
-        EPWM_setTimeBaseCounterMode(EPWM_PWR_BASE, EPWM_COUNTER_MODE_UP);
-    }
+    // uint16_t newPrd = (uint16_t)prd;
+    // uint16_t oldPrd = (hwControl.pwmPeriod ? (uint16_t)hwControl.pwmPeriod : EPWM4_TBPRD);
+    // uint16_t oldCmp = EPWM_getCounterCompareValue(EPWM_PWR_BASE, EPWM_COUNTER_COMPARE_A);
+    // float    duty   = (oldPrd ? ((float)oldCmp/(float)oldPrd) : 0.5f);
+    // if(duty < 0.0f) duty = 0.0f;
+    
+    // float maxDuty = (newPrd > 0U) ? ((float)(newPrd - 1U) / (float)newPrd) : 0.0f;
+    // if(duty > maxDuty) duty = maxDuty;
 
-    hwControl.pwmPeriod = newPrd;
+    // EPWM_setCounterCompareValue(EPWM_PWR_BASE, EPWM_COUNTER_COMPARE_A,
+    //                             (uint16_t)(duty * (float)newPrd + 0.5f));
+
+    
+    // if(buckHwGetPwmEnable())
+    // {
+    //     EPWM_setTimeBaseCounter(EPWM_PWR_BASE, 0);
+    //     EPWM_setTimeBaseCounterMode(EPWM_PWR_BASE, EPWM_COUNTER_MODE_UP);
+    // }
+
+    // hwControl.pwmPeriod = newPrd;
 }
 //-----------------------------------------------------------------------------
 uint32_t buckHwGetPwmFrequency(void)
 {
-    uint16_t prd = EPWM_getTimeBasePeriod(EPWM_PWR_BASE);
-    if(prd == 0U) prd = (uint16_t)hwControl.pwmPeriod;
+    // uint16_t prd = EPWM_getTimeBasePeriod(EPWM_PWR_BASE);
+    // if(prd == 0U) prd = (uint16_t)hwControl.pwmPeriod;
 
-    return (prd ? (DEVICE_SYSCLK_FREQ/(uint32_t)prd) : 0U);
+    // return (prd ? (DEVICE_SYSCLK_FREQ/(uint32_t)prd) : 0U);
 }
 //-----------------------------------------------------------------------------
 void buckHwSetPwmDuty(float duty)
@@ -187,52 +190,50 @@ void buckHwSetPwmDuty(float duty)
     if(cmpa >= prd) cmpa = prd - 1U;
 
     EPWM_setCounterCompareValue(EPWM_PWR_BASE, EPWM_COUNTER_COMPARE_A, cmpa);
-
-    hwControl.control.u = duty;
 }
 //-----------------------------------------------------------------------------
 float buckHwGetPwmDuty(void)
 {
-    uint16_t prd = EPWM_getTimeBasePeriod(EPWM_PWR_BASE);
-    if(prd == 0U) prd = (uint16_t)(hwControl.pwmPeriod ? hwControl.pwmPeriod : EPWM4_TBPRD);
+    // uint16_t prd = EPWM_getTimeBasePeriod(EPWM_PWR_BASE);
+    // if(prd == 0U) prd = (uint16_t)(hwControl.pwmPeriod ? hwControl.pwmPeriod : EPWM4_TBPRD);
 
-    uint16_t cmp = EPWM_getCounterCompareValue(EPWM_PWR_BASE, EPWM_COUNTER_COMPARE_A);
-    return (prd ? ((float)cmp / (float)prd) : 0.0f);
+    // uint16_t cmp = EPWM_getCounterCompareValue(EPWM_PWR_BASE, EPWM_COUNTER_COMPARE_A);
+    // return (prd ? ((float)cmp / (float)prd) : 0.0f);
 }
 //-----------------------------------------------------------------------------
 void buckHwSetPwmDeadTime(float deadtime_us)
 {
-    if(deadtime_us < 0.0f) deadtime_us = 0.0f;
+    // if(deadtime_us < 0.0f) deadtime_us = 0.0f;
 
     
-    double   ticks_d = (double)DEVICE_SYSCLK_FREQ * (deadtime_us * 1e-6);
-    if(ticks_d > 65535.0) ticks_d = 65535.0;
-    uint16_t ticks   = (uint16_t)(ticks_d + 0.5);
+    // double   ticks_d = (double)DEVICE_SYSCLK_FREQ * (deadtime_us * 1e-6);
+    // if(ticks_d > 65535.0) ticks_d = 65535.0;
+    // uint16_t ticks   = (uint16_t)(ticks_d + 0.5);
 
-    if(ticks == 0U)
-    {
+    // if(ticks == 0U)
+    // {
        
-        EPWM_setDeadBandDelayMode(EPWM_PWR_BASE, EPWM_DB_RED, false);
-        EPWM_setDeadBandDelayMode(EPWM_PWR_BASE, EPWM_DB_FED, false);
-        EPWM_setRisingEdgeDelayCount (EPWM_PWR_BASE, 0U);
-        EPWM_setFallingEdgeDelayCount(EPWM_PWR_BASE, 0U);
-    }
-    else
-    {
+    //     EPWM_setDeadBandDelayMode(EPWM_PWR_BASE, EPWM_DB_RED, false);
+    //     EPWM_setDeadBandDelayMode(EPWM_PWR_BASE, EPWM_DB_FED, false);
+    //     EPWM_setRisingEdgeDelayCount (EPWM_PWR_BASE, 0U);
+    //     EPWM_setFallingEdgeDelayCount(EPWM_PWR_BASE, 0U);
+    // }
+    // else
+    // {
         
-        EPWM_setRisingEdgeDelayCount (EPWM_PWR_BASE, ticks);
-        EPWM_setFallingEdgeDelayCount(EPWM_PWR_BASE, ticks);
-        EPWM_setDeadBandDelayMode(EPWM_PWR_BASE, EPWM_DB_RED, true);
-        EPWM_setDeadBandDelayMode(EPWM_PWR_BASE, EPWM_DB_FED, true);
+    //     EPWM_setRisingEdgeDelayCount (EPWM_PWR_BASE, ticks);
+    //     EPWM_setFallingEdgeDelayCount(EPWM_PWR_BASE, ticks);
+    //     EPWM_setDeadBandDelayMode(EPWM_PWR_BASE, EPWM_DB_RED, true);
+    //     EPWM_setDeadBandDelayMode(EPWM_PWR_BASE, EPWM_DB_FED, true);
         
-    }
+    // }
 
-    s_deadtimeTicks = ticks; 
+    // s_deadtimeTicks = ticks; 
 }
 //-----------------------------------------------------------------------------
 float buckHwGetPwmDeadTime(void)
 {
-    return (float)s_deadtimeTicks / (float)DEVICE_SYSCLK_FREQ * 1e6f;
+    // return (float)s_deadtimeTicks / (float)DEVICE_SYSCLK_FREQ * 1e6f;
 }
 //-----------------------------------------------------------------------------
 int32_t buckHwGetMeasurements(void *meas)
@@ -280,6 +281,8 @@ void buckHwDisable(void){
     EPWM_disableADCTrigger(EPWM_TRIG_BASE, EPWM_SOC_A);
 
     EPWM_setTimeBaseCounterMode(EPWM_TRIG_BASE, EPWM_COUNTER_MODE_STOP_FREEZE);
+
+    buckHwSetPwmEnable(0);
 }
 //-----------------------------------------------------------------------------
 void buckHwEnable(void){
@@ -289,8 +292,10 @@ void buckHwEnable(void){
     EPWM_enableADCTrigger(EPWM_TRIG_BASE, EPWM_SOC_A);
 
     EPWM_setTimeBaseCounter(EPWM_TRIG_BASE, 0);
-
     EPWM_setTimeBaseCounterMode(EPWM_TRIG_BASE, EPWM_COUNTER_MODE_UP);
+
+    EPWM_setTimeBaseCounter(EPWM_PWR_BASE, 0);
+    EPWM_setTimeBaseCounterMode(EPWM_PWR_BASE, EPWM_COUNTER_MODE_UP);
 
     SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
 }
