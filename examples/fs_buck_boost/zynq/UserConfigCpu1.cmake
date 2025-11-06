@@ -8,11 +8,11 @@ cmake_minimum_required(VERSION 3.16)
 #        ocp/
 #        ocp_lrs/
 # Go up three directories to reach PE_LAB/
-get_filename_component(ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../../../.." ABSOLUTE)
+get_filename_component(ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../libs" ABSOLUTE)
 
 # Set paths relative to the repo root
-set(OCP_LRS_PATH "${ROOT_DIR}")
-set(OCP_PATH "${ROOT_DIR}/../ocp")
+set(OCP_LRS_PATH "${ROOT_DIR}/ocp-lrs")
+set(OCP_PATH "${ROOT_DIR}/ocp")
 
 
 message(STATUS "OCP_LRS_PATH = ${OCP_LRS_PATH}")

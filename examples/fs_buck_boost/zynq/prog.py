@@ -4,7 +4,7 @@ import subprocess
 import platform
 
 # --- Input ---
-ws_path = './build'
+ws_path = '../../../../../build'
 
 # --- LRSSOC app ---
 platform_name = 'lrssoc'

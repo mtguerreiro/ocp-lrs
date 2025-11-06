@@ -5,7 +5,7 @@ import shutil
 import zipfile
 
 # --- Input ---
-ws_path = './build'
+ws_path = '../../../../../build'
 
 # --- Fetching the ocp_lrs ---
 
