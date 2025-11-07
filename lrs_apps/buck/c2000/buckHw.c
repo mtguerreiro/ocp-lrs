@@ -16,6 +16,10 @@
 
 #include <stdint.h>
 #include <string.h>
+
+/* Open controller project */
+#include "ocpConfig.h"
+#include "ocp/ocpTrace.h"
 //=============================================================================
 
 //=============================================================================
@@ -55,6 +59,7 @@ typedef struct{
     buckConfigMeasGains_t    gains;
     float alpha;
     void (*adcCallback)(void);
+    float outputRelay;
 } buckHwControl_t;
 //=============================================================================
 
@@ -70,8 +75,7 @@ static void buckHwInitializeMeasGains(void);
 //=============================================================================
 /*--------------------------------- Globals ---------------------------------*/
 //=============================================================================
-static buckHwControl_t hwControl = {.pwmPeriod = 0, .status = 0, .alpha = 0.2f};
-static uint16_t s_deadtimeTicks = 0U;   
+static buckHwControl_t hwControl = {.pwmPeriod = 0, .status = 0, .alpha = 0.2f, .outputRelay=0.0f};
 //=============================================================================
 
 //=============================================================================
@@ -87,6 +91,9 @@ int32_t buckHwInit(void *adcCallback)
     buckHwInitializeMeasGains();
 
     hwControl.pwmPeriod = EPWM_getTimeBasePeriod(EPWM_PWR_BASE);
+
+    /* Add output relay to trace so we can trigger on it */
+    // ocpTraceAddSignal(BUCK_CONFIG_OCP_TRACE_ID, &hwControl.outputRelay, "Output relay");
 
     return 0;
 }
@@ -339,7 +346,8 @@ uint32_t buckHwGetInputRelay(void)
 }
 //-----------------------------------------------------------------------------
 void buckHwSetOutputRelay(uint32_t state)
-{
+{   
+    hwControl.outputRelay = (float)(state & 0x01);
     GPIO_writePin(GPIO_RELAY2_PIN, (state ? 1U : 0U));
 }
 //-----------------------------------------------------------------------------

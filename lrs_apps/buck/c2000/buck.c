@@ -90,7 +90,7 @@ static int32_t buckOcpTracesInit(void){
     
     /* Initializes buck's trace */
     config.mem = (void *)C2000_CONFIG_MEM_TRACE_ADR;
-    config.size = C2000_CONFIG_MEM_TRACE_SIZE_MAX;
+    config.size = C2000_CONFIG_MEM_TRACE_SIZE_MAX / sizeof(float);
     config.data = (void **)trace0Data;
     config.names = trace0Names;
     

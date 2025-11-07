@@ -25,16 +25,16 @@
 #define C2000_CONFIG_CPU2_CPU1_FLAG             10U
 
 /* CPU1 to CPU2 data */
-#define C2000_CONFIG_MEM_CPU1_TO_CPU2_ADR       0x00012000 // MEMCFG_SECT_GS6
+#define C2000_CONFIG_MEM_CPU1_TO_CPU2_ADR       0x0000F000 // MEMCFG_SECT_GS3
 #define C2000_CONFIG_MEM_CPU1_TO_CPU2_SIZE      0x00001000
 
 /* CPU2 to CPU1 data */
-#define C2000_CONFIG_MEM_CPU2_TO_CPU1_ADR       0x00013000 // MEMCFG_SECT_GS7
+#define C2000_CONFIG_MEM_CPU2_TO_CPU1_ADR       0x00010000 // MEMCFG_SECT_GS4
 #define C2000_CONFIG_MEM_CPU2_TO_CPU1_SIZE      0x00001000
 
 /* RAM memory for scope data */
-#define C2000_CONFIG_MEM_TRACE_ADR              0x00014000 // MEMCFG_SECT_GS8 - GS12
-#define C2000_CONFIG_MEM_TRACE_SIZE_MAX         (0x001000 * 5)
+#define C2000_CONFIG_MEM_TRACE_ADR              0x00011000 // MEMCFG_SECT_GS5 - GS12
+#define C2000_CONFIG_MEM_TRACE_SIZE_MAX         (0x001000U * 8)
 //-----------------------------------------------------------------------------
 //=============================================================================
 
