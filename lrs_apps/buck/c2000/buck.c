@@ -41,8 +41,8 @@ void buckAdcIrq(void);
 //=============================================================================
 /*------------------------------- Definitions -------------------------------*/
 //=============================================================================
-#define BUCK_OCP_CONFIG_TRACE_NAME_LEN          128
-#define BUCK_OCP_CONFIG_TRACE_MAX_SIGNALS       32
+#define BUCK_OCP_CONFIG_TRACE_NAME_LEN          192
+#define BUCK_OCP_CONFIG_TRACE_MAX_SIGNALS       16
 
 #define BUCK_OCP_CONFIG_INPUT_BUF_SIZE           16
 #define BUCK_OCP_CONFIG_OUTPUT_BUF_SIZE          8

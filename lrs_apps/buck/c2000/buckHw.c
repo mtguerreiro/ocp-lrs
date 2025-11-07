@@ -93,7 +93,7 @@ int32_t buckHwInit(void *adcCallback)
     hwControl.pwmPeriod = EPWM_getTimeBasePeriod(EPWM_PWR_BASE);
 
     /* Add output relay to trace so we can trigger on it */
-    // ocpTraceAddSignal(BUCK_CONFIG_OCP_TRACE_ID, &hwControl.outputRelay, "Output relay");
+    ocpTraceAddSignal(BUCK_CONFIG_OCP_TRACE_ID, (void *)&hwControl.outputRelay, "Output relay");
 
     return 0;
 }

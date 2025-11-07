@@ -125,9 +125,10 @@ void mainC2000InitCpu2(void)
     // (2) Assign GS RAM blocks to CPU2 (must match linker file)
     //------------------------------------------------------------------------
     MemCfg_setGSRAMMasterSel(
-        MEMCFG_SECT_GS4  | MEMCFG_SECT_GS5 | MEMCFG_SECT_GS6 |
-        MEMCFG_SECT_GS7  | MEMCFG_SECT_GS8 | MEMCFG_SECT_GS9 |
-        MEMCFG_SECT_GS10 | MEMCFG_SECT_GS11| MEMCFG_SECT_GS12,
+        MEMCFG_SECT_GS4  | MEMCFG_SECT_GS5 | MEMCFG_SECT_GS6  |
+        MEMCFG_SECT_GS7  | MEMCFG_SECT_GS8 | MEMCFG_SECT_GS9  |
+        MEMCFG_SECT_GS10 | MEMCFG_SECT_GS11| MEMCFG_SECT_GS12 |
+        MEMCFG_SECT_GS14,
         MEMCFG_GSRAMMASTER_CPU2
     );
 
