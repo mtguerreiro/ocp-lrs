@@ -87,7 +87,6 @@ int32_t buckHwInit(void *adcCallback)
     buckHwInitializeMeasGains();
 
     hwControl.pwmPeriod = EPWM_getTimeBasePeriod(EPWM_PWR_BASE);
-    hwControl.control.u = 0.5f;  // start at 50%
 
     return 0;
 }
@@ -271,6 +270,20 @@ int32_t buckHwGetMeasurements(void *meas)
     dst->v_dc_out = hwControl.gains.v_dc_out_gain * v_out_buck_raw + hwControl.gains.v_dc_out_ofs;
     dst->v_out = hwControl.gains.v_out_gain * v_out_raw + hwControl.gains.v_out_ofs;
 
+    if( (dst->v_dc_in > BUCK_CONFIG_V_LIM) || (dst->v_in > BUCK_CONFIG_V_LIM) )
+        hwControl.status = 1;
+
+    if( (dst->v_dc_out > BUCK_CONFIG_V_LIM) || (dst->v_out > BUCK_CONFIG_V_LIM) )
+        hwControl.status = 1;
+    
+    if( (dst->il > BUCK_CONFIG_I_LIM) || (dst->il < -BUCK_CONFIG_I_LIM) )
+        hwControl.status = 1;
+
+    if( hwControl.status != 0 ){
+        buckHwShutDown();
+        return -1;
+    }
+
     return sizeof(buckConfigMeasurements_t);
 }
 //-----------------------------------------------------------------------------
@@ -350,8 +363,10 @@ uint32_t buckHwGetMeasGains(buckConfigMeasGains_t *gains)
 //-----------------------------------------------------------------------------
 void buckHwShutDown(void)
 {
+    buckHwSetInputRelay(0);
+    buckHwSetOutputRelay(0);
     buckHwSetPwmDuty(0.0f);
-    buckHwDisable();
+    buckHwSetPwmEnable(0);
 }
 //-----------------------------------------------------------------------------
 //=============================================================================

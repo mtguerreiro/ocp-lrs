@@ -18,6 +18,7 @@ int32_t mainTcpServerOcpIf(uint8_t sn, uint8_t* buf, uint32_t size, uint16_t por
    uint8_t *p;
    uint32_t rxSize;
    uint32_t txSize;
+   uint32_t txedSize;
 
 #if TCP_SERVER_ECHO_CFG_DEBUG == 1
    uint8_t destip[4];
@@ -58,10 +59,19 @@ int32_t mainTcpServerOcpIf(uint8_t sn, uint8_t* buf, uint32_t size, uint16_t por
                 return -1;
             }
 
-            ret = send(sn, p, txSize);
-            if(ret != txSize){
+            txedSize = 0;
+            while( txedSize < txSize){
+               ret = send(sn, p, txSize);
+               if( ret < 0 ) break;
+               txedSize += ret;
+               p += (ret >> 1); // because of 16-bit access
+            }
+            if( txedSize != txSize){
+#if TCP_SERVER_ECHO_CFG_DEBUG == 1
+               printf("%s (sn %d): Error sending data. Should send %d but sent only %d. Closing socket...\r\n", __func__, sn, txSize, txedSize);
+#endif
                 close(sn);
-                return -1;                
+                return -1;
             }
          }
          break;
