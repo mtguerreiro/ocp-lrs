@@ -4,11 +4,6 @@ import numpy as np
 import pyocp
 import time
 
-_TRACE_MODE_MANUAL  = 0
-_TRACE_MODE_TRIGGER = 1
-
-_TRACE_DATA_SIZE_BYTES = 4
-
 """
 Trace functions that have more than one OCP command are reimplemented here
 in order to add some delay between subsequent OCP calls. This is to handle
@@ -33,7 +28,7 @@ class Trace(pyocp.trace.TraceTemplate):
             return (-1, status)
         time.sleep(0.05)
         
-        if mode == _TRACE_MODE_TRIGGER:
+        if mode == self._TRACE_MODE_TRIGGER:
             status, data_bin = self._reorder_data(data_bin)
             if status < 0:
                 return (-1, status)
@@ -57,7 +52,7 @@ class Trace(pyocp.trace.TraceTemplate):
         if status < 0:
             return (-1, status)
 
-        size = tr_size / n_signals / _TRACE_DATA_SIZE_BYTES
+        size = tr_size / n_signals
 
         return (0, size)
     
@@ -69,6 +64,6 @@ class Trace(pyocp.trace.TraceTemplate):
             return (-1, status)
         time.sleep(0.025)
 
-        tr_size = size * n_signals * _TRACE_DATA_SIZE_BYTES
+        tr_size = size * n_signals
 
         return self._ocp_if.trace_set_size(self._tr_id, tr_size)
