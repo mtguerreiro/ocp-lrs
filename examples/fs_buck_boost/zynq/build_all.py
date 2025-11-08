@@ -1,17 +1,21 @@
 import vitis
 import os
+import sys
 import pathlib
 import shutil
 import zipfile
 
 # --- Input ---
-ws_path = '../../../../../build'
+if len(sys.argv) > 1:
+    ws_path = sys.argv[1]
+else:
+    ws_path = './build'
 
 # --- Fetching the ocp_lrs ---
+script_dir = os.path.dirname(os.path.abspath(__file__)) 
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) 
-
-ocp_lrs = os.path.abspath(os.path.join(SCRIPT_DIR, '..', '..','..'))
+ocp_lrs = os.path.abspath(os.path.join(script_dir, '..', '..', '..'))
+ocp_lrs_upper = os.path.abspath(os.path.join(ocp_lrs, '..'))
 
 lrs_app = 'fs_buck_boost'
 
@@ -85,6 +89,23 @@ pathlib.Path(f'{ws_path}/{cpu1_app_name}/src/UserConfig.cmake').unlink()
 file = 'UserConfigCpu1.cmake'
 f = shutil.copy(f'{source}/{file}', f'{ws_path}/{cpu1_app_name}/src')
 pathlib.Path(f).rename(f'{ws_path}/{cpu1_app_name}/src/UserConfig.cmake')
+
+# Creates PathConfig.cmake with the path upper level of ocp-lrs
+file = 'PathConfig.cmake'
+file_txt = f"""
+# Fetches the path to ocp and ocp-lrs. It is expected that both folders are inside a top-level folder:
+# top-level/
+#     ocp/
+#     ocp_lrs/
+# Do not make any changes to this file, it will be automatically modified by the build_all.py script.
+
+get_filename_component(ROOT_DIR "{ocp_lrs_upper}" ABSOLUTE)
+"""
+with open(f'{ws_path}/{cpu0_app_name}/src/{file}', 'w') as f:
+    f.write(file_txt)
+
+with open(f'{ws_path}/{cpu1_app_name}/src/{file}', 'w') as f:
+    f.write(file_txt)
 
 # Extracts bitstream from xsa file
 with zipfile.ZipFile(hw_file, 'r') as f:

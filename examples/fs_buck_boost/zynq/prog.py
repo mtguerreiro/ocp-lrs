@@ -2,9 +2,13 @@ import xsdb
 import time
 import subprocess
 import platform
+import sys
 
 # --- Input ---
-ws_path = '../../../../../build'
+if len(sys.argv) > 1:
+    ws_path = sys.argv[1]
+else:
+    ws_path = './build'
 
 # --- LRSSOC app ---
 platform_name = 'lrssoc'
