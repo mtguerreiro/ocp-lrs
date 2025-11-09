@@ -8,7 +8,6 @@ import pyocp
 import struct
 import numpy as np
 import scipy.signal
-import control
 import pyctl
 
 from dataclasses import dataclass
@@ -52,8 +51,9 @@ class Controllers:
         self.ramp = _Ramp(1, ctl_if)
         self.cpl = _CPL(2, ctl_if)
         self.buck_sfb = _BuckSFB(3, ctl_if)
-        self.boost_energy = _BoostEnergy(4, ctl_if)
-        self.boost_energy_mpc = _BoostEnergyMpc(5, ctl_if)
+        self.plecs = _Plecs(4, ctl_if)
+        self.boost_energy = _BoostEnergy(5, ctl_if)
+        self.boost_energy_mpc = _BoostEnergyMpc(6, ctl_if)
 
 
 class _Idle(pyocp.controller.ControllerTemplate):
@@ -192,7 +192,7 @@ class _BuckSFB(pyocp.controller.ControllerTemplate):
         )
         
         return {'ki':ki, 'kv':kv, 'k_ev':k_ev, 'dt':dt}
-    
+
 
     def _decode(self, params_bin):
         
@@ -212,6 +212,14 @@ class _BuckSFB(pyocp.controller.ControllerTemplate):
         params_bin = struct.pack(f'<{len(keys)}f', *_params)
 
         return params_bin
+
+
+class _Plecs(pyocp.controller.ControllerTemplate):
+    
+    def __init__(self, ctl_id, ctl_if):
+        super().__init__(ctl_id, ctl_if)
+
+        self.keys = ()
 
 
 class _BoostEnergy(pyocp.controller.ControllerTemplate):

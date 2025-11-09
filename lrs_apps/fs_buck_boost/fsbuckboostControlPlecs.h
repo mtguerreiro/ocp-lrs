@@ -1,6 +1,6 @@
 
-#ifndef FS_BUCK_BOOST_CONTROLLER_BOOST_ENERGY_MPC_H_
-#define FS_BUCK_BOOST_CONTROLLER_BOOST_ENERGY_MPC_H_
+#ifndef FS_BUCK_BOOST_CONTROLLER_PLECS_H_
+#define FS_BUCK_BOOST_CONTROLLER_PLECS_H_
 
 //=============================================================================
 /*-------------------------------- Includes ---------------------------------*/
@@ -20,20 +20,28 @@
 /*-------------------------------- Functions --------------------------------*/
 //=============================================================================
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControlBoostEnergyMpcInit(void);
+int32_t fsbuckboostControlPlecsInit(void);
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControlBoostEnergyMpcRun(void *meas, int32_t nmeas,
+int32_t fsbuckboostControlPlecsRun(void *meas, int32_t nmeas,
     void *refs, int32_t nrefs,
     void *outputs, int32_t nmaxoutputs);
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControlBoostEnergyMpcSetParams(void *buffer, uint32_t size);
+int32_t fsbuckboostControlPlecsSetParams(void *buffer, uint32_t size);
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControlBoostEnergyMpcGetParams(void *buffer, uint32_t size);
+int32_t fsbuckboostControlPlecsGetParams(void *buffer, uint32_t size);
 //-----------------------------------------------------------------------------
-void fsbuckboostControlBoostEnergyMpcReset(void);
+void fsbuckboostControlPlecsReset(void);
 //-----------------------------------------------------------------------------
-void fsbuckboostControlBoostEnergyMpcGetCallbacks(void *callbacksBuffer);
+int32_t fsbuckboostControlPlecsFirstEntry(void *meas, int32_t nmeas,
+    void *refs, int32_t nrefs,
+    void *outputs, int32_t nmaxoutputs);
+//-----------------------------------------------------------------------------
+int32_t fsbuckboostControlPlecsLastExit(void *meas, int32_t nmeas,
+    void *refs, int32_t nrefs,
+    void *outputs, int32_t nmaxoutputs);
+//-----------------------------------------------------------------------------
+void fsbuckboostControlPlecsGetCallbacks(void *callbacksBuffer);
 //-----------------------------------------------------------------------------
 //=============================================================================
 
-#endif /* FS_BUCK_BOOST_CONTROLLER_BOOST_ENERGY_MPC_H_ */
+#endif /* FS_BUCK_BOOST_CONTROLLER_PLECS_H_ */

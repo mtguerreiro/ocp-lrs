@@ -10,7 +10,6 @@ import pyocp
 import struct
 import numpy as np
 import scipy.signal
-import control
 import pyctl
 
 from dataclasses import dataclass

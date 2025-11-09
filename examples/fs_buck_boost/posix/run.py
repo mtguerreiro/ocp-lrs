@@ -58,7 +58,7 @@ def make():
 
     subprocess.Popen([build_path + run_cmd], cwd=build_path)    
 
-run_params = pyocp.data_mng_util.load_json('run_params')
-#config_sim(run_params['fsbb']['model_params'])
-config_sim(run_params['cpl']['model_params'])
-make()
+##run_params = pyocp.data_mng_util.load_json('run_params')
+###config_sim(run_params['fsbb']['model_params'])
+##config_sim(run_params['cpl']['model_params'])
+##make()
