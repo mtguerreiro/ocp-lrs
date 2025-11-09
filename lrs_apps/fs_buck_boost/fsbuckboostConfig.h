@@ -85,7 +85,9 @@ typedef struct{
 #ifdef OCP_LRS_ZYNQ_BUILD_CPU1
 #include "zynqConfig.h"
 #define FS_BUCK_BOOST_CONFIG_TRACE_ADDR             ZYNQ_CONFIG_MEM_TRACE_ADR
-#define FS_BUCK_BOOST_CONFIG_TRACE_SIZE             ZYNQ_CONFIG_MEM_TRACE_SIZE_MAX
+#define FS_BUCK_BOOST_CONFIG_TRACE_SIZE_BYTES       ((uint32_t)ZYNQ_CONFIG_MEM_TRACE_SIZE_MAX)
+#else
+#define FS_BUCK_BOOST_CONFIG_TRACE_SIZE_BYTES       (16U * 1024U * 1024U)
 #endif
 //=============================================================================
 

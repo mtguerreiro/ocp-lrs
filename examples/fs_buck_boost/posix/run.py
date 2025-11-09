@@ -1,6 +1,4 @@
 import pyocp_lrs
-#import pyocp_lrs.fsbuckboost.boost_tb as btb
-import pyocp_lrs.fsbuckboost.buck_tb as btb
 import pyocp
 
 import numpy as np

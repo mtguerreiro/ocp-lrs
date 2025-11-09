@@ -52,7 +52,6 @@ blinkControl_t xblinkControl;
 /*-------------------------------- Prototypes -------------------------------*/
 //=============================================================================
 static void blinkInitialize(void);
-static int32_t blinkPeriodUpdate(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
 static void blinkToggleColor(uint32_t color);
 //=============================================================================
 

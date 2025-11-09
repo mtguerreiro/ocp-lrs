@@ -48,12 +48,6 @@ void fsbuckboostAdcIrq(void *callbackRef);
 //=============================================================================
 
 //=============================================================================
-/*------------------------------- Definitions -------------------------------*/
-//=============================================================================
-
-//=============================================================================
-
-//=============================================================================
 /*--------------------------------- Globals ---------------------------------*/
 //=============================================================================
 static char traceNames[FS_BUCK_BOOST_CONFIG_TRACE_0_NAME_LEN];
@@ -89,9 +83,11 @@ static int32_t fsbuckboostInitializeTrace(void){
     ocpTraceConfig_t config;
 
     config.mem = (void *)FS_BUCK_BOOST_CONFIG_TRACE_ADDR;
-    config.size = FS_BUCK_BOOST_CONFIG_TRACE_SIZE;
+    config.size = (uint32_t)( FS_BUCK_BOOST_CONFIG_TRACE_SIZE_BYTES / sizeof(uint32_t) );
     config.data = (void **)traceData;
+    config.dataSize = FS_BUCK_BOOST_CONFIG_TRACE_0_MAX_SIGNALS;
     config.names = traceNames;
+    config.namesBufferSize = sizeof(traceNames);
 
     ocpTraceInitialize(FS_BUCK_BOOST_CONFIG_TRACE_ID, &config, "FS buck boost trace");
 

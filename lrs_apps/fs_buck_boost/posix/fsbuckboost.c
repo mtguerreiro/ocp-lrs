@@ -23,7 +23,6 @@
 #include "fsbuckboostHwIf.h"
 #include "fsbuckboostHw.h"
 #include "fsbuckboostConfig.h"
-
 //=============================================================================
 
 //=============================================================================
@@ -41,15 +40,9 @@ void fsbuckboostAdcIrq(void *callbackRef);
 //=============================================================================
 
 //=============================================================================
-/*------------------------------- Definitions -------------------------------*/
-//=============================================================================
-
-//=============================================================================
-
-//=============================================================================
 /*--------------------------------- Globals ---------------------------------*/
 //=============================================================================
-static char traceRawData[16 * 1024 * 1024];
+static uint32_t traceRawData[FS_BUCK_BOOST_CONFIG_TRACE_SIZE_BYTES / sizeof(uint32_t)];
 
 static char traceNames[FS_BUCK_BOOST_CONFIG_TRACE_0_NAME_LEN];
 static size_t traceData[FS_BUCK_BOOST_CONFIG_TRACE_0_MAX_SIGNALS];
@@ -85,7 +78,6 @@ void fsbuckboostInit(void *params){
     config.getControllerData = fsbuckboostHwOpilGetControllerData;
 
     ocpOpilInitialize(&config);
-
 }
 //-----------------------------------------------------------------------------
 //=============================================================================
@@ -100,9 +92,11 @@ static int32_t fsbuckboostInitializeTrace(void){
     ocpTraceConfig_t config;
 
     config.mem = (void *)traceRawData;
-    config.size = sizeof(traceRawData);
+    config.size = (uint32_t)( FS_BUCK_BOOST_CONFIG_TRACE_SIZE_BYTES / sizeof(uint32_t) );
     config.data = (void **)traceData;
+    config.dataSize = FS_BUCK_BOOST_CONFIG_TRACE_0_MAX_SIGNALS;
     config.names = traceNames;
+    config.namesBufferSize = sizeof(traceNames);
 
     ocpTraceInitialize(FS_BUCK_BOOST_CONFIG_TRACE_ID, &config, "FS buck boost trace");
 
