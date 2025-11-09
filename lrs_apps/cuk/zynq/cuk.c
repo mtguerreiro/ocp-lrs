@@ -92,9 +92,11 @@ static int32_t cukInitializeTrace(void){
     ocpTraceConfig_t config;
 
     config.mem = (void *)CUK_CONFIG_TRACE_ADDR;
-    config.size = CUK_CONFIG_TRACE_SIZE;
+    config.size = (uint32_t)( CUK_CONFIG_TRACE_SIZE_BYTES / sizeof(uint32_t) );
     config.data = (void **)traceData;
+    config.dataSize = CUK_CONFIG_TRACE_0_MAX_SIGNALS;
     config.names = traceNames;
+    config.namesBufferSize = sizeof(traceNames);
 
     ocpTraceInitialize(CUK_CONFIG_TRACE_ID, &config, "Cuk trace");
 

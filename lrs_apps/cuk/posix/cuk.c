@@ -50,7 +50,7 @@ void cukAdcIrq(void *callbackRef);
 //=============================================================================
 /*--------------------------------- Globals ---------------------------------*/
 //=============================================================================
-static char traceRawData[16 * 1024 * 1024];
+static uint32_t traceRawData[CUK_CONFIG_TRACE_SIZE_BYTES / sizeof(uint32_t)];
 
 static char traceNames[CUK_CONFIG_TRACE_0_NAME_LEN];
 static size_t traceData[CUK_CONFIG_TRACE_0_MAX_SIGNALS];
@@ -102,9 +102,11 @@ static int32_t cukInitializeTrace(void){
     ocpTraceConfig_t config;
 
     config.mem = (void *)traceRawData;
-    config.size = sizeof(traceRawData);
+    config.size = (uint32_t)( CUK_CONFIG_TRACE_SIZE_BYTES / sizeof(uint32_t) );
     config.data = (void **)traceData;
+    config.dataSize = CUK_CONFIG_TRACE_0_MAX_SIGNALS;
     config.names = traceNames;
+    config.namesBufferSize = sizeof(traceNames);
 
     ocpTraceInitialize(CUK_CONFIG_TRACE_ID, &config, "Cuk trace");
 
