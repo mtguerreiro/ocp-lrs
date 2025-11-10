@@ -16,10 +16,6 @@
 
 #include <stdint.h>
 #include <string.h>
-
-/* Open controller project */
-#include "ocpConfig.h"
-#include "ocp/ocpTrace.h"
 //=============================================================================
 
 //=============================================================================
@@ -91,9 +87,6 @@ int32_t buckHwInit(void *adcCallback)
     buckHwInitializeMeasGains();
 
     hwControl.pwmPeriod = EPWM_getTimeBasePeriod(EPWM_PWR_BASE);
-
-    /* Add output relay to trace so we can trigger on it */
-    ocpTraceAddSignal(BUCK_CONFIG_OCP_TRACE_ID, (void *)&hwControl.outputRelay, "Output relay");
 
     return 0;
 }

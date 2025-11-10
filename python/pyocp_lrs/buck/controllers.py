@@ -17,9 +17,9 @@ from dataclasses import dataclass
 @dataclass
 class ModelParams:
     v_in : float = 16
-    R : float = 20
+    R : float = 10
     L : float = 47e-6
-    Co : float = 150e-6
+    Co : float = 560e-6
 
 
 class Reference(pyocp.controller.ReferenceTemplate):
@@ -52,6 +52,7 @@ class Controllers:
         self.idle = _Idle(0, ctl_if)
         self.ramp = _Ramp(1, ctl_if)
         self.sfb = _SFB(2, ctl_if)
+        self.plecs = _Plecs(3, ctl_if)
 
 
 class _Idle(pyocp.controller.ControllerTemplate):
@@ -130,6 +131,14 @@ class _SFB(pyocp.controller.ControllerTemplate):
         return _dict_encode(self.keys, params)
 
 
+class _Plecs(pyocp.controller.ControllerTemplate):
+    
+    def __init__(self, ctl_id, ctl_if):
+        super().__init__(ctl_id, ctl_if)
+
+        self.keys = ()
+
+        
 def _dict_encode(keys, params):
     
     _params = [params[key] for key in keys]

@@ -104,7 +104,7 @@ static int32_t buckOcpTracesInit(void){
     ocpTraceAddSignal(BUCK_CONFIG_OCP_TRACE_ID, (void *)&meas->v_dc_in, "Input dc link voltage");
     ocpTraceAddSignal(BUCK_CONFIG_OCP_TRACE_ID, (void *)&meas->v_dc_out, "Output dc link voltage");
     ocpTraceAddSignal(BUCK_CONFIG_OCP_TRACE_ID, (void *)&meas->v_out, "Output voltage");
-    ocpTraceAddSignal(BUCK_CONFIG_OCP_TRACE_ID, (void *)&control->u, "Duty-cycle");
+    ocpTraceAddSignal(BUCK_CONFIG_OCP_TRACE_ID, (void *)&control->u, "Duty cycle");
 
     return 0;
 }
