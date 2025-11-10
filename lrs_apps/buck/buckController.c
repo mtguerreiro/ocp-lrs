@@ -19,6 +19,7 @@
 #include "buckControlIdle.h"
 #include "buckControlRamp.h"
 #include "buckControlSfb.h"
+#include "buckControlPlecs.h"
 //============================================================================
 
 //=============================================================================
@@ -28,6 +29,7 @@ typedef enum{
     BUCK_CONTROLLER_IDLE,
     BUCK_CONTROLLER_RAMP,
     BUCK_CONTROLLER_SFB,
+    BUCK_CONTROLLER_PLECS,
     BUCK_CONTROLLER_END
 }appControllersEnum_t;
 
@@ -57,6 +59,7 @@ int32_t buckControllerInit(void){
     ctlGetCbs[BUCK_CONTROLLER_IDLE] = buckControlIdleGetCallbacks;
     ctlGetCbs[BUCK_CONTROLLER_RAMP] = buckControlRampGetCallbacks;
     ctlGetCbs[BUCK_CONTROLLER_SFB] = buckControlSfbGetCallbacks;
+    ctlGetCbs[BUCK_CONTROLLER_PLECS] = buckControlPlecsGetCallbacks;
 
     config.refBuffer = (void *)&xbuckControler.refs;
     config.refSize = sizeof(xbuckControler.refs);
