@@ -75,7 +75,7 @@ Plecs {
       MaskIconOpaque off
       MaskIconRotates on
       Schematic {
-        Location      [2613, 172; 3463, 694]
+        Location      [259, 153; 1109, 675]
         ZoomFactor    1.30957
         SliderPosition [0, 0]
         ShowBrowser   off
@@ -4231,17 +4231,17 @@ Plecs {
               Direction     up
               Flipped       off
               LabelPosition south
-              Location      [86, 114; 436, 441]
+              Location      [86, 114; 436, 481]
               State         "AAAA/wAAAAD9AAAAAgAAAAEAAAAAAAAAAPwCAAAAA/sAAAAQA"
 "FoAbwBvAG0AQQByAGUAYQAAAAAA/////wAAAIEA////+wAAABQAUwBhAHYAZQBkAFYAaQBlAHcAcw"
 "AAAAAA/////wAAAGMA////+wAAAAwAVAByAGEAYwBlAHMAAAAAAP////8AAABjAP///wAAAAMAAAA"
 "AAAAAAPwBAAAAAfsAAAAUAEQAYQB0AGEAVwBpAGQAZwBlAHQAAAAAAP////8AAABEAP///wAAAV4A"
-"AAEoAAAABAAAAAQAAAAIAAAACPwAAAABAAAAAgAAAAEAAAAOAFQAbwBvAGwAQgBhAHIBAAAAAP///"
+"AAFQAAAABAAAAAQAAAAIAAAACPwAAAABAAAAAgAAAAEAAAAOAFQAbwBvAGwAQgBhAHIBAAAAAP///"
 "/8AAAAAAAAAAA=="
               SavedViews    "AAAAAgAAAAA="
               HeaderState   "AAAA/wAAAAAAAAABAAAAAQAAAAAAAAAAAAAAAAAAAAAL/gMAA"
-"AAJAAAABQAAAGQAAAAEAAAAZAAAAAcAAABkAAAABgAAAGQAAAABAAAAZAAAAAMAAABkAAAAAgAAAG"
-"QAAAAJAAAAZAAAAAgAAABkAAAAZQAAAAsBAAABAAAAAAAAAAAAAAAAZP////8AAACBAAAAAAAAAAs"
+"AAJAAAAAwAAAGQAAAABAAAAZAAAAAYAAABkAAAABwAAAGQAAAAEAAAAZAAAAAUAAABkAAAACAAAAG"
+"QAAAAJAAAAZAAAAAIAAABkAAAAZQAAAAsBAAABAAAAAAAAAAAAAAAAZP////8AAACBAAAAAAAAAAs"
 "AAABCAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAA"
 "AAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA"
 "QAAAAAAAAAjAAAAAQAAAAAAAAPoAAAAACM="
@@ -5648,8 +5648,8 @@ Plecs {
           SampleTime    "-1"
           CodeGenDiscretizationMethod "2"
           CodeGenTarget "Generic"
-          MaskType      "Four-switch buck/boost"
-          MaskDescription "Model of the four-switch buck/boost. \n"
+          MaskType      "Buck converter"
+          MaskDescription "Model of the LRS buck converter. \n"
 "\n"
 "TODO\n"
 "- Add link to documentation"
@@ -5819,9 +5819,9 @@ Plecs {
             Direction     right
           }
           Schematic {
-            Location      [2397, 118; 3357, 983]
-            ZoomFactor    1
-            SliderPosition [18, 0]
+            Location      [960, 118; 1920, 983]
+            ZoomFactor    1.49863
+            SliderPosition [198, 26]
             ShowBrowser   off
             BrowserWidth  100
             Component {
@@ -5962,7 +5962,7 @@ Plecs {
               LabelPosition south
               Parameter {
                 Variable      "Tag"
-                Value         "ii_m"
+                Value         "il_m"
                 Show          off
               }
               Parameter {
@@ -6779,12 +6779,12 @@ Plecs {
               }
               Parameter {
                 Variable      "sigma"
-                Value         "ii_std"
+                Value         "il_std"
                 Show          off
               }
               Parameter {
                 Variable      "seed"
-                Value         "302942"
+                Value         "4823"
                 Show          off
               }
               Parameter {
@@ -7267,6 +7267,14 @@ Plecs {
             }
           }
           MaskProbe {
+            Name          "Input voltage (V)"
+            Probe {
+              Component     "Vm4"
+              Path          ""
+              Signals       {"Measured voltage"}
+            }
+          }
+          MaskProbe {
             Name          "Input dc voltage (V)"
             Probe {
               Component     "Vm3"
@@ -7291,18 +7299,12 @@ Plecs {
             }
           }
           MaskProbe {
-            Name          "Input current (A)"
-          }
-          MaskProbe {
             Name          "Inductor current (A)"
             Probe {
               Component     "Am1"
               Path          ""
               Signals       {"Measured current"}
             }
-          }
-          MaskProbe {
-            Name          "Output current (A)"
           }
           MaskProbe {
             Name          "Duty cycle"
