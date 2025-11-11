@@ -35,7 +35,7 @@ def run_exp():
     buck.trace.set_mode(1); time.sleep(0.1)
     buck.trace.set_size(2000); time.sleep(0.1)
     buck.trace.set_n_pre_trig_samples(100); time.sleep(0.1)
-    buck.trace.set_trig_signal(6); time.sleep(0.1)
+    buck.trace.set_trig_signal(7); time.sleep(0.1)
     buck.trace.set_trig_level(5); time.sleep(0.1)
     buck.trace.reset(); time.sleep(0.1)
 

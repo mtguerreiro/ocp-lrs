@@ -29,11 +29,14 @@ class Commands:
         self.set_output_relay = 10
         self.get_output_relay = 11
 
-        self.set_meas_gains = 12
-        self.get_meas_gains = 13
+        self.set_load_switch = 12
+        self.get_load_switch = 13
+        
+        self.set_meas_gains = 14
+        self.get_meas_gains = 15
 
-        self.clear_status = 14
-        self.get_status = 15
+        self.clear_status = 16
+        self.get_status = 17
 
 
 class MeasGains:
@@ -162,6 +165,22 @@ class Hw:
         return (status, int(state))
 
 
+    def set_load_switch(self, state):
+        """Sets the load switch.
+        """
+        return self._set_load_switch(int(state))
+
+
+    def get_load_switch(self):
+        """Gets the load switch.
+        """
+        status, state = self._get_load_switch()
+        if status != 0:
+            return (-1, status)
+        
+        return (status, int(state))
+
+
     def set_output_relay(self, state):
         """Sets the output relay.
         """
@@ -176,7 +195,7 @@ class Hw:
             return (-1, status)
         
         return (status, int(state))
-
+    
 
     def get_meas_gains(self):
         """Gets conversion gains.
@@ -517,6 +536,57 @@ class Hw:
 
         if status < 0:
             print('Error getting the output switch. Error code {:}\r\n'.format(status))
+            return (-1, status)
+
+        state = pyocp.conversions.u8_to_u32(state, msb=False)
+        
+        return (0, state)
+
+
+    def _set_load_switch(self, state):
+        """
+
+        Parameters
+        ----------
+
+        Raises
+        ------
+
+        """
+        cmd = self._cmd.set_load_switch
+
+        tx_data = []
+        tx_data.extend( pyocp.conversions.u32_to_u8(cmd, msb=False) )
+        tx_data.extend( pyocp.conversions.u32_to_u8(state, msb=False) )
+        
+        status, _ = self._ocp_if.cs_hardware_if(self._cs_id, tx_data)
+
+        if status < 0:
+            print('Error setting the load switch. Error code {:}\r\n'.format(status))
+            return (-1, status)
+        
+        return (0,)
+
+
+    def _get_load_switch(self):
+        """
+
+        Parameters
+        ----------
+
+        Raises
+        ------
+
+        """
+        cmd = self._cmd.get_load_switch
+
+        tx_data = []
+        tx_data.extend( pyocp.conversions.u32_to_u8(cmd, msb=False) )
+        
+        status, state = self._ocp_if.cs_hardware_if(self._cs_id, tx_data)
+
+        if status < 0:
+            print('Error getting the load siwtch. Error code {:}\r\n'.format(status))
             return (-1, status)
 
         state = pyocp.conversions.u8_to_u32(state, msb=False)

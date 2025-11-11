@@ -17,9 +17,12 @@
 //=============================================================================
 /*------------------------------- Prototypes --------------------------------*/
 //=============================================================================
-void mainInit(void);
-void mainC2000Init(void);
-void mainC2000InitCpu2(void);
+static void mainInit(void);
+static void mainC2000Init(void);
+static void mainC2000InitCpu2(void);
+static void mainInitCpuTimer(void);
+
+__interrupt void mainCpuTimer0ISR(void);
 //=============================================================================
 
 //=============================================================================
@@ -61,7 +64,7 @@ void main(void)
 /*---------------------------- Static functions -----------------------------*/
 //=============================================================================
 //-----------------------------------------------------------------------------
-void mainInit(void)
+static void mainInit(void)
 {
     mainC2000Init();
 
@@ -79,9 +82,11 @@ void mainInit(void)
 
     // Initialize Ethernet (W5500)
     C2000W5500Init();
+
+    mainInitCpuTimer();
 }
 //-----------------------------------------------------------------------------
-void mainC2000Init(void)
+static void mainC2000Init(void)
 {
     //
     // Initialize device clock and peripherals
@@ -113,7 +118,7 @@ void mainC2000Init(void)
     mainC2000InitCpu2();
 }
 //-----------------------------------------------------------------------------
-void mainC2000InitCpu2(void)
+static void mainC2000InitCpu2(void)
 {
     //------------------------------------------------------------------------
     // (1) Example LED assigned to CPU2
@@ -219,6 +224,40 @@ void mainC2000InitCpu2(void)
 
     HWREG(IPC_BASE + IPC_O_ACK) = 1UL << C2000_CONFIG_CPU2_INIT;
     HWREG(IPC_BASE + IPC_O_CLR) = 1UL << C2000_CONFIG_CPU2_INIT;
+}
+//-----------------------------------------------------------------------------
+static void mainInitCpuTimer(void){
+
+    Interrupt_register(INT_TIMER0, &mainCpuTimer0ISR);
+    CPUTimer_setPeriod(CPUTIMER0_BASE, 0x05F5E100U - 1U);
+    CPUTimer_setPreScaler(CPUTIMER0_BASE, 0);
+    CPUTimer_stopTimer(CPUTIMER0_BASE);
+    CPUTimer_reloadTimerCounter(CPUTIMER0_BASE);
+
+    CPUTimer_setEmulationMode(
+        CPUTIMER0_BASE,
+        CPUTIMER_EMULATIONMODE_STOPAFTERNEXTDECREMENT
+    );
+
+    CPUTimer_enableInterrupt(CPUTIMER0_BASE);
+
+    CPUTimer_startTimer(CPUTIMER0_BASE);
+}
+//-----------------------------------------------------------------------------
+//=============================================================================
+
+//=============================================================================
+/*----------------------------------- ISRs ----------------------------------*/
+//=============================================================================
+//-----------------------------------------------------------------------------
+__interrupt void mainCpuTimer0ISR(void)
+{
+    GPIO_togglePin(DEVICE_GPIO_PIN_LED1);
+
+    //
+    // Acknowledge this interrupt to receive more interrupts from group 1
+    //
+    Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP1);
 }
 //-----------------------------------------------------------------------------
 //=============================================================================

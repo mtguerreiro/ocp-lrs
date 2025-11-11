@@ -40,7 +40,7 @@ class Interface(Controllers, Reference):
         self.disable()                   ; time.sleep(0.015)
         self.hw.clear_status()           ; time.sleep(0.015)
         self.hw.set_input_relay(1)       ; time.sleep(0.015)
-        self.hw.set_output_relay(0)      ; time.sleep(0.015)
+        self.hw.set_output_relay(1)      ; time.sleep(0.015)
         time.sleep(0.2)
 
         if( self._run_enable_procedure() != 0 ): return -1
@@ -54,7 +54,7 @@ class Interface(Controllers, Reference):
 
     def set_output_voltage_trigger(self, voltage, size=1000, pre_trig=100):
 
-        return self._set_trace_trigger(6, voltage, size=size, pre_trig=pre_trig)
+        return self._set_trace_trigger(7, voltage, size=size, pre_trig=pre_trig)
 
 
     def get_transient_data(self):

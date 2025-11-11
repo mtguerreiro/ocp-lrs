@@ -187,6 +187,32 @@ typedef enum{
     /**
      * Command
      *  ---------------------------------------------
+     *  | SET LOAD SWITCH (uint32) | STATE (uint32) |
+     *  ---------------------------------------------
+     *
+     * Response
+     * No response
+     *
+     */
+    BUCK_HW_IF_SET_LOAD_SWITCH,
+
+    /**
+     * Command
+     *  ----------------------------
+     *  | GET LOAD SWITCH (uint32) |
+     *  ----------------------------
+     *
+     * Response
+     *  ------------------------
+     *  | LOAD SWITCH (uint32) |
+     *  ------------------------
+     *
+     */
+    BUCK_HW_IF_GET_LOAD_SWITCH,
+
+    /**
+     * Command
+     *  ---------------------------------------------
      *  | SET MEAS GAINS (uint32) | GAINS (N bytes) |
      *  ---------------------------------------------
      *

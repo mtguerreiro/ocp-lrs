@@ -51,6 +51,9 @@ static int32_t buckHwIfGetInputRelay(void *in, uint32_t insize, void **out, uint
 static int32_t buckHwIfSetOutputRelay(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
 static int32_t buckHwIfGetOutputRelay(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
 
+static int32_t buckHwIfSetLoadSwitch(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
+static int32_t buckHwIfGetLoadSwitch(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
+
 static int32_t buckHwIfSetMeasGains(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
 static int32_t buckHwIfGetMeasGains(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
 
@@ -83,6 +86,9 @@ int32_t buckHwIfInitialize(void){
 
     rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_SET_OUTPUT_RELAY, buckHwIfSetOutputRelay);
     rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_GET_OUTPUT_RELAY, buckHwIfGetOutputRelay);
+
+    rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_SET_LOAD_SWITCH, buckHwIfSetLoadSwitch);
+    rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_GET_LOAD_SWITCH, buckHwIfGetLoadSwitch);
 
     rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_SET_MEAS_GAINS, buckHwIfSetMeasGains);
     rpRegisterHandle(&hwControl.interface.rp, BUCK_HW_IF_GET_MEAS_GAINS, buckHwIfGetMeasGains);
@@ -280,6 +286,36 @@ static int32_t buckHwIfGetOutputRelay(void *in, uint32_t insize, void **out, uin
     uint32_t state;
 
     state = buckHwGetOutputRelay();
+
+    if( maxoutsize < sizeof(state) ) return -1;
+
+    memcpy( *out, (void *)&state, sizeof(state) );
+
+    return sizeof(state);
+}
+//-----------------------------------------------------------------------------
+static int32_t buckHwIfSetLoadSwitch(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
+
+    (void)out;
+    (void)maxoutsize;
+    uint32_t state;
+
+    if( insize != sizeof(state) ) return -1;
+
+    memcpy( (void *)&state, in, sizeof(state) );
+
+    buckHwSetLoadSwitch(state);
+
+    return 0;
+}
+//-----------------------------------------------------------------------------
+static int32_t buckHwIfGetLoadSwitch(void *in, uint32_t insize, void **out, uint32_t maxoutsize){
+
+    (void)in;
+    (void)insize;
+    uint32_t state;
+
+    state = buckHwGetLoadSwitch();
 
     if( maxoutsize < sizeof(state) ) return -1;
 

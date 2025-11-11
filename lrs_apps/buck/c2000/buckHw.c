@@ -16,6 +16,10 @@
 
 #include <stdint.h>
 #include <string.h>
+
+/* Open controller project */
+#include "ocpConfig.h"
+#include "ocp/ocpTrace.h"
 //=============================================================================
 
 //=============================================================================
@@ -57,7 +61,7 @@ typedef struct{
     buckConfigMeasGains_t    gains;
     float alpha;
     void (*adcCallback)(void);
-    float outputRelay;
+    float loadSwitch;
 } buckHwControl_t;
 //=============================================================================
 
@@ -73,7 +77,7 @@ static void buckHwInitializeMeasGains(void);
 //=============================================================================
 /*--------------------------------- Globals ---------------------------------*/
 //=============================================================================
-static buckHwControl_t hwControl = {.pwmPeriod = 0, .status = 0, .alpha = 0.2f, .outputRelay=0.0f};
+static buckHwControl_t hwControl = {.pwmPeriod = 0, .status = 0, .alpha = 0.2f, .loadSwitch=0.0f};
 //=============================================================================
 
 //=============================================================================
@@ -89,6 +93,9 @@ int32_t buckHwInit(void *adcCallback)
     buckHwInitializeMeasGains();
 
     hwControl.pwmPeriod = EPWM_getTimeBasePeriod(EPWM_PWR_BASE);
+
+    /* Adds load switch to the trace so we can trigger on it */
+    ocpTraceAddSignal(BUCK_CONFIG_OCP_TRACE_ID, (void *)&hwControl.loadSwitch, "Load switch");
 
     return 0;
 }
@@ -342,13 +349,23 @@ uint32_t buckHwGetInputRelay(void)
 //-----------------------------------------------------------------------------
 void buckHwSetOutputRelay(uint32_t state)
 {   
-    hwControl.outputRelay = (float)(state & 0x01);
     GPIO_writePin(GPIO_RELAY2_PIN, (state ? 1U : 0U));
 }
 //-----------------------------------------------------------------------------
 uint32_t buckHwGetOutputRelay(void)
 {
     return (uint32_t)GPIO_readPin(GPIO_RELAY2_PIN);
+}
+//-----------------------------------------------------------------------------
+void buckHwSetLoadSwitch(uint32_t state)
+{   
+    hwControl.loadSwitch = (float)(state & 0x01);
+    GPIO_writePin(GPIO_LOAD_SWITCH_PIN, (state ? 1U : 0U));
+}
+//-----------------------------------------------------------------------------
+uint32_t buckHwGetLoadSwitch(void)
+{
+    return (uint32_t)GPIO_readPin(GPIO_LOAD_SWITCH_PIN);
 }
 //-----------------------------------------------------------------------------
 void buckHwSetMeasGains(buckConfigMeasGains_t *gains)
@@ -368,6 +385,7 @@ void buckHwShutDown(void)
 {
     buckHwSetInputRelay(0);
     buckHwSetOutputRelay(0);
+    buckHwSetLoadSwitch(0);
     buckHwSetPwmDuty(0.0f);
     buckHwSetPwmEnable(0);
 }
@@ -377,7 +395,7 @@ void buckHwShutDown(void)
 //=============================================================================
 /*----------------------------- Static functions ----------------------------*/
 //=============================================================================
-
+//-----------------------------------------------------------------------------
 static void buckHwInitializeAdc(void *adcCallback)
 {
 
@@ -500,15 +518,12 @@ static void buckHwInitializePwm(void)
 //-----------------------------------------------------------------------------
 static void buckHwInitializeGpio(void)
 {
-    // GPIO_setPinConfig(GPIO_0_GPIO0);
-    // GPIO_setPinConfig(GPIO_1_GPIO1);
-    // GPIO_setPinConfig(GPIO_9_GPIO9);
-    // GPIO_setPinConfig(GPIO_8_GPIO8);
-    
     GPIO_writePin(GPIO_DEBUG_PIN, 0);
     GPIO_writePin(GPIO_RELAY1_PIN, 0);
     GPIO_writePin(GPIO_RELAY2_PIN, 0);
-    GPIO_writePin(GPIO_RELAY2_PIN, 0);
+
+    GPIO_writePin(GPIO_LOAD_SWITCH_PIN, 0);
+    hwControl.loadSwitch = 0.0f;
 }
 //-----------------------------------------------------------------------------
 static void buckHwInitializeMeasGains(void)

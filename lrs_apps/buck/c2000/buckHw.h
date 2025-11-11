@@ -68,6 +68,10 @@ void buckHwSetOutputRelay(uint32_t state);
 //-----------------------------------------------------------------------------
 uint32_t buckHwGetOutputRelay(void);
 //-----------------------------------------------------------------------------
+void buckHwSetLoadSwitch(uint32_t state);
+//-----------------------------------------------------------------------------
+uint32_t buckHwGetLoadSwitch(void);
+//-----------------------------------------------------------------------------
 void buckHwSetMeasGains(buckConfigMeasGains_t *gains);
 //-----------------------------------------------------------------------------
 uint32_t buckHwGetMeasGains(buckConfigMeasGains_t *gains);

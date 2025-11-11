@@ -21,7 +21,7 @@
  */
 
 wiz_NetInfo gWIZNETINFO = { .mac = {0x0800, 0x00DC, 0xCDAB},
-                            .ip = {0xF683, 0xAC4B}, //131, 246, 75, 172
+                            .ip = {0xF683, 0xAF4B}, //131, 246, 75, 175
                             .sn = {0xFFFF, 0x00FF},
                             .gw = {0xF683, 0xFE4B}, //131, 246, 75, 254
                             .dns = {0, 0},
