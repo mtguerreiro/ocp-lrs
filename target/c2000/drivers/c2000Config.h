@@ -14,9 +14,11 @@
 
 /* GPIOs */
 #define C2000_CONFIG_CPU2_LED                   34U
-#define C2000_CONFIG_CPU2_GPIO_0                8U
-#define C2000_CONFIG_CPU2_GPIO_1                9U
-#define C2000_CONFIG_CPU2_GPIO_2                25U
+#define C2000_CONFIG_CPU2_GPIO_INPUT_RELAY      8U
+#define C2000_CONFIG_CPU2_GPIO_OUTPUT_RELAY     9U
+#define C2000_CONFIG_CPU2_GPIO_LOAD_SWITCH      1U
+#define C2000_CONFIG_CPU2_GPIO_DEBUG            0U
+//#define C2000_CONFIG_CPU2_GPIO_2                25U
 
 /* IPC flags */
 #define C2000_CONFIG_CPU1_INIT                  16U

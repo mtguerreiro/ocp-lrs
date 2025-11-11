@@ -23,8 +23,22 @@ void mainC2000InitCpu2(void);
 //=============================================================================
 
 //=============================================================================
+// GPIO pin definitions for CPU2 peripherals
+//=============================================================================
+#define GPIO_DEBUG_PIN          C2000_CONFIG_CPU2_GPIO_DEBUG
+#define GPIO_EPWM2A_PIN         2U
+#define GPIO_EPWM2B_PIN         3U
+#define GPIO_EPWM4A_PIN         6U
+#define GPIO_EPWM4B_PIN         7U
+#define GPIO_RELAY1_PIN         C2000_CONFIG_CPU2_GPIO_INPUT_RELAY
+#define GPIO_RELAY2_PIN         C2000_CONFIG_CPU2_GPIO_OUTPUT_RELAY
+#define GPIO_LOAD_SWITCH_PIN    C2000_CONFIG_CPU2_GPIO_LOAD_SWITCH
+//=============================================================================
+
+//=============================================================================
 /*----------------------------------- Main ----------------------------------*/
 //=============================================================================
+//-----------------------------------------------------------------------------
 void main(void)
 {
     uint8_t buffer[64];
@@ -44,8 +58,9 @@ void main(void)
 //=============================================================================
 
 //=============================================================================
-/*---------------------------- Initialization -------------------------------*/
+/*---------------------------- Static functions -----------------------------*/
 //=============================================================================
+//-----------------------------------------------------------------------------
 void mainInit(void)
 {
     mainC2000Init();
@@ -66,7 +81,6 @@ void mainInit(void)
     C2000W5500Init();
 }
 //-----------------------------------------------------------------------------
-
 void mainC2000Init(void)
 {
     //
@@ -99,19 +113,6 @@ void mainC2000Init(void)
     mainC2000InitCpu2();
 }
 //-----------------------------------------------------------------------------
-
-//=============================================================================
-// GPIO pin definitions for CPU2 peripherals
-//=============================================================================
-#define GPIO_DEBUG_PIN         0U
-#define GPIO_EPWM2A_PIN        2U
-#define GPIO_EPWM2B_PIN        3U
-#define GPIO_EPWM4A_PIN        6U
-#define GPIO_EPWM4B_PIN        7U
-#define GPIO_RELAY1_PIN        8U
-#define GPIO_RELAY2_PIN        9U
-//=============================================================================
-
 void mainC2000InitCpu2(void)
 {
     //------------------------------------------------------------------------
@@ -178,9 +179,14 @@ void mainC2000InitCpu2(void)
     GPIO_setMasterCore(GPIO_RELAY2_PIN, GPIO_CORE_CPU2);
     GPIO_setDirectionMode(GPIO_RELAY2_PIN, GPIO_DIR_MODE_OUT);
 
+    GPIO_setPadConfig(GPIO_LOAD_SWITCH_PIN, GPIO_PIN_TYPE_STD);
+    GPIO_setMasterCore(GPIO_LOAD_SWITCH_PIN, GPIO_CORE_CPU2);
+    GPIO_setDirectionMode(GPIO_LOAD_SWITCH_PIN, GPIO_DIR_MODE_OUT);
+
     GPIO_setPadConfig(GPIO_DEBUG_PIN, GPIO_PIN_TYPE_STD);
     GPIO_setMasterCore(GPIO_DEBUG_PIN, GPIO_CORE_CPU2);
     GPIO_setDirectionMode(GPIO_DEBUG_PIN, GPIO_DIR_MODE_OUT);
+
     //------------------------------------------------------------------------
     // (7) Enable/reset clocks for EPWM and ADC modules
     //------------------------------------------------------------------------
@@ -214,4 +220,5 @@ void mainC2000InitCpu2(void)
     HWREG(IPC_BASE + IPC_O_ACK) = 1UL << C2000_CONFIG_CPU2_INIT;
     HWREG(IPC_BASE + IPC_O_CLR) = 1UL << C2000_CONFIG_CPU2_INIT;
 }
+//-----------------------------------------------------------------------------
 //=============================================================================

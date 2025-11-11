@@ -23,25 +23,27 @@
 //=============================================================================
 
 // ePWM bases
-#define EPWM_TRIG_BASE   EPWM2_BASE   
-#define EPWM_PWR_BASE    EPWM4_BASE   
+#define EPWM_TRIG_BASE          EPWM2_BASE   
+#define EPWM_PWR_BASE           EPWM4_BASE   
 
-#define GPIO_DEBUG_PIN   0
+#define GPIO_DEBUG_PIN          C2000_CONFIG_CPU2_GPIO_DEBUG
 
 // Relay GPIOs
-#define GPIO_RELAY1_PIN  8U
-#define GPIO_RELAY2_PIN  9U
+#define GPIO_RELAY1_PIN         C2000_CONFIG_CPU2_GPIO_INPUT_RELAY
+#define GPIO_RELAY2_PIN         C2000_CONFIG_CPU2_GPIO_OUTPUT_RELAY
+
+// Load switch
+#define GPIO_LOAD_SWITCH_PIN    C2000_CONFIG_CPU2_GPIO_LOAD_SWITCH
 
 // Time-base (UP-count)
-#define EPWM2_TBPRD      ((uint16_t)1000 - 1)     // ADC trigger period
-#define EPWM4_TBPRD      ((uint16_t)1000 - 1)    // Power PWM period
+#define EPWM2_TBPRD             ((uint16_t)1000 - 1)     // ADC trigger period
+#define EPWM4_TBPRD             ((uint16_t)1000 - 1)    // Power PWM period
 
 // ADC acquisition
-#define ADC_ACQPS        (25U)               
+#define ADC_ACQPS               (25U)               
 
 // Forward for ISR
 static __interrupt void buckHwAdcA_ISR(void);
-
 //=============================================================================
 
 //=============================================================================
@@ -498,12 +500,14 @@ static void buckHwInitializePwm(void)
 //-----------------------------------------------------------------------------
 static void buckHwInitializeGpio(void)
 {
-    GPIO_setPinConfig(GPIO_0_GPIO0);
-    GPIO_setPinConfig(GPIO_9_GPIO9);
-    GPIO_setPinConfig(GPIO_8_GPIO8);
+    // GPIO_setPinConfig(GPIO_0_GPIO0);
+    // GPIO_setPinConfig(GPIO_1_GPIO1);
+    // GPIO_setPinConfig(GPIO_9_GPIO9);
+    // GPIO_setPinConfig(GPIO_8_GPIO8);
     
     GPIO_writePin(GPIO_DEBUG_PIN, 0);
     GPIO_writePin(GPIO_RELAY1_PIN, 0);
+    GPIO_writePin(GPIO_RELAY2_PIN, 0);
     GPIO_writePin(GPIO_RELAY2_PIN, 0);
 }
 //-----------------------------------------------------------------------------
