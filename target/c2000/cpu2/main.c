@@ -2,7 +2,6 @@
 //=============================================================================
 /*-------------------------------- Includes ---------------------------------*/
 //=============================================================================
-#include "driverlib.h"
 #include "device.h"
 
 #include "c2000Config.h"
@@ -22,6 +21,8 @@
 static void mainInit(void);
 static void mainInitC2000(void);
 static void mainInitIpc(void);
+static void mainInitCpuTimer(void);
+__interrupt void mainCpuTimer0ISR(void);
 //=============================================================================
 
 //=============================================================================
@@ -44,6 +45,7 @@ void main(void)
 static void mainInit(void){
 
     mainInitC2000();
+    mainInitCpuTimer();
 
     mainInitIpc();
 
@@ -92,6 +94,41 @@ static void mainInitIpc(void){
         C2000_CONFIG_MEM_CPU1_TO_CPU2_ADR, C2000_CONFIG_MEM_CPU1_TO_CPU2_SIZE,
         C2000_CONFIG_MEM_CPU2_TO_CPU1_ADR, C2000_CONFIG_MEM_CPU2_TO_CPU1_SIZE
     );
+}
+//-----------------------------------------------------------------------------
+static void mainInitCpuTimer(void){
+
+    Interrupt_enable(INT_TIMER0);
+    Interrupt_register(INT_TIMER0, &mainCpuTimer0ISR);
+    CPUTimer_setPeriod(CPUTIMER0_BASE, 0x0BEBC200 - 1U);
+    CPUTimer_setPreScaler(CPUTIMER0_BASE, 0);
+    CPUTimer_stopTimer(CPUTIMER0_BASE);
+    CPUTimer_reloadTimerCounter(CPUTIMER0_BASE);
+
+    CPUTimer_setEmulationMode(
+        CPUTIMER0_BASE,
+        CPUTIMER_EMULATIONMODE_RUNFREE
+    );
+
+    CPUTimer_enableInterrupt(CPUTIMER0_BASE);
+
+    CPUTimer_startTimer(CPUTIMER0_BASE);
+}
+//-----------------------------------------------------------------------------
+//=============================================================================
+
+//=============================================================================
+/*----------------------------------- ISRs ----------------------------------*/
+//=============================================================================
+//-----------------------------------------------------------------------------
+__interrupt void mainCpuTimer0ISR(void)
+{
+    GPIO_togglePin(DEVICE_GPIO_PIN_LED2);
+
+    //
+    // Acknowledge this interrupt to receive more interrupts from group 1
+    //
+    Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP1);
 }
 //-----------------------------------------------------------------------------
 //=============================================================================

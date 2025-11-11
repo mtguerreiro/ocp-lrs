@@ -360,7 +360,7 @@ uint32_t buckHwGetOutputRelay(void)
 void buckHwSetLoadSwitch(uint32_t state)
 {   
     hwControl.loadSwitch = (float)(state & 0x01);
-    GPIO_writePin(GPIO_LOAD_SWITCH_PIN, (state ? 1U : 0U));
+    GPIO_writePin(GPIO_LOAD_SWITCH_PIN, (state ? 0U : 1U));
 }
 //-----------------------------------------------------------------------------
 uint32_t buckHwGetLoadSwitch(void)
@@ -522,7 +522,7 @@ static void buckHwInitializeGpio(void)
     GPIO_writePin(GPIO_RELAY1_PIN, 0);
     GPIO_writePin(GPIO_RELAY2_PIN, 0);
 
-    GPIO_writePin(GPIO_LOAD_SWITCH_PIN, 0);
+    GPIO_writePin(GPIO_LOAD_SWITCH_PIN, 1); // Load switch has inverted logic
     hwControl.loadSwitch = 0.0f;
 }
 //-----------------------------------------------------------------------------

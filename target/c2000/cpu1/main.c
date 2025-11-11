@@ -1,7 +1,6 @@
 //=============================================================================
 /*-------------------------------- Includes ---------------------------------*/
 //=============================================================================
-#include "driverlib.h"
 #include "device.h"
 
 #include "c2000Config.h"
@@ -68,6 +67,8 @@ static void mainInit(void)
 {
     mainC2000Init();
 
+    mainInitCpuTimer();
+    
     // Initialize IPC between CPU1 and CPU2
     ipcClientC2000Initialize(0);
     ipcClientInitialize(
@@ -82,8 +83,6 @@ static void mainInit(void)
 
     // Initialize Ethernet (W5500)
     C2000W5500Init();
-
-    mainInitCpuTimer();
 }
 //-----------------------------------------------------------------------------
 static void mainC2000Init(void)
@@ -228,15 +227,16 @@ static void mainC2000InitCpu2(void)
 //-----------------------------------------------------------------------------
 static void mainInitCpuTimer(void){
 
+    Interrupt_enable(INT_TIMER0);
     Interrupt_register(INT_TIMER0, &mainCpuTimer0ISR);
-    CPUTimer_setPeriod(CPUTIMER0_BASE, 0x05F5E100U - 1U);
+    CPUTimer_setPeriod(CPUTIMER0_BASE, 0x0BEBC200 - 1U);
     CPUTimer_setPreScaler(CPUTIMER0_BASE, 0);
     CPUTimer_stopTimer(CPUTIMER0_BASE);
     CPUTimer_reloadTimerCounter(CPUTIMER0_BASE);
 
     CPUTimer_setEmulationMode(
         CPUTIMER0_BASE,
-        CPUTIMER_EMULATIONMODE_STOPAFTERNEXTDECREMENT
+        CPUTIMER_EMULATIONMODE_RUNFREE
     );
 
     CPUTimer_enableInterrupt(CPUTIMER0_BASE);
