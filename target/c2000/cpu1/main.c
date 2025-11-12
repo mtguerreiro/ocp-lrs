@@ -119,6 +119,10 @@ static void mainC2000Init(void)
 //-----------------------------------------------------------------------------
 static void mainC2000InitCpu2(void)
 {
+
+    /* Tells CPU2 to boot from flash */
+    Device_bootCPU2(C1C2_BROM_BOOTMODE_BOOT_FROM_FLASH);
+
     //------------------------------------------------------------------------
     // (1) Example LED assigned to CPU2
     //------------------------------------------------------------------------
