@@ -41,6 +41,7 @@ class Interface(Controllers, Reference):
         self.hw.clear_status()           ; time.sleep(0.015)
         self.hw.set_input_relay(1)       ; time.sleep(0.015)
         self.hw.set_output_relay(1)      ; time.sleep(0.015)
+        self.hw.set_load_switch(0)       ; time.sleep(0.015)
         time.sleep(0.2)
 
         if( self._run_enable_procedure() != 0 ): return -1
@@ -84,7 +85,7 @@ class Interface(Controllers, Reference):
         self.disable()                                        ; time.sleep(0.015)
         self.hw.set_output_relay(0)                           ; time.sleep(0.015)
         self.hw.set_input_relay(0)                            ; time.sleep(0.015)
-
+        self.hw.set_load_switch(0)                            ; time.sleep(0.015)
     
     def _run_enable_procedure(self):
         
