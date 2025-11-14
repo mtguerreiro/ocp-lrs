@@ -57,6 +57,11 @@ class Interface(Controllers, Reference):
         return self._set_trace_trigger(7, voltage, size=size, pre_trig=pre_trig)
 
 
+    def set_output_load_trigger(self, size=1000, pre_trig=100):
+
+        return self._set_trace_trigger(6, 0.5, size=size, pre_trig=pre_trig)
+    
+
     def get_transient_data(self):
 
         status, data = self.trace.read()             ; time.sleep(0.015)
@@ -117,6 +122,3 @@ class Interface(Controllers, Reference):
         self.trace.reset()                                 ; time.sleep(0.015)
 
         return 0
-    
-
-    
