@@ -92,6 +92,7 @@ pathlib.Path(f).rename(f'{ws_path}/{cpu1_app_name}/src/UserConfig.cmake')
 
 # Creates PathConfig.cmake with the path upper level of ocp-lrs
 file = 'PathConfig.cmake'
+ocp_lrs_upper_cmake = ocp_lrs_upper.replace('\\', '/') # Because of windows
 file_txt = f"""
 # Fetches the path to ocp and ocp-lrs. It is expected that both folders are inside a top-level folder:
 # top-level/
@@ -99,7 +100,7 @@ file_txt = f"""
 #     ocp_lrs/
 # Do not make any changes to this file, it will be automatically modified by the build_all.py script.
 
-get_filename_component(ROOT_DIR "{ocp_lrs_upper}" ABSOLUTE)
+get_filename_component(ROOT_DIR "{ocp_lrs_upper_cmake}" ABSOLUTE)
 """
 with open(f'{ws_path}/{cpu0_app_name}/src/{file}', 'w') as f:
     f.write(file_txt)
