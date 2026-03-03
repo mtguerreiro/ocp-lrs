@@ -11,6 +11,10 @@
 
 #include "stdio.h"
 #include "string.h"
+
+/* OCP */
+#include "ocpConfig.h"
+#include "ocp/ocpTrace.h"
 //============================================================================
 
 //=============================================================================
@@ -51,18 +55,12 @@ static ctlparams_t params = {
 static float vo_r = 0.0f;
 static float il_r = 0.0f;
 
-/*
- * y_1 and y_dot_1 are future samples of y and y_dot, used for delay
- * compensation.
- */
 static float yr = 0.0f;
 static float y = 0.0f, y_1 = 0.0f, y_dot = 0.0f, y_dot_1 = 0.0f;
 
 static float v, v_1;
 static float v_init;
 static float dv;
-
-static uint32_t first_enter = 0;
 
 static float dv_min, dv_min_v, dv_min_z2;
 static float dv_max, dv_max_v, dv_max_z2;
@@ -78,6 +76,9 @@ static float io_filt;
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostControlBoostEnergyMpcInit(void){
 
+    ocpTraceAddSignal(FS_BUCK_BOOST_CONFIG_TRACE_ID, (void *)&y, "Energy");
+    ocpTraceAddSignal(FS_BUCK_BOOST_CONFIG_TRACE_ID, (void *)&yr, "Energy reference");
+
     return 0;
 }
 //-----------------------------------------------------------------------------
@@ -90,15 +91,10 @@ int32_t fsbuckboostControlBoostEnergyMpcRun(void *meas, int32_t nmeas,
     (void)nmaxoutputs;
 
     float duty;
-    float y_dot_comp;
 
     fsbuckboostConfigMeasurements_t *m = (fsbuckboostConfigMeasurements_t *)meas;
     fsbuckboostConfigControl_t *o = (fsbuckboostConfigControl_t *)outputs;
     fsbuckboostConfigReferences_t *r = (fsbuckboostConfigReferences_t *)refs;
-
-    if(first_enter == 0 ){
-        io_filt = m->io;
-    }
 
     if( params.filt_en != 0 ) io_filt = dfiltExpMovAvg(m->io, io_filt, params.filt_coef);
     else io_filt = m->io;
@@ -114,28 +110,19 @@ int32_t fsbuckboostControlBoostEnergyMpcRun(void *meas, int32_t nmeas,
     y = (1.f / 2.f) * params.C * m->v_dc_out * m->v_dc_out + (1.f / 2.f) * params.L * m->il * m->il;
     y_dot = m->v_in * m->il - m->v_dc_out * io_filt;
 
-    if( first_enter == 0 ){
-        first_enter = 1;
-
-        o->u = (m->v_dc_out - m->v_in) / (m->v_dc_out);
-        v_init = m->v_in / params.L * (m->v_in - (1.0f - o->u) * m->v_dc_out) / params.alpha;
-
-        v_1 = v_init;
-        y_1 = y;
-        y_dot_1 = y_dot;
-    }
-
-    /* Delay compensation */
-    y_dot_comp = y_dot;
-    y = y + params.dt * y_dot + params.alpha * params.dt * params.dt / 2.0f * v_1;
-    y_dot = y_dot + params.alpha * params.dt * v_1;
+    // float il_1 = m->il + params.dt * (-(1.0f - o->u) * m->v_dc_out + m->v_in - 0.04f * m->il) / params.L;
+    // float vc_1 = m->v_dc_out + params.dt * ((1.0f - o->u) * m->il - io_filt) / params.C;
+    // float y_dot_comp = m->v_in * il_1 - vc_1 * io_filt;
+    //
+    // dv_min_z2 = (-params.il_lim * m->v_in - m->v_dc_out * io_filt - 2.0f * y_dot_comp + y_dot) / (params.alpha * params.dt);
+    // dv_max_z2 = ( params.il_lim * m->v_in - m->v_dc_out * io_filt - 2.0f * y_dot_comp + y_dot) / (params.alpha * params.dt);
 
     /* Determine bounds for dv */
     dv_min_v = m->v_in / params.L * (m->v_in - m->v_dc_out) / params.alpha - v_1;
     dv_max_v = m->v_in * m->v_in / params.L / params.alpha - v_1;
 
-    dv_min_z2 = (-params.il_lim * m->v_in - m->v_dc_out * io_filt - 2.0f * y_dot + y_dot_comp) / (params.alpha * params.dt);
-    dv_max_z2 = ( params.il_lim * m->v_in - m->v_dc_out * io_filt - 2.0f * y_dot + y_dot_comp) / (params.alpha * params.dt);
+    dv_min_z2 = (-params.il_lim * m->v_in - m->v_dc_out * io_filt - 2.0f * (y_dot + params.alpha * params.dt * v_1) + y_dot) / (params.alpha * params.dt);
+    dv_max_z2 = ( params.il_lim * m->v_in - m->v_dc_out * io_filt - 2.0f * (y_dot + params.alpha * params.dt * v_1) + y_dot) / (params.alpha * params.dt);
 
     dv_min = dv_min_v > dv_min_z2 ? dv_min_v : dv_min_z2;
     dv_max = dv_max_v < dv_max_z2 ? dv_max_v : dv_max_z2;
@@ -181,19 +168,34 @@ int32_t fsbuckboostControlBoostEnergyMpcGetParams(void *buffer, uint32_t size){
 //-----------------------------------------------------------------------------
 void fsbuckboostControlBoostEnergyMpcReset(void){
 
-    first_enter = 0;
 }
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostControlBoostEnergyMpcFirstEntry(void *meas, int32_t nmeas,
     void *refs, int32_t nrefs,
     void *outputs, int32_t nmaxoutputs){
 
-    (void)meas;
     (void)nmeas;
     (void)refs;
     (void)nrefs;
-    (void)outputs;
     (void)nmaxoutputs;
+    (void)outputs;
+
+    fsbuckboostConfigMeasurements_t *m = (fsbuckboostConfigMeasurements_t *)meas;
+
+    float duty;
+    float y, y_dot;
+
+    io_filt = m->io;
+
+    duty = (m->v_dc_out - m->v_in) / (m->v_dc_out);
+    v_init = m->v_in / params.L * (m->v_in - (1.0f - duty) * m->v_dc_out) / params.alpha;
+
+    y = (1.f / 2.f) * params.C * m->v_dc_out * m->v_dc_out + (1.f / 2.f) * params.L * m->il * m->il;
+    y_dot = m->v_in * m->il - m->v_dc_out * io_filt;
+
+    v_1 = v_init;
+    y_1 = y;
+    y_dot_1 = y_dot;
 
     return 0;
 }
@@ -208,8 +210,6 @@ int32_t fsbuckboostControlBoostEnergyMpcLastExit(void *meas, int32_t nmeas,
     (void)nrefs;
     (void)outputs;
     (void)nmaxoutputs;
-
-    first_enter = 0;
 
     return 0;
 }
