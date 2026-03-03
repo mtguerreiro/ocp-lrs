@@ -277,7 +277,7 @@ class _BoostEnergyMpc(pyocp.controller.ControllerTemplate):
         super().__init__(ctl_id, ctl_if)
 
         self.keys = (
-            'C', 'L', 'ts', 'il_lim', 'alpha',
+            'C', 'L', 't_mpc_sampling', 't_pwm', 'il_lim', 'alpha',
             'Ky', 'K_dz_1', 'K_dz_2',
             'filt_coef', 'filt_en',
             'kd'
@@ -329,7 +329,7 @@ class _BoostEnergyMpc(pyocp.controller.ControllerTemplate):
         gains = {
             'Ky':sys.Ky[0][0],
             'K_dz_1':sys.Kx[0][0], 'K_dz_2':sys.Kx[0][1],
-            'dt':dt, 'alpha':alpha
+            't_mpc_sampling':dt, 'alpha':alpha
         }
 
         return gains

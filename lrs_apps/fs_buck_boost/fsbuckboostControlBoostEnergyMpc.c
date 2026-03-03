@@ -23,7 +23,8 @@
 typedef struct{
     float C;
     float L;
-    float dt;
+    float t_mpc_sampling;
+    float t_pwm;
     float il_lim;
     float alpha;
     float Ky;
@@ -33,6 +34,7 @@ typedef struct{
     float filt_en;
     float kd;
 }ctlparams_t;
+
 //=============================================================================
 
 //=============================================================================
@@ -41,7 +43,8 @@ typedef struct{
 static ctlparams_t params = {
     .C = 100e-6,
     .L = 15e-6,
-    .dt = 1.0f/100e3,
+    .t_mpc_sampling = 1.0f/100e3,
+    .t_pwm = 1.0f/100e3,
     .il_lim = 15.0f,
     .alpha = 1e6,
     .Ky = 123.48210247f,
@@ -67,6 +70,8 @@ static float dv_max, dv_max_v, dv_max_z2;
 
 static float io_filt;
 
+static uint32_t div = 1;
+static uint32_t count = 0;
 //=============================================================================
 
 
@@ -91,6 +96,7 @@ int32_t fsbuckboostControlBoostEnergyMpcRun(void *meas, int32_t nmeas,
     (void)nmaxoutputs;
 
     float duty;
+    float il_1, vo_1;
 
     fsbuckboostConfigMeasurements_t *m = (fsbuckboostConfigMeasurements_t *)meas;
     fsbuckboostConfigControl_t *o = (fsbuckboostConfigControl_t *)outputs;
@@ -99,44 +105,48 @@ int32_t fsbuckboostControlBoostEnergyMpcRun(void *meas, int32_t nmeas,
     if( params.filt_en != 0 ) io_filt = dfiltExpMovAvg(m->io, io_filt, params.filt_coef);
     else io_filt = m->io;
 
-    /* References */
-    il_r = m->v_dc_out * io_filt / m->v_in;
+    if( count == 0 ){
 
-    vo_r = r->v_out - params.kd * io_filt;
+        /* Delay compensation */
+        il_1 = m->il + params.t_pwm * (-(1.0f - o->u) * m->v_dc_out + m->v_in) / params.L;
+        vo_1 = m->v_dc_out + params.t_pwm * ((1.0f - o->u) * m->il - io_filt) / params.C;
 
-    yr = (1.f / 2.f) * params.C * vo_r * vo_r + (1.f / 2.f) * params.L * il_r * il_r;
+        /* References */
+        il_r = m->v_dc_out * io_filt / m->v_in;
+        vo_r = r->v_out - params.kd * io_filt;
+        yr = (1.f / 2.f) * params.C * vo_r * vo_r + (1.f / 2.f) * params.L * il_r * il_r;
 
-    /* States */
-    y = (1.f / 2.f) * params.C * m->v_dc_out * m->v_dc_out + (1.f / 2.f) * params.L * m->il * m->il;
-    y_dot = m->v_in * m->il - m->v_dc_out * io_filt;
+        /* States */
+        y = (1.f / 2.f) * params.C * m->v_dc_out * m->v_dc_out + (1.f / 2.f) * params.L * m->il * m->il;
+        y_dot = m->v_in * il_1 - vo_1 * io_filt;
 
-    // float il_1 = m->il + params.dt * (-(1.0f - o->u) * m->v_dc_out + m->v_in - 0.04f * m->il) / params.L;
-    // float vc_1 = m->v_dc_out + params.dt * ((1.0f - o->u) * m->il - io_filt) / params.C;
-    // float y_dot_comp = m->v_in * il_1 - vc_1 * io_filt;
-    //
-    // dv_min_z2 = (-params.il_lim * m->v_in - m->v_dc_out * io_filt - 2.0f * y_dot_comp + y_dot) / (params.alpha * params.dt);
-    // dv_max_z2 = ( params.il_lim * m->v_in - m->v_dc_out * io_filt - 2.0f * y_dot_comp + y_dot) / (params.alpha * params.dt);
+        /* Bounds for dv */
+        dv_min_v = m->v_in / params.L * (m->v_in - m->v_dc_out) / params.alpha - v_1;
+        dv_max_v = m->v_in * m->v_in / params.L / params.alpha - v_1;
 
-    /* Determine bounds for dv */
-    dv_min_v = m->v_in / params.L * (m->v_in - m->v_dc_out) / params.alpha - v_1;
-    dv_max_v = m->v_in * m->v_in / params.L / params.alpha - v_1;
+        dv_min_z2 = (-params.il_lim * m->v_in - m->v_dc_out * io_filt - 2.0f * y_dot + y_dot_1) / (params.alpha * params.t_mpc_sampling);
+        dv_max_z2 = ( params.il_lim * m->v_in - m->v_dc_out * io_filt - 2.0f * y_dot + y_dot_1) / (params.alpha * params.t_mpc_sampling);
 
-    dv_min_z2 = (-params.il_lim * m->v_in - m->v_dc_out * io_filt - 2.0f * (y_dot + params.alpha * params.dt * v_1) + y_dot) / (params.alpha * params.dt);
-    dv_max_z2 = ( params.il_lim * m->v_in - m->v_dc_out * io_filt - 2.0f * (y_dot + params.alpha * params.dt * v_1) + y_dot) / (params.alpha * params.dt);
+        // dv_min_z2 = (-params.il_lim * m->v_in - m->v_dc_out * io_filt - 2.0f * (y_dot + params.alpha * params.t_mpc_sampling * v_1) + y_dot) / (params.alpha * params.t_mpc_sampling);
+        // dv_max_z2 = ( params.il_lim * m->v_in - m->v_dc_out * io_filt - 2.0f * (y_dot + params.alpha * params.t_mpc_sampling * v_1) + y_dot) / (params.alpha * params.t_mpc_sampling);
 
-    dv_min = dv_min_v > dv_min_z2 ? dv_min_v : dv_min_z2;
-    dv_max = dv_max_v < dv_max_z2 ? dv_max_v : dv_max_z2;
+        dv_min = dv_min_v > dv_min_z2 ? dv_min_v : dv_min_z2;
+        dv_max = dv_max_v < dv_max_z2 ? dv_max_v : dv_max_z2;
 
-    /* Optimization */
-    dv = - params.Ky * (y - yr) - params.K_dz_1 * (y - y_1) - params.K_dz_2 * (y_dot - y_dot_1);
-    if( dv > dv_max ) dv = dv_max;
-    else if( dv < dv_min ) dv = dv_min;
-    v = v_1 + dv;
+        /* Optimization */
+        dv = - params.Ky * (y - yr) - params.K_dz_1 * (y - y_1) - params.K_dz_2 * (y_dot - y_dot_1);
+        if( dv > dv_max ) dv = dv_max;
+        else if( dv < dv_min ) dv = dv_min;
+        v = v_1 + dv;
 
-    /* Saves variables */
-    y_1 = y;
-    y_dot_1 = y_dot;
-    v_1 = v;
+        /* Saves variables*/
+        y_1 = y;
+        y_dot_1 = y_dot;
+        v_1 = v;
+    }
+
+    count++;
+    if( count >= div ) count = 0;
 
     /* Feedback linearization */
     duty = 1.0f - 1.0f / m->v_dc_out * (m->v_in - params.L / m->v_in * params.alpha * v);
@@ -196,6 +206,9 @@ int32_t fsbuckboostControlBoostEnergyMpcFirstEntry(void *meas, int32_t nmeas,
     v_1 = v_init;
     y_1 = y;
     y_dot_1 = y_dot;
+
+    count = 0;
+    div = (uint32_t)(params.t_mpc_sampling / params.t_pwm);
 
     return 0;
 }
