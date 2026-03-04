@@ -277,11 +277,11 @@ class _BoostEnergyMpc(pyocp.controller.ControllerTemplate):
         super().__init__(ctl_id, ctl_if)
 
         self.keys = (
-            'C', 'L', 't_mpc_sampling', 't_pwm', 'il_lim', 'alpha',
-            'Ky', 'K_dz_1', 'K_dz_2',
+            'C', 'L', 't_mpc_sampling', 't_pwm', 'il_max', 'il_min',
+            'alpha', 'Ky', 'K_dz_1', 'K_dz_2',
             'filt_coef', 'filt_en',
             'kd'
-            )
+        )
         self._model_params = ModelParams
         
 

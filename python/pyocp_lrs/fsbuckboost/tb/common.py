@@ -38,10 +38,16 @@ def init(fsbb, model_params, exp_params, plat_params):
 
     fsbb.hw.set_meas_gains(plat_params['meas_gains'])
 
+    status, traces = fsbb.trace.get_signals()
+
     if 'trigger' in plat_params:
+        trigger_signal = plat_params['trigger']['signal'].encode('ascii')
+        if trigger_signal not in traces:
+            raise ValueError(f"Trigger signal {plat_params['trigger']['signal']} not in {traces}.")
+        trigger_signal_idx = traces.index(trigger_signal)
         fsbb.trace.set_n_pre_trig_samples(plat_params['trigger']['pretrig'])
         fsbb.trace.set_size(plat_params['trigger']['size'])
-        fsbb.trace.set_trig_signal(plat_params['trigger']['signal'])
+        fsbb.trace.set_trig_signal(trigger_signal_idx)
         fsbb.trace.set_trig_level(plat_params['trigger']['level'])
     else:
         v_ref = exp_params['v_ref']
@@ -50,7 +56,12 @@ def init(fsbb, model_params, exp_params, plat_params):
         fsbb.trace.set_n_pre_trig_samples(200)
         fsbb.trace.set_size(2000)
         fsbb.trace.set_trig_level(trig_level)
-        fsbb.trace.set_trig_signal(8)
+
+        if b'Voltage reference' not in traces:
+            raise ValueError(f"Signal \'Voltage reference\' not in {traces}.")
+        trigger_signal_idx = traces.index(b'Voltage reference')
+        print(f"trigger_signal_idx: {trigger_signal_idx}")
+        fsbb.trace.set_trig_signal(trigger_signal_idx)
     
     fsbb.trace.set_mode(1)
     fsbb.trace.reset()

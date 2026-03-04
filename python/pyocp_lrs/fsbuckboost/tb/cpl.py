@@ -28,6 +28,10 @@ def run_ref_step(
     time.sleep(0.2)
     common.init_relays(cpl)
     time.sleep(0.2)
+
+    #cpl.trace.reset()
+    #src.trace.reset()
+    #time.sleep(0.1 * k)
     
     common.ramp_duty_up(src)
     time.sleep(0.2 * k)
@@ -40,7 +44,7 @@ def run_ref_step(
     cpl.trace.reset()
     src.trace.reset()
 
-    time.sleep(0.05 * k)
+    time.sleep(0.3 * k)
     
     if src_ctl == 'energy':
         src.boost_energy.enable()
@@ -56,6 +60,10 @@ def run_ref_step(
 
     src.set_ref(src_exp_params['v_ref'])
     time.sleep(0.1 * k)
+
+    if 'v_ref_step_down' in src_exp_params:
+        src.set_ref(src_exp_params['v_ref_step_down'])
+        time.sleep(0.1 * k)
     
     cpl.set_ref(cpl_exp_params['v_ref'])
     time.sleep(0.1 * k)

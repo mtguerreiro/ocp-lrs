@@ -25,7 +25,8 @@ typedef struct{
     float L;
     float t_mpc_sampling;
     float t_pwm;
-    float il_lim;
+    float il_max;
+    float il_min;
     float alpha;
     float Ky;
     float K_dz_1;
@@ -45,7 +46,8 @@ static ctlparams_t params = {
     .L = 15e-6,
     .t_mpc_sampling = 1.0f/100e3,
     .t_pwm = 1.0f/100e3,
-    .il_lim = 15.0f,
+    .il_max =  15.0f,
+    .il_min = -15.0f,
     .alpha = 1e6,
     .Ky = 123.48210247f,
     .K_dz_1 = 9.68565167e+02f,
@@ -124,11 +126,11 @@ int32_t fsbuckboostControlBoostEnergyMpcRun(void *meas, int32_t nmeas,
         dv_min_v = m->v_in / params.L * (m->v_in - m->v_dc_out) / params.alpha - v_1;
         dv_max_v = m->v_in * m->v_in / params.L / params.alpha - v_1;
 
-        dv_min_z2 = (-params.il_lim * m->v_in - m->v_dc_out * io_filt - 2.0f * y_dot + y_dot_1) / (params.alpha * params.t_mpc_sampling);
-        dv_max_z2 = ( params.il_lim * m->v_in - m->v_dc_out * io_filt - 2.0f * y_dot + y_dot_1) / (params.alpha * params.t_mpc_sampling);
+        dv_min_z2 = (params.il_min * m->v_in - m->v_dc_out * io_filt - 2.0f * y_dot + y_dot_1) / (params.alpha * params.t_mpc_sampling);
+        dv_max_z2 = (params.il_max * m->v_in - m->v_dc_out * io_filt - 2.0f * y_dot + y_dot_1) / (params.alpha * params.t_mpc_sampling);
 
-        // dv_min_z2 = (-params.il_lim * m->v_in - m->v_dc_out * io_filt - 2.0f * (y_dot + params.alpha * params.t_mpc_sampling * v_1) + y_dot) / (params.alpha * params.t_mpc_sampling);
-        // dv_max_z2 = ( params.il_lim * m->v_in - m->v_dc_out * io_filt - 2.0f * (y_dot + params.alpha * params.t_mpc_sampling * v_1) + y_dot) / (params.alpha * params.t_mpc_sampling);
+        // dv_min_z2 = (params.il_min * m->v_in - m->v_dc_out * io_filt - 2.0f * (y_dot + params.alpha * params.t_mpc_sampling * v_1) + y_dot) / (params.alpha * params.t_mpc_sampling);
+        // dv_max_z2 = (params.il_max * m->v_in - m->v_dc_out * io_filt - 2.0f * (y_dot + params.alpha * params.t_mpc_sampling * v_1) + y_dot) / (params.alpha * params.t_mpc_sampling);
 
         dv_min = dv_min_v > dv_min_z2 ? dv_min_v : dv_min_z2;
         dv_max = dv_max_v < dv_max_z2 ? dv_max_v : dv_max_z2;

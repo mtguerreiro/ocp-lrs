@@ -104,13 +104,16 @@ def _config_boost_energy_mpc_controller(fsbb, model_params, ctl_params):
         {'C':C, 'L':L, 't_pwm':1/f_pwm, 'dt':dt}
     )
 
-    il_lim = ctl_params['il_lim']
+    il_max = ctl_params['il_max']
+    il_min = ctl_params['il_min']
     filt_coef = ctl_params['filt_coef']
     filt_en = ctl_params['filt_en']
     kd = ctl_params['kd']
     fsbb.boost_energy_mpc.set_params(
-        {'il_lim':il_lim, 'filt_coef':filt_coef, 'filt_en':filt_en, 'kd':kd}
-        )
+        {'il_max':il_max, 'il_min':il_min,
+         'filt_coef':filt_coef, 'filt_en':filt_en,
+         'kd':kd}
+    )
     
     alpha = ctl_params['alpha']
     rw = ctl_params['rw']
