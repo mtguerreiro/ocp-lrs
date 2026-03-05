@@ -50,16 +50,16 @@ def run_ref_step(
         src.boost_energy.enable()
     elif src_ctl == 'energy_mpc':
         src.boost_energy_mpc.enable()
-    time.sleep(0.1 * k)
+    time.sleep(0.075 * k)
 
     cpl.set_ref(cpl_exp_params['v_ref_step_up'])
-    time.sleep(0.1 * k)
+    time.sleep(0.075 * k)
 
     src.set_ref(src_exp_params['v_ref_step_up'])
-    time.sleep(0.1 * k)
+    time.sleep(0.075 * k)
 
     src.set_ref(src_exp_params['v_ref'])
-    time.sleep(0.1 * k)
+    time.sleep(0.075 * k)
 
     if 'v_ref_step_down' in src_exp_params:
         src.set_ref(src_exp_params['v_ref_step_down'])
