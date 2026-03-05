@@ -145,18 +145,18 @@ int32_t fsbuckboostControlBoostEnergyMpcRun(void *meas, int32_t nmeas,
         y_1 = y;
         y_dot_1 = y_dot;
         v_1 = v;
+
+        /* Feedback linearization */
+        duty = 1.0f - 1.0f / m->v_dc_out * (m->v_in - params.L / m->v_in * params.alpha * v);
+
+        if( duty > 1.0f ) duty = 1.0f;
+        else if( duty < 0.0f ) duty = 0.0f;
+
+        o->u = duty;
     }
 
     count++;
     if( count >= div ) count = 0;
-
-    /* Feedback linearization */
-    duty = 1.0f - 1.0f / m->v_dc_out * (m->v_in - params.L / m->v_in * params.alpha * v);
-    
-    if( duty > 1.0f ) duty = 1.0f;
-    else if( duty < 0.0f ) duty = 0.0f;
-
-    o->u = duty;
 
     return sizeof(fsbuckboostConfigControl_t);
 }

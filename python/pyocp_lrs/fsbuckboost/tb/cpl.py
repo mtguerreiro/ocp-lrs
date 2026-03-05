@@ -44,7 +44,7 @@ def run_ref_step(
     cpl.trace.reset()
     src.trace.reset()
 
-    time.sleep(0.3 * k)
+    time.sleep(0.05 * k)
     
     if src_ctl == 'energy':
         src.boost_energy.enable()
