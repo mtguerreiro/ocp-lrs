@@ -25,21 +25,21 @@ def run_ref_step(
         return (-1, -1)
     
     common.init_relays(src)
-    time.sleep(0.2)
+    time.sleep(0.1)
     common.init_relays(cpl)
-    time.sleep(0.2)
+    time.sleep(0.1)
 
     #cpl.trace.reset()
     #src.trace.reset()
     #time.sleep(0.1 * k)
     
     common.ramp_duty_up(src)
-    time.sleep(0.2 * k)
+    time.sleep(0.075 * k)
     common.ramp_duty_up(cpl)
-    time.sleep(0.2 * k)
+    time.sleep(0.075 * k)
 
     cpl.cpl.enable()
-    time.sleep(0.2 * k)
+    time.sleep(0.075 * k)
 
     cpl.trace.reset()
     src.trace.reset()
@@ -63,15 +63,15 @@ def run_ref_step(
 
     if 'v_ref_step_down' in src_exp_params:
         src.set_ref(src_exp_params['v_ref_step_down'])
-        time.sleep(0.1 * k)
+        time.sleep(0.075 * k)
     
     cpl.set_ref(cpl_exp_params['v_ref'])
-    time.sleep(0.1 * k)
+    time.sleep(0.075 * k)
     
     common.ramp_duty_down(cpl)
-    time.sleep(0.2 * k)
+    time.sleep(0.1 * k)
     common.ramp_duty_down(src)
-    time.sleep(0.2 * k)
+    time.sleep(0.1 * k)
 
     common.wait_for_trigger(cpl)
     status, cpl_data = cpl.trace.read()

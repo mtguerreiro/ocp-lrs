@@ -62,6 +62,7 @@ static float il_r = 0.0f;
 
 static float yr = 0.0f;
 static float y = 0.0f, y_1 = 0.0f, y_dot = 0.0f, y_dot_1 = 0.0f;
+static float y_dot_hat = 0.0f, y_dot_hat_1 = 0.0f;
 
 static float v, v_1;
 static float v_init;
@@ -120,14 +121,16 @@ int32_t fsbuckboostControlBoostEnergyMpcRun(void *meas, int32_t nmeas,
 
         /* States */
         y = (1.f / 2.f) * params.C * m->v_dc_out * m->v_dc_out + (1.f / 2.f) * params.L * m->il * m->il;
-        y_dot = m->v_in * il_1 - vo_1 * io_filt;
+        y_dot = m->v_in * m->il - m->v_dc_out * io_filt;
+
+        y_dot_hat = m->v_in * il_1 - vo_1 * io_filt;
 
         /* Bounds for dv */
         dv_min_v = m->v_in / params.L * (m->v_in - m->v_dc_out) / params.alpha - v_1;
         dv_max_v = m->v_in * m->v_in / params.L / params.alpha - v_1;
 
-        dv_min_z2 = (params.il_min * m->v_in - m->v_dc_out * io_filt - 2.0f * y_dot + y_dot_1) / (params.alpha * params.t_mpc_sampling);
-        dv_max_z2 = (params.il_max * m->v_in - m->v_dc_out * io_filt - 2.0f * y_dot + y_dot_1) / (params.alpha * params.t_mpc_sampling);
+        dv_min_z2 = (params.il_min * m->v_in - m->v_dc_out * io_filt - 2.0f * y_dot_hat + y_dot_hat_1) / (params.alpha * params.t_mpc_sampling);
+        dv_max_z2 = (params.il_max * m->v_in - m->v_dc_out * io_filt - 2.0f * y_dot_hat + y_dot_hat_1) / (params.alpha * params.t_mpc_sampling);
 
         // dv_min_z2 = (params.il_min * m->v_in - m->v_dc_out * io_filt - 2.0f * (y_dot + params.alpha * params.t_mpc_sampling * v_1) + y_dot) / (params.alpha * params.t_mpc_sampling);
         // dv_max_z2 = (params.il_max * m->v_in - m->v_dc_out * io_filt - 2.0f * (y_dot + params.alpha * params.t_mpc_sampling * v_1) + y_dot) / (params.alpha * params.t_mpc_sampling);
@@ -144,6 +147,7 @@ int32_t fsbuckboostControlBoostEnergyMpcRun(void *meas, int32_t nmeas,
         /* Saves variables*/
         y_1 = y;
         y_dot_1 = y_dot;
+        y_dot_hat_1 = y_dot_hat;
         v_1 = v;
 
         /* Feedback linearization */
@@ -203,11 +207,15 @@ int32_t fsbuckboostControlBoostEnergyMpcFirstEntry(void *meas, int32_t nmeas,
     v_init = m->v_in / params.L * (m->v_in - (1.0f - duty) * m->v_dc_out) / params.alpha;
 
     y = (1.f / 2.f) * params.C * m->v_dc_out * m->v_dc_out + (1.f / 2.f) * params.L * m->il * m->il;
+    y_1 = y;
+
     y_dot = m->v_in * m->il - m->v_dc_out * io_filt;
+    y_dot_1 = y_dot;
+
+    y_dot_hat = y_dot;
+    y_dot_hat = y_dot;
 
     v_1 = v_init;
-    y_1 = y;
-    y_dot_1 = y_dot;
 
     count = 0;
     div = (uint32_t)(params.t_mpc_sampling / params.t_pwm);
