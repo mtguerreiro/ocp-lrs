@@ -262,17 +262,17 @@ class _EnergyMpc(pyocp.controller.ControllerTemplate):
     def set_gains(
         self,
         rw=0.05, l_pred=200, alpha=1e6,
-        fw=None, qw=None, l_past=None, window='hann',
+        fw=None, qu=None, l_past=None, window='hann',
         il_max=6, il_min=0.15, Co=330e-6,
         dt=1/100e3
         ):
 
         if l_past is not None:
-            qw = self._get_q(fw, qw, dt, l_pred, l_past)
+            qu = self._get_q(fw, qu, dt, l_pred, l_past)
 
         mpc_params = self._get_mpc_gains(
             rw=rw, l_pred=l_pred, alpha=alpha,
-            qw=qw, l_past=l_past, window=window,
+            qu=qu, l_past=l_past, window=window,
             dt=dt
         )
 
@@ -287,7 +287,7 @@ class _EnergyMpc(pyocp.controller.ControllerTemplate):
     def _get_mpc_gains(
         self,
         rw=0.05, l_pred=200, alpha=1e6,
-        qw=None, l_past=None, window='hann',
+        qu=None, l_past=None, window='hann',
         dt=1/100e3
         ):
 
@@ -304,7 +304,7 @@ class _EnergyMpc(pyocp.controller.ControllerTemplate):
         sys = pyctl.mpc.System(
             Ad, Bd, Cd,
             l_pred=l_pred, rw=rw,
-            l_past=l_past, q=qw, window=window
+            l_past=l_past, qu=qu, window=window
         )
 
         #sys.export(r'/home/marco/projects/ocp-lrs/lrs_apps/cuk/cdmpc/')

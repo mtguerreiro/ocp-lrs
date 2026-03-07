@@ -45,7 +45,7 @@ def _config_cuk_energy_mpc_controller(cuk, model_params, ctl_params):
     alpha = ctl_params['alpha']
 
     fw = ctl_params['fw']
-    qw = ctl_params['qw']
+    qu = ctl_params['qu']
     l_past = ctl_params['l_past']
     window = ctl_params['window']
 
@@ -56,7 +56,7 @@ def _config_cuk_energy_mpc_controller(cuk, model_params, ctl_params):
 
     cuk.energy_mpc.set_gains(
         rw=rw, l_pred=l_pred, alpha=alpha,
-        fw=fw, qw=qw, l_past=l_past, window=window,
+        fw=fw, qu=qu, l_past=l_past, window=window,
         il_max=il_max, il_min=il_min, Co=Co,
         dt=dt
     )
