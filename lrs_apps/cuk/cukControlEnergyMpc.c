@@ -52,23 +52,12 @@ typedef struct{
 //=============================================================================
 /*--------------------------------- Globals ---------------------------------*/
 //=============================================================================
-// #define Ky      (4.015134334564209f)
-// #define K_dz_1  (114.55923461914062f)
-// #define K_dz_2  (0.016813231632113457f)
-//
-// #define params.dt      ((float)(1.0f/100e3))
-//
-// #define params.alpha   ((float)1e6)
-//
-// #define params.Co      ((float)330e-6)
-//
-// #define params.il_max  6.0f
-// #define params.il_min  0.15f
 
 static float p_in = 0.0f, p_out = 0.0f;
 
 /* y_1 and y_dot_1 are past samples of y and y_dot */
 static float y = 0.0f, y_1 = 0.0f, y_dot = 0.0f, y_dot_1 = 0.0f;
+static float y_dot_hat = 0.0f;
 static float yr = 0.0f;
 
 static float v, v_1 = 0.0f;
@@ -118,7 +107,6 @@ int32_t cukControlEnergyMpcRun(void *meas, int32_t nmeas, void *refs, int32_t nr
     uint32_t i;
     float duty;
     float aux = 0;
-    float y_dot_comp;
 
     p = (float **)meas;
 
@@ -157,24 +145,21 @@ int32_t cukControlEnergyMpcRun(void *meas, int32_t nmeas, void *refs, int32_t nr
     /* Initialization */
     if( first_enter == 0 ){
         first_enter = 1;
-        y_1 = y;
         v_1 = 0.0f;
+        y_1 = y;
+        y_dot = 0.0f;
+        y_dot_1 = 0.0f;
+        y_dot_hat = 0.0f;
     }
 
-    /* Delay compensation */
-    y_dot_comp = y_dot;
-    y = y + params.dt * y_dot + params.alpha * params.dt * params.dt / 2.0f * v_1;
-    y_dot = y_dot + params.alpha * params.dt * v_1;
-
-    //y_dot_comp_1 = y_dot;
-    //y_dot_comp = y_dot + params.alpha * params.dt * v_1;
+    y_dot_hat = y_dot + params.alpha * params.dt * v_1;
 
     /* Determine bounds for dv */
     dv_min_v = hwm->vi_dc / CUK_CONFIG_L_IN * (hwm->vi_dc - x3) / params.alpha - v_1;
     dv_max_v = hwm->vi_dc * hwm->vi_dc / CUK_CONFIG_L_IN / params.alpha - v_1;
 
-    dv_min_z2 = (params.il_min * hwm->vi_dc - p_out - 2.0f * y_dot + y_dot_comp) / (params.alpha * params.dt);
-    dv_max_z2 = (params.il_max * hwm->vi_dc - p_out - 2.0f * y_dot + y_dot_comp) / (params.alpha * params.dt);
+    dv_min_z2 = (params.il_min * hwm->vi_dc - p_out - 2.0f * y_dot_hat + y_dot) / (params.alpha * params.dt);
+    dv_max_z2 = (params.il_max * hwm->vi_dc - p_out - 2.0f * y_dot_hat + y_dot) / (params.alpha * params.dt);
 
     dv_min = dv_min_v > dv_min_z2 ? dv_min_v : dv_min_z2;
     dv_max = dv_max_v < dv_max_z2 ? dv_max_v : dv_max_z2;
@@ -189,15 +174,14 @@ int32_t cukControlEnergyMpcRun(void *meas, int32_t nmeas, void *refs, int32_t nr
     else if( dv < dv_min ) dv = dv_min;
     v = v_1 + dv;
 
+    /* Feedback linearization */
+    duty = 1.0f - 1.0f / x3 * (hwm->vi_dc - CUK_CONFIG_L_IN / hwm->vi_dc * params.alpha * v);
+    o->u = duty;
+
     /* Saves variables */
     y_1 = y;
     y_dot_1 = y_dot;
     v_1 = v;
-
-    /* Feedback linearization */
-    duty = 1.0f - 1.0f / x3 * (hwm->vi_dc - CUK_CONFIG_L_IN / hwm->vi_dc * params.alpha * v);
-
-    o->u = duty;
 
     if( o->u > 1.0f ) o->u = 1.0f;
     else if ( o->u < 0.0f ) o->u = 0.0f;
