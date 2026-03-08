@@ -1,5 +1,3 @@
-
-
 //=============================================================================
 /*-------------------------------- Includes ---------------------------------*/
 //=============================================================================
@@ -9,10 +7,6 @@
 #include "ocp/ocpTrace.h"
 
 #include "cukConfig.h"
-
-// #include "cdmpc/mvops.h"
-// #include "cdmpc/dmpc_matrices.h"
-// #include "cdmpc/dmpc_defs.h"
 
 #include "controller/controller.h"
 
@@ -84,6 +78,10 @@ static params_t params = {
 //=============================================================================
 //-----------------------------------------------------------------------------
 int32_t cukControlEnergyMpcInitialize(void){
+
+    ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, (void *)&y, "Energy");
+    ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, (void *)&yr, "Energy reference");
+    ocpTraceAddSignal(CUK_CONFIG_TRACE_ID, (void *)&v, "Virtual signal");
 
     return 0;
 }
@@ -178,13 +176,13 @@ int32_t cukControlEnergyMpcRun(void *meas, int32_t nmeas, void *refs, int32_t nr
     duty = 1.0f - 1.0f / x3 * (hwm->vi_dc - CUK_CONFIG_L_IN / hwm->vi_dc * params.alpha * v);
     o->u = duty;
 
+    if( o->u > 1.0f ) o->u = 1.0f;
+    else if ( o->u < 0.0f ) o->u = 0.0f;
+
     /* Saves variables */
     y_1 = y;
     y_dot_1 = y_dot;
     v_1 = v;
-
-    if( o->u > 1.0f ) o->u = 1.0f;
-    else if ( o->u < 0.0f ) o->u = 0.0f;
 
     for(i = 0; i < (L_PAST - 1); i++){
         D[i] = D[i + 1];
@@ -228,7 +226,12 @@ int32_t cukControlEnergyMpcFirstEntry(void *meas, int32_t nmeas,
 //-----------------------------------------------------------------------------
 void cukControlEnergyMpcReset(void){
 
+    uint32_t i;
+
     first_enter = 0;
+    for(i = 0; i < L_PAST; i++){
+        D[i] = 0.0f;
+    }
 }
 //-----------------------------------------------------------------------------
 void cukControlEnergyMpcGetCallbacks(void *callbacksBuffer){
