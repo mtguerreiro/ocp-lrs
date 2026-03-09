@@ -15,22 +15,22 @@ def run_ref_step(cuk, model_params, exp_params, plat_params, save=False, ctl='en
         return (-1, -1)
 
     common.ramp_duty_up(cuk)
-    time.sleep(0.2 * k)
+    time.sleep(0.075 * k)
 
     if ctl == 'energy':
         cuk.energy.enable()
     elif ctl == 'energy_mpc':
         cuk.energy_mpc.enable()
-    time.sleep(0.2 * k)
+    time.sleep(0.075 * k)
 
     cuk.set_ref(exp_params['v_ref_step_up'])
-    time.sleep(0.2 * k)
+    time.sleep(0.075 * k)
 
     cuk.set_ref(exp_params['v_ref'])
-    time.sleep(0.2 * k)
+    time.sleep(0.075 * k)
     
     common.ramp_duty_down(cuk)
-    time.sleep(0.2 * k)
+    time.sleep(0.075 * k)
 
     common.wait_for_trigger(cuk)
     

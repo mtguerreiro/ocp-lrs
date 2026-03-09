@@ -133,6 +133,7 @@ set(USER_LINK_DIRECTORIES
 set(USER_LINK_OTHER_FLAGS
 )
 
+include(${OCP_LRS_PATH}/target/zynq/ocp_defs.cmake)
 include(${OCP_LRS_PATH}/target/zynq/ocp_sources.cmake)
 include(${OCP_LRS_PATH}/target/zynq/ocp_headers.cmake)
 
