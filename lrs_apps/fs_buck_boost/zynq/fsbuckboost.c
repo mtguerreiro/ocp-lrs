@@ -45,6 +45,8 @@ static int32_t fsbuckboostInitializeControlSystem(void);
 //-----------------------------------------------------------------------------
 void fsbuckboostAdcIrq(void *callbackRef);
 //-----------------------------------------------------------------------------
+void fsbuckboostSwIrq(void *callbackRef);
+//-----------------------------------------------------------------------------
 //=============================================================================
 
 //=============================================================================
@@ -69,6 +71,11 @@ void fsbuckboostInit(void *intcInst){
 
     fsbuckboostInitializeHw(intcInst);
     fsbuckboostInitializeControlSystem();
+}
+//-----------------------------------------------------------------------------
+void fsbuckboostTrigSwIrq(void){
+
+    fsbuckboostHwTriggerSwIrq();
 }
 //-----------------------------------------------------------------------------
 //=============================================================================
@@ -103,6 +110,7 @@ static int32_t fsbuckboostInitializeHw(void *intcInst){
 
     hwConfig.intc = intcInst;
     hwConfig.irqhandle = fsbuckboostAdcIrq;
+    hwConfig.swirqhandle = fsbuckboostSwIrq;
 
     fsbuckboostHwInitialize(&hwConfig);
 
@@ -158,6 +166,7 @@ static int32_t fsbuckboostInitializeControlSystem(void){
     config.fapplyOutputs = fsbuckboostHwApplyOutputs;
 
     config.frun = fsbuckboostControllerRun;
+    config.frun2 = fsbuckboostControllerRun2;
     config.fcontrollerInterface = fsbuckboostControllerIf;
     config.fcontrollerStatus = fsbuckboostControllerStatus;
 
@@ -192,6 +201,13 @@ void fsbuckboostAdcIrq(void *callbackRef){
 
     ticks = ticks - GetTicks();
     texec_buck_boost = TicksToS(ticks) / 1e-6;
+}
+//-----------------------------------------------------------------------------
+void fsbuckboostSwIrq(void *callbackRef){
+
+    (void)callbackRef;
+
+    ocpCSRun2(FS_BUCK_BOOST_CONFIG_CS_ID);
 }
 //-----------------------------------------------------------------------------
 //=============================================================================

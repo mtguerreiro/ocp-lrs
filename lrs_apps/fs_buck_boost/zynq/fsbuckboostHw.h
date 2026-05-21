@@ -24,6 +24,7 @@ typedef struct{
 
     void *intc;
     fsbuckboostHwAdcIrqHandle_t irqhandle;
+    void (*swirqhandle)(void *);
 
 }fsbuckboostHwInitConfig_t;
 
@@ -124,6 +125,8 @@ void fsbuckboostHwSetMeasGains(fsbuckboostConfigMeasGains_t *gains);
 uint32_t fsbuckboostHwGetMeasGains(fsbuckboostConfigMeasGains_t *gains);
 //-----------------------------------------------------------------------------
 void fsbuckboostHwShutDown(void);
+//-----------------------------------------------------------------------------
+void fsbuckboostHwTriggerSwIrq(void);
 //-----------------------------------------------------------------------------
 //=============================================================================
 

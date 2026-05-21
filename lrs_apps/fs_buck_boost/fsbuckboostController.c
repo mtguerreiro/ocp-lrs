@@ -23,6 +23,7 @@
 #include "fsbuckboostControlPlecs.h"
 #include "fsbuckboostControlBoostEnergy.h"
 #include "fsbuckboostControlBoostEnergyMpc.h"
+#include "fsbuckboostControlBoostCascFblin.h"
 
 //============================================================================
 
@@ -37,6 +38,7 @@ typedef enum{
     FS_BUCK_BOOST_CONTROLLER_PLECS,
     FS_BUCK_BOOST_CONTROLLER_BOOST_ENERGY,
     FS_BUCK_BOOST_CONTROLLER_BOOST_ENERGY_MPC,
+    FS_BUCK_BOOST_CONTROLLER_BOOST_CASC_FBLIN,
     FS_BUCK_BOOST_CONTROLLER_END
 }appControllersEnum_t;
 
@@ -75,6 +77,8 @@ int32_t fsbuckboostControllerInit(void){
     ctlGetCbs[FS_BUCK_BOOST_CONTROLLER_BOOST_ENERGY] = fsbuckboostControlBoostEnergyGetCallbacks;
     ctlGetCbs[FS_BUCK_BOOST_CONTROLLER_BOOST_ENERGY_MPC] = fsbuckboostControlBoostEnergyMpcGetCallbacks;
 
+    ctlGetCbs[FS_BUCK_BOOST_CONTROLLER_BOOST_CASC_FBLIN] = fsbuckboostControlBoostCascFblinGetCallbacks;
+
     config.refBuffer = (void *)&xfsbuckboostControler.refs;
     config.refSize = sizeof(xfsbuckboostControler.refs);
     
@@ -109,6 +113,14 @@ int32_t fsbuckboostControllerRun(void *inputs, int32_t ninputs, void *outputs, i
         outputs, nmaxoutputs);
 
     return status;
+}
+//-----------------------------------------------------------------------------
+void fsbuckboostControllerRun2(void *inputs, int32_t ninputs){
+
+    controllerRun2(
+        &xfsbuckboostControler.controller,
+        inputs, ninputs
+    );
 }
 //-----------------------------------------------------------------------------
 int32_t fsbuckboostControllerIf(void *in, uint32_t insize, void **out, uint32_t maxoutsize){

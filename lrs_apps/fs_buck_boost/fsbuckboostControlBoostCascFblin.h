@@ -1,6 +1,6 @@
 
-#ifndef FS_BUCK_BOOST_CONTROLLER_H_
-#define FS_BUCK_BOOST_CONTROLLER_H_
+#ifndef FS_BUCK_BOOST_CONTROLLER_BOOST_CASC_FBLIN_H_
+#define FS_BUCK_BOOST_CONTROLLER_BOOST_CASC_FBLIN_H_
 
 //=============================================================================
 /*-------------------------------- Includes ---------------------------------*/
@@ -13,22 +13,40 @@
 /*------------------------------- Definitions -------------------------------*/
 //=============================================================================
 
+
 //=============================================================================
 
 //=============================================================================
 /*-------------------------------- Functions --------------------------------*/
 //=============================================================================
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControllerInit(void);
+int32_t fsbuckboostControlBoostCascFblinInit(void);
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControllerRun(void *inputs, int32_t ninputs, void *outputs, int32_t nmaxoutputs);
+int32_t fsbuckboostControlBoostCascFblinRun(void *meas, int32_t nmeas,
+    void *refs, int32_t nrefs,
+    void *outputs, int32_t nmaxoutputs);
 //-----------------------------------------------------------------------------
-void fsbuckboostControllerRun2(void *inputs, int32_t ninputs);
+void fsbuckboostControlBoostCascFblinRun2(
+    void *meas, int32_t nmeas,
+    void *refs, int32_t nrefs
+);
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControllerIf(void *in, uint32_t insize, void **out, uint32_t maxoutsize);
+int32_t fsbuckboostControlBoostCascFblinSetParams(void *buffer, uint32_t size);
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControllerStatus(void);
+int32_t fsbuckboostControlBoostCascFblinGetParams(void *buffer, uint32_t size);
+//-----------------------------------------------------------------------------
+void fsbuckboostControlBoostCascFblinReset(void);
+//-----------------------------------------------------------------------------
+int32_t fsbuckboostControlBoostCascFblinFirstEntry(void *meas, int32_t nmeas,
+    void *refs, int32_t nrefs,
+    void *outputs, int32_t nmaxoutputs);
+//-----------------------------------------------------------------------------
+int32_t fsbuckboostControlBoostCascFblinLastExit(void *meas, int32_t nmeas,
+    void *refs, int32_t nrefs,
+    void *outputs, int32_t nmaxoutputs);
+//-----------------------------------------------------------------------------
+void fsbuckboostControlBoostCascFblinGetCallbacks(void *callbacksBuffer);
 //-----------------------------------------------------------------------------
 //=============================================================================
 
-#endif /* FS_BUCK_BOOST_CONTROLLER_H_ */
+#endif /* FS_BUCK_BOOST_CONTROLLER_BOOST_CASC_FBLIN_H_ */

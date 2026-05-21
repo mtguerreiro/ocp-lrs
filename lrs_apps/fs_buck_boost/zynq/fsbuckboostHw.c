@@ -531,4 +531,8 @@ static void fsbuckboostHwInitializeMeasGains(void){
     hwControl.gains.v_out_ofs = FS_BUCK_BOOST_CFG_V_OUT_OFFS;
 }
 //-----------------------------------------------------------------------------
+void fsbuckboostHwTriggerSwIrq(void){
+
+}
+//-----------------------------------------------------------------------------
 //=============================================================================

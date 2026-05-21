@@ -23,6 +23,8 @@
 #include "fsbuckboostHwIf.h"
 #include "fsbuckboostHw.h"
 #include "fsbuckboostConfig.h"
+
+#include "stdio.h"
 //=============================================================================
 
 //=============================================================================
@@ -36,6 +38,8 @@ static int32_t fsbuckboostInitializeTraceSignals(void);
 static int32_t fsbuckboostInitializeControlSystem(void);
 //-----------------------------------------------------------------------------
 void fsbuckboostAdcIrq(void *callbackRef);
+//-----------------------------------------------------------------------------
+void fsbuckboostSwIrq(void *callbackRef);
 //-----------------------------------------------------------------------------
 //=============================================================================
 
@@ -78,6 +82,11 @@ void fsbuckboostInit(void *params){
     config.getControllerData = fsbuckboostHwOpilGetControllerData;
 
     ocpOpilInitialize(&config);
+}
+//-----------------------------------------------------------------------------
+void fsbuckboostTrigSwIrq(void){
+
+    fsbuckboostSwIrq(0);
 }
 //-----------------------------------------------------------------------------
 //=============================================================================
@@ -154,6 +163,7 @@ static int32_t fsbuckboostInitializeControlSystem(void){
     config.fapplyOutputs = fsbuckboostHwApplyOutputs;
 
     config.frun = fsbuckboostControllerRun;
+    config.frun2 = fsbuckboostControllerRun2;
     config.fcontrollerInterface = fsbuckboostControllerIf;
     config.fcontrollerStatus = fsbuckboostControllerStatus;
 
@@ -180,8 +190,21 @@ void fsbuckboostAdcIrq(void *callbackRef){
 
     (void)callbackRef;
 
+    printf("AD IRQ\n");
+    fflush(stdout);
+
     ocpCSRun(FS_BUCK_BOOST_CONFIG_CS_ID);
     ocpTraceSave(FS_BUCK_BOOST_CONFIG_TRACE_ID);
+}
+//-----------------------------------------------------------------------------
+void fsbuckboostSwIrq(void *callbackRef){
+
+    (void)callbackRef;
+
+    printf("SW IRQ\n");
+    fflush(stdout);
+
+    ocpCSRun2(FS_BUCK_BOOST_CONFIG_CS_ID);
 }
 //-----------------------------------------------------------------------------
 //=============================================================================

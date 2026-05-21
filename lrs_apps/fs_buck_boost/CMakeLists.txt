@@ -12,6 +12,7 @@ target_sources(fs_buck_boost
     fsbuckboostControlPlecs.c
     fsbuckboostControlBoostEnergy.c
     fsbuckboostControlBoostEnergyMpc.c
+    fsbuckboostControlBoostCascFblin.c
     fsbuckboostHwIf.c
 )
 
