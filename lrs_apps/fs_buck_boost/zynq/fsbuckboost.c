@@ -194,6 +194,7 @@ void fsbuckboostAdcIrq(void *callbackRef){
     (void)callbackRef;
     uint32_t ticks;
 
+    fsbuckboostHwSetDbgPin(0, 1);
     ticks = GetTicks();
 
     ocpCSRun(FS_BUCK_BOOST_CONFIG_CS_ID);
@@ -201,13 +202,17 @@ void fsbuckboostAdcIrq(void *callbackRef){
 
     ticks = ticks - GetTicks();
     texec_buck_boost = TicksToS(ticks) / 1e-6;
+    fsbuckboostHwSetDbgPin(0, 0);
 }
 //-----------------------------------------------------------------------------
 void fsbuckboostSwIrq(void *callbackRef){
 
     (void)callbackRef;
 
+    // fsbuckboostHwSetDbgPin(1, 1);
     ocpCSRun2(FS_BUCK_BOOST_CONFIG_CS_ID);
+
+    // fsbuckboostHwSetDbgPin(1, 0);
 }
 //-----------------------------------------------------------------------------
 //=============================================================================

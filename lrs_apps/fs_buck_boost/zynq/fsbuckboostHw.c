@@ -42,6 +42,12 @@
 #define FS_BUCK_BOOST_HW_CONFIG_GPIO_LOAD_SW_OFFS    (1U)
 #define FS_BUCK_BOOST_HW_CONFIG_GPIO_LOAD_SW         (1 << FS_BUCK_BOOST_HW_CONFIG_GPIO_LOAD_SW_OFFS)
 
+#define FS_BUCK_BOOST_HW_CONFIG_GPIO_DBG1_OFFS       (2U)
+#define FS_BUCK_BOOST_HW_CONFIG_GPIO_DBG1            (1 << FS_BUCK_BOOST_HW_CONFIG_GPIO_DBG1_OFFS)
+
+#define FS_BUCK_BOOST_HW_CONFIG_GPIO_DBG2_OFFS       (3U)
+#define FS_BUCK_BOOST_HW_CONFIG_GPIO_DBG2            (1 << FS_BUCK_BOOST_HW_CONFIG_GPIO_DBG2_OFFS)
+
 /* PWM peripheral clock, in Hz */
 #define FS_BUCK_BOOST_HW_PWM_CLK                      100000000
 #define FS_BUCK_BOOST_HW_ADC_CLK                      100000000
@@ -505,6 +511,8 @@ static void fsbuckboostHwInitializeGpio(void){
     XGpio_Initialize(&hwControl.gpio, FS_BUCK_BOOST_HW_CONFIG_GPIO_BASE);
     XGpio_SetDataDirection(&hwControl.gpio, FS_BUCK_BOOST_HW_CONFIG_GPIO_CHANNEL, 0);
 
+    XGpio_DiscreteWrite(&hwControl.gpio, FS_BUCK_BOOST_HW_CONFIG_GPIO_CHANNEL, 0);
+
     fsbuckboostHwSetInputRelay(0);
     fsbuckboostHwSetOutputRelay(0);
     fsbuckboostHwSetLoadSwitch(0);
@@ -533,6 +541,29 @@ static void fsbuckboostHwInitializeMeasGains(void){
 //-----------------------------------------------------------------------------
 void fsbuckboostHwTriggerSwIrq(void){
 
+}
+//-----------------------------------------------------------------------------
+void fsbuckboostHwSetDbgPin(uint32_t pin, uint32_t state){
+
+    uint32_t gpio;
+    uint32_t offs;
+    uint32_t mask;
+
+    if( pin == 0 )
+        offs = FS_BUCK_BOOST_HW_CONFIG_GPIO_DBG1_OFFS;
+    else if( pin == 1 )
+        offs = FS_BUCK_BOOST_HW_CONFIG_GPIO_DBG2_OFFS;
+    else
+        return;
+
+    mask = 1 << offs;
+    state = (state & 0x01) << offs;
+
+    gpio = XGpio_DiscreteRead(&hwControl.gpio, FS_BUCK_BOOST_HW_CONFIG_GPIO_CHANNEL) & (~mask);
+
+    gpio = gpio | state;
+
+    XGpio_DiscreteWrite(&hwControl.gpio, FS_BUCK_BOOST_HW_CONFIG_GPIO_CHANNEL, gpio);
 }
 //-----------------------------------------------------------------------------
 //=============================================================================
