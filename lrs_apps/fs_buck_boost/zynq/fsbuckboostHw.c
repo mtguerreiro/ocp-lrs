@@ -5,14 +5,14 @@
 #include "fsbuckboostHw.h"
 
 #include "xparameters.h"
+#include "xscugic.h"
+#include "xgpio.h"
 #include "zynqAxiFsPwm.h"
 #include "zynqAxiAdc.h"
 
 #include "fsbuckboostConfig.h"
 
 #include "zynqConfig.h"
-
-#include "xgpio.h"
 
 /* Open controller project */
 #include "ocpConfig.h"
@@ -30,6 +30,11 @@
 
 #define FS_BUCK_BOOST_HW_CONFIG_IRQ_PL_CPU1          ZYNQ_CONFIG_IRQ_PL_TO_CPU1
 #define FS_BUCK_BOOST_HW_CONFIG_IRQ_PL_CPU1_PRIO     ZYNQ_CONFIG_IRQ_PL_TO_CPU1_PRIO
+
+#define FS_BUCK_BOOST_HW_CONFIG_IRQ_CPU1_SGI         ZYNQ_CONFIG_SIG_CPU1
+#define FS_BUCK_BOOST_HW_CONFIG_IRQ_CPU1_SGI_ID      ZYNQ_CONFIG_SIG_CPU1_FS_ID
+#define FS_BUCK_BOOST_HW_CONFIG_IRQ_CPU1_SGI_PRIO    ZYNQ_CONFIG_SIG_CPU1_FS_PRIO
+
 #define FS_BUCK_BOOST_HW_CONFIG_ADC_BUFFER           ( ZYNQ_CONFIG_MEM_PL_TO_CPU1_ADR )
 
 #define FS_BUCK_BOOST_HW_CONFIG_GPIO_BASE            XPAR_XGPIO_0_BASEADDR
@@ -69,6 +74,8 @@ typedef struct{
 
     float alpha;
 
+    void *intc;
+
 }fsbuckboostHwControl_t;
 //=============================================================================
 
@@ -76,6 +83,7 @@ typedef struct{
 /*-------------------------------- Prototypes -------------------------------*/
 //=============================================================================
 static void fsbuckboostHwInitializeAdc(void *intc, fsbuckboostHwAdcIrqHandle_t irqhandle);
+static void fsbuckboostHwInitializeSwIrq(void *intc, void (*swirqhandle)(void *));
 static void fsbuckboostHwInitializePwm(void);
 static void fsbuckboostHwInitializeGpio(void);
 static void fsbuckboostHwInitializeMeasGains(void);
@@ -94,9 +102,12 @@ static fsbuckboostHwControl_t hwControl = {.pwmPeriod = 0, .status = 0, .alpha =
 int32_t fsbuckboostHwInitialize(fsbuckboostHwInitConfig_t *config){
 
     fsbuckboostHwInitializeAdc(config->intc, config->irqhandle);
+    fsbuckboostHwInitializeSwIrq(config->intc, config->swirqhandle);
     fsbuckboostHwInitializePwm();
     fsbuckboostHwInitializeGpio();
     fsbuckboostHwInitializeMeasGains();
+
+    hwControl.intc = config->intc;
 
     /* Add load switch to trace so we can trigger on it */
     ocpTraceAddSignal(FS_BUCK_BOOST_CONFIG_TRACE_ID, &hwControl.loadSwitch, "Load switch");
@@ -462,6 +473,37 @@ void fsbuckboostHwShutDown(void){
     fsbuckboostHwSetLoadSwitch(0);
 }
 //-----------------------------------------------------------------------------
+void fsbuckboostHwTriggerSwIrq(void){
+
+    XScuGic_SoftwareIntr(
+        hwControl.intc,
+        FS_BUCK_BOOST_HW_CONFIG_IRQ_CPU1_SGI, FS_BUCK_BOOST_HW_CONFIG_IRQ_CPU1_SGI_ID
+    );
+}
+//-----------------------------------------------------------------------------
+void fsbuckboostHwSetDbgPin(uint32_t pin, uint32_t state){
+
+    uint32_t gpio;
+    uint32_t offs;
+    uint32_t mask;
+
+    if( pin == 0 )
+        offs = FS_BUCK_BOOST_HW_CONFIG_GPIO_DBG1_OFFS;
+    else if( pin == 1 )
+        offs = FS_BUCK_BOOST_HW_CONFIG_GPIO_DBG2_OFFS;
+    else
+        return;
+
+    mask = 1 << offs;
+    state = (state & 0x01) << offs;
+
+    gpio = XGpio_DiscreteRead(&hwControl.gpio, FS_BUCK_BOOST_HW_CONFIG_GPIO_CHANNEL) & (~mask);
+
+    gpio = gpio | state;
+
+    XGpio_DiscreteWrite(&hwControl.gpio, FS_BUCK_BOOST_HW_CONFIG_GPIO_CHANNEL, gpio);
+}
+//-----------------------------------------------------------------------------
 //=============================================================================
 
 //=============================================================================
@@ -485,6 +527,22 @@ static void fsbuckboostHwInitializeAdc(void *intc, fsbuckboostHwAdcIrqHandle_t i
     zynqAxiAdcInterruptConfig(intc, FS_BUCK_BOOST_HW_CONFIG_IRQ_PL_CPU1, FS_BUCK_BOOST_HW_CONFIG_IRQ_PL_CPU1_PRIO, irqhandle);
 
     zynqAxiAdcEnableWrite(FS_BUCK_BOOST_HW_CONFIG_ADC_BASE, 1);
+}
+//-----------------------------------------------------------------------------
+static void fsbuckboostHwInitializeSwIrq(void *intc, void (*swirqhandle)(void *)){
+
+    XScuGic_SetPriorityTriggerType(
+        intc,
+        FS_BUCK_BOOST_HW_CONFIG_IRQ_CPU1_SGI, FS_BUCK_BOOST_HW_CONFIG_IRQ_CPU1_SGI_PRIO,
+        0x3
+    );
+    XScuGic_Connect(
+        intc, FS_BUCK_BOOST_HW_CONFIG_IRQ_CPU1_SGI, (Xil_ExceptionHandler)swirqhandle, intc
+    );
+
+    XScuGic_Enable(
+        intc, FS_BUCK_BOOST_HW_CONFIG_IRQ_CPU1_SGI
+    );
 }
 //-----------------------------------------------------------------------------
 static void fsbuckboostHwInitializePwm(void){
@@ -537,33 +595,6 @@ static void fsbuckboostHwInitializeMeasGains(void){
 
     hwControl.gains.v_out_gain = FS_BUCK_BOOST_CFG_V_OUT_GAIN;
     hwControl.gains.v_out_ofs = FS_BUCK_BOOST_CFG_V_OUT_OFFS;
-}
-//-----------------------------------------------------------------------------
-void fsbuckboostHwTriggerSwIrq(void){
-
-}
-//-----------------------------------------------------------------------------
-void fsbuckboostHwSetDbgPin(uint32_t pin, uint32_t state){
-
-    uint32_t gpio;
-    uint32_t offs;
-    uint32_t mask;
-
-    if( pin == 0 )
-        offs = FS_BUCK_BOOST_HW_CONFIG_GPIO_DBG1_OFFS;
-    else if( pin == 1 )
-        offs = FS_BUCK_BOOST_HW_CONFIG_GPIO_DBG2_OFFS;
-    else
-        return;
-
-    mask = 1 << offs;
-    state = (state & 0x01) << offs;
-
-    gpio = XGpio_DiscreteRead(&hwControl.gpio, FS_BUCK_BOOST_HW_CONFIG_GPIO_CHANNEL) & (~mask);
-
-    gpio = gpio | state;
-
-    XGpio_DiscreteWrite(&hwControl.gpio, FS_BUCK_BOOST_HW_CONFIG_GPIO_CHANNEL, gpio);
 }
 //-----------------------------------------------------------------------------
 //=============================================================================
