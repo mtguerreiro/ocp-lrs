@@ -35,6 +35,7 @@
 
 /* Software generated interrupts between CPU0 and CPU1 */
 #define ZYNQ_CONFIG_SIG_CPU0_TO_CPU1            0x0EU
+#define ZYNQ_CONFIG_SIG_CPU0_TO_CPU1_PRIO       16U
 #define ZYNQ_CONFIG_SIG_CPU1_TO_CPU0            0x0FU
 
 /* Software generated interrupt in CPU1 */
