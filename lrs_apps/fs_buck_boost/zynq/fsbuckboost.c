@@ -26,6 +26,7 @@
 
 /* Zynq */
 #include "zynqConfig.h"
+#include "xil_exception.h"
 
 /* Benchmarking */
 #include "benchmarking_zynq.h"
@@ -59,6 +60,7 @@ static float bInputs[FS_BUCK_BOOST_CONFIG_INPUT_BUF_SIZE];
 static float bOutputs[FS_BUCK_BOOST_CONFIG_OUTPUT_BUG_SIZE];
 
 static float texec_buck_boost = 0.0f;
+static float texec_buck_boost_2 = 0.0f;
 //=============================================================================
 
 //=============================================================================
@@ -139,6 +141,7 @@ static int32_t fsbuckboostInitializeTraceSignals(void){
 
     /* Other signals to add */
     ocpTraceAddSignal(FS_BUCK_BOOST_CONFIG_TRACE_ID, &texec_buck_boost, "Exec. time");
+    ocpTraceAddSignal(FS_BUCK_BOOST_CONFIG_TRACE_ID, &texec_buck_boost_2, "Exec. time 2");
 
     return 0;
 }
@@ -194,25 +197,38 @@ void fsbuckboostAdcIrq(void *callbackRef){
     (void)callbackRef;
     uint32_t ticks;
 
-    fsbuckboostHwSetDbgPin(0, 1);
     ticks = GetTicks();
+
+    fsbuckboostHwSetDbgPin(1, 1);
 
     ocpCSRun(FS_BUCK_BOOST_CONFIG_CS_ID);
     ocpTraceSave(FS_BUCK_BOOST_CONFIG_TRACE_ID);
 
+    fsbuckboostHwSetDbgPin(1, 0);
+
     ticks = ticks - GetTicks();
     texec_buck_boost = TicksToS(ticks) / 1e-6;
-    fsbuckboostHwSetDbgPin(0, 0);
 }
 //-----------------------------------------------------------------------------
 void fsbuckboostSwIrq(void *callbackRef){
 
     (void)callbackRef;
+    uint32_t ticks;
 
-    // fsbuckboostHwSetDbgPin(1, 1);
+    Xil_EnableNestedInterrupts();
+
+    ticks = GetTicks();
+
+    fsbuckboostHwSetDbgPin(0, 1);
+
     ocpCSRun2(FS_BUCK_BOOST_CONFIG_CS_ID);
 
-    // fsbuckboostHwSetDbgPin(1, 0);
+    fsbuckboostHwSetDbgPin(0, 0);
+
+    ticks = ticks - GetTicks();
+    texec_buck_boost_2 = TicksToS(ticks) / 1e-6;
+
+    Xil_DisableNestedInterrupts();
 }
 //-----------------------------------------------------------------------------
 //=============================================================================

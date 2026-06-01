@@ -35,11 +35,17 @@
 
 /* Software generated interrupts between CPU0 and CPU1 */
 #define ZYNQ_CONFIG_SIG_CPU0_TO_CPU1            0x0EU
+#define ZYNQ_CONFIG_SIG_CPU0_TO_CPU1_PRIO       16U
 #define ZYNQ_CONFIG_SIG_CPU1_TO_CPU0            0x0FU
+
+/* Software generated interrupt in CPU1 */
+#define ZYNQ_CONFIG_SIG_CPU1                    0x0DU
 
 /* CPU0 and CPU1 IDs for SGI */
 #define ZYNQ_CONFIG_SIG_CPU0_ID                 0x01
 #define ZYNQ_CONFIG_SIG_CPU1_ID                 0x02
+#define ZYNQ_CONFIG_SIG_CPU1_FS_ID              ZYNQ_CONFIG_SIG_CPU1_ID
+#define ZYNQ_CONFIG_SIG_CPU1_FS_PRIO            8U
 
 /* Interrupts from PL to CPU1 */
 #define ZYNQ_CONFIG_IRQ_PL_TO_CPU1              61U

@@ -190,7 +190,7 @@ void fsbuckboostAdcIrq(void *callbackRef){
 
     (void)callbackRef;
 
-    printf("AD IRQ\n");
+    // printf("AD IRQ\n");
     fflush(stdout);
 
     ocpCSRun(FS_BUCK_BOOST_CONFIG_CS_ID);
@@ -201,7 +201,7 @@ void fsbuckboostSwIrq(void *callbackRef){
 
     (void)callbackRef;
 
-    printf("SW IRQ\n");
+    // printf("SW IRQ\n");
     fflush(stdout);
 
     ocpCSRun2(FS_BUCK_BOOST_CONFIG_CS_ID);
