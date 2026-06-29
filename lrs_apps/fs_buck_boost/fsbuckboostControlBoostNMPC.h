@@ -13,24 +13,27 @@
 //=============================================================================
 /*------------------------------- Definitions -------------------------------*/
 //=============================================================================
-#define NX      2
+#define NX      3
 #define NU      1
 
-#define R_load       ((float)5.0f)
-#define L_inductor       ((float)15e-6f)
+#define R_load       ((float)22.0f)
+#define L_inductor       ((float)100e-6f)
 #define Co      ((float)430e-6f)
-#define V_in    ((float)8.0f)
+#define V_in    ((float)6.0f)
 
-#define I_NORM  ((float)2.0f) //I_REF
-#define V_NORM  ((float)100.0f) //V_REF
+#define I_NORM  ((float)2.5f) //I_REF
+#define V_NORM  ((float)12.0f) //V_REF
 
-#define I_ABS   ((float)6.0f)
-#define TS      ((float)50e-6f)
+#define I_ABS   ((float)4.0f)
+#define TS      ((float)100e-6f)
+#define RL      ((float)0.05f)
+#define RCO      ((float)0.015f)
 
 typedef struct{
     float rw;
     float io;
     float v_in;
+    float qz;
 }uparams_t;
 
 //=============================================================================

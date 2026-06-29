@@ -34,6 +34,7 @@
 
 #include "probfct.h"
 
+
 #include "fsbuckboostControlBoostNMPC.h"
 
  /* square macro */
@@ -61,21 +62,90 @@ void ocp_dim(typeInt *Nx, typeInt *Nu, typeInt *Np, typeInt *Ng, typeInt *Nh, ty
 void ffct(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *u, ctypeRNum *p, const typeGRAMPCparam *param, typeUSERPARAM *userparam)
 {
 	uparams_t *up = (uparams_t *)userparam;
+    ctypeRNum *xdes = param->xdes;
+    ctypeRNum *udes = param->udes;
 
-	out[0] = (-(1.0f - u[0]) * (V_NORM * x[1]) + up->v_in) / L_inductor / I_NORM;
-	out[1] = ((1.0f - u[0]) * (I_NORM * x[0]) - up->io) / Co / V_NORM;
+	// out[0] = (-(1.0f - u[0]) * (V_NORM * x[1]) + up->v_in) / L_inductor / I_NORM;
+	// out[1] = ((1.0f - u[0]) * (I_NORM * x[0]) - up->io) / Co / V_NORM;
+	float iL = I_NORM * x[0];
+    float vC = V_NORM * x[1];
+
+    float vo =
+        vC
+        + RCO * (
+            (1.0f - u[0]) * iL
+            - up->io
+        );
+
+    out[0] =
+        (
+            up->v_in
+            - RL * iL
+            - (1.0f - u[0]) * vo
+        )
+        / (L_inductor * I_NORM);
+
+    out[1] =
+        (
+            (1.0f - u[0]) * iL
+            - up->io
+        )
+        / (Co * V_NORM);
+	/* Integrator state dynamics */
+	out[2] = V_NORM*xdes[1] - vo;
 }
 /** Jacobian df/dx multiplied by vector vec, i.e. (df/dx)^T*vec or vec^T*(df/dx) **/
 void dfdx_vec(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *u, ctypeRNum *p, ctypeRNum *vec, const typeGRAMPCparam *param, typeUSERPARAM *userparam)
 {
-	out[0] = (1.0f - u[0]) * I_NORM / V_NORM / Co * vec[1];
-	out[1] = -(1.0f - u[0]) * V_NORM / I_NORM / L_inductor * vec[0];
+	// out[0] = (1.0f - u[0]) * I_NORM / V_NORM / Co * vec[1];
+	// out[1] = -(1.0f - u[0]) * V_NORM / I_NORM / L_inductor * vec[0];
+	float alpha = 1.0f - u[0];
+
+    out[0] =
+        - (RL + RCO * alpha * alpha)
+          / L_inductor
+          * vec[0]
+        +
+        alpha
+        * I_NORM
+        / (Co * V_NORM)
+        * vec[1];
+
+    out[1] =
+        - alpha
+          * V_NORM
+          / (L_inductor * I_NORM)
+          * vec[0];
+    out[2] = - 1.0f /V_NORM * vec[1];
 }
 /** Jacobian df/du multiplied by vector vec, i.e. (df/du)^T*vec or vec^T*(df/du) **/
 void dfdu_vec(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *u, ctypeRNum *p, ctypeRNum *vec, const typeGRAMPCparam *param, typeUSERPARAM *userparam)
 {
-	out[0] = x[1] * V_NORM / I_NORM / L_inductor * vec[0] - x[0] * I_NORM / V_NORM / Co * vec[1];
+	// out[0] = x[1] * V_NORM / I_NORM / L_inductor * vec[0] - x[0] * I_NORM / V_NORM / Co * vec[1];
+    uparams_t *up = (uparams_t *)userparam;
+    float alpha = 1.0f - u[0];
+    float iL = I_NORM * x[0];
+    float vC = V_NORM * x[1];
+    float vo =
+        vC
+        + RCO * (
+            alpha * iL
+            - up->io
+        );
+
+    out[0] =
+        (
+            vo
+            + alpha * RCO * iL
+        )
+        / (L_inductor * I_NORM)
+        * vec[0]
+        -
+        iL
+        / (Co * V_NORM)
+        * vec[1];
 }
+
 /** Jacobian df/dp multiplied by vector vec, i.e. (df/dp)^T*vec or vec^T*(df/dp) **/
 void dfdp_vec(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *u, ctypeRNum *p, ctypeRNum *vec, const typeGRAMPCparam *param, typeUSERPARAM *userparam)
 {
@@ -92,7 +162,8 @@ void lfct(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *u, ctypeRNum *p, 
     ctypeRNum *xdes = param->xdes;
     ctypeRNum *udes = param->udes;
 
-	out[0] = POW2(xdes[1] - x[1]) + up->rw * POW2(udes[0] - u[0]);
+	out[0] = POW2(xdes[1] - x[1]) + up->rw * POW2(udes[0] - u[0]) + up->qz* POW2(x[2]); // adding the integrator 
+
 }
 /** Gradient dl/dx **/
 void dldx(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *u, ctypeRNum *p, const typeGRAMPCparam *param, typeUSERPARAM *userparam)
@@ -104,6 +175,7 @@ void dldx(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *u, ctypeRNum *p, 
 
 	out[0] =  0.0f;
 	out[1] = -2.0f * (xdes[1] - x[1]);
+    out[2] = 2.0f * up->qz * (x[2]);
 }
 /** Gradient dl/du **/
 void dldu(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *u, ctypeRNum *p, const typeGRAMPCparam *param, typeUSERPARAM *userparam)

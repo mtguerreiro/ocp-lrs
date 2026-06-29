@@ -60,6 +60,39 @@ class Interface(Controllers, Reference):
         self.plecs.enable()
 
         return 0
+    
+    def init_boost_casc_fblin_controller(self, vo_ref=0):
+
+        self.disable()
+        self.hw.clear_status()
+        self.hw.set_load_switch(0)
+        #self.hw.set_input_relay(1)
+        self.hw.set_output_relay(1)
+        self.set_converter_mode('boost')
+
+        if( self._run_enable_procedure() != 0 ): return -1
+        
+        self.set_ref(vo_ref)
+        self.casc_fblin.reset()
+        self.casc_fblin.enable()
+
+        return 0
+    def init_boost_NMPC(self, vo_ref=0):
+
+        self.disable()
+        self.hw.clear_status()
+        self.hw.set_load_switch(0)
+        #self.hw.set_input_relay(1)
+        self.hw.set_output_relay(1)
+        self.set_converter_mode('boost')
+
+        if( self._run_enable_procedure() != 0 ): return -1
+        
+        self.set_ref(vo_ref)
+        self.boost_NMPC.reset()
+        self.boost_NMPC.enable()
+
+        return 0
 
 
     def set_output_voltage_trigger(self, voltage, size=1000, pre_trig=100):

@@ -8,9 +8,10 @@ set(OCP_IF_THREAD_SERVER_PORT 8080 CACHE STRING "Port for OCP interface")
 set(OCP_DEMO_THREADS_OCP  ON)
 set(OCP_DEMO_THREADS_OPIL ON)
 
-set(OPIL_PATH "../../../../opil")
+set(OPIL_PATH "../../../../../../opil")
 set(OPIL_TARGET_IP "127.0.0.1" CACHE STRING "IP of the OPiL target")
 set(OPIL_TARGET_PORT 8090 CACHE STRING "Port opened by the OPiL target")
+# 131.246.75.171
 
 set(OCP_CONFIG_DIR "${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/")
 set(STYPES_DIR "${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/")

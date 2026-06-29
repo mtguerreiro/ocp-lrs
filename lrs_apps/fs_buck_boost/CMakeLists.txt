@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.18)
 
 add_library(fs_buck_boost)
 
-set(GRAMPC_ROOT "E:/BOOST-converter/grampc")
+set(GRAMPC_ROOT "D:/proj/grampc")
 
 target_sources(fs_buck_boost
     PRIVATE
