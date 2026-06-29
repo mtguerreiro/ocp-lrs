@@ -10,6 +10,7 @@ include(PathConfig.cmake)
 # Set paths relative to the repo root
 set(OCP_LRS_PATH "${ROOT_DIR}/ocp-lrs")
 set(OCP_PATH "${ROOT_DIR}/ocp")
+set(GRAMPC_ROOT "/home/marco/projects/grampc")
 
 ###    DO NOT ADD OR REMOVE VARIABLES FROM THIS SECTION    ###
 # -----------------------------------------

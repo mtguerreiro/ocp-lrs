@@ -49,7 +49,6 @@ typeUSERPARAM *userparam = &uparams;
 static uint32_t isinit = 1;
 static uint32_t first_enter = 1;
 
-
 //=============================================================================
 
 
@@ -192,11 +191,11 @@ void fsbuckboostControlBoostNMPCRun2(
     // umin[0] = 1.0f - (1.0f/x2) * (m->v_in - L * (-I_ABS - x1) / TS);
     // if( umin[0] < 0.0f ) umin[0] = 0.0f;
     float x1_1, x2_1;
-    x1_1 = x1 + L  / TS * (-(1.0 - duty)*x2 + m->v_in);
+    x1_1 = x1 + L  / TS * (-(1.0 - duty)*x2 + m->v_in - 25e-3*x1);
     x2_1 = x2 + Co / TS * ( (1.0 - duty)*x1 - m->io);
-    umax[0] = 1.0f - (1.0f/x2_1) * (m->v_in - L * ( I_ABS - x1_1) / TS);
+    umax[0] = 1.0f - (1.0f/x2_1) * (m->v_in - L * ( I_ABS - x1_1) / TS - 25e-3*x1_1);
     if( umax[0] > 1.0f ) umax[0] = 1.0f;
-    umin[0] = 1.0f - (1.0f/x2_1) * (m->v_in - L * (-I_ABS - x1_1) / TS);
+    umin[0] = 1.0f - (1.0f/x2_1) * (m->v_in - L * (-I_ABS - x1_1) / TS - 25e-3*x1_1);
     if( umin[0] < 0.0f ) umin[0] = 0.0f;
 #endif
 
