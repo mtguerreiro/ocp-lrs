@@ -109,8 +109,8 @@ int32_t fsbuckboostControlBoostNMPCInit(void){
     /********* estimate and set PenaltyMin *********/
     grampc_estim_penmin(grampc, 1);
 
-    grampc_printopt(grampc);
-    grampc_printparam(grampc);
+    // grampc_printopt(grampc);
+    // grampc_printparam(grampc);
 
     return 0;
 }
@@ -132,8 +132,10 @@ int32_t fsbuckboostControlBoostNMPCRun(void *meas, int32_t nmeas,
             fsbuckboostTrigSwIrq();
 
         k++;
-        if( k == (n - 1) ) o->u = duty;
-        if( k >= n ) k = 0;
+        if( k >= n ){
+            k = 0;
+            o->u = duty;
+        }
     }
 
     return sizeof(fsbuckboostConfigControl_t);
@@ -246,6 +248,7 @@ int32_t fsbuckboostControlBoostNMPCFirstEntry(void *meas, int32_t nmeas,
 
     n = (uint32_t)params.n;
     k = 0;
+    first_enter = 0;
 
     return 0;
 }
