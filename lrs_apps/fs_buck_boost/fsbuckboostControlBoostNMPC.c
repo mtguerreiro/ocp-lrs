@@ -31,6 +31,8 @@ static uint32_t k;
 static uint32_t n;
 
 static float duty;
+static float ki = 4.0f / 20e-3f;
+static float e = 0.0f;
 
 static ctlparams_t params = {
     .n = 10.0f
@@ -161,10 +163,8 @@ void fsbuckboostControlBoostNMPCRun2(
     // x1 = x1_1 + L  / TS * (-(1.0 - duty)*x2_1 + m->v_in);
     // x2 = x2_1 + Co / TS * ( (1.0 - duty)*x1_1 - m->io);
 
-    if(first_enter == 1 ){
-        first_enter = 0;
-        duty = (x2 - m->v_in) / x2;
-    }
+    e = e + TS * (x2_ref - x2);
+    // x2_ref += ki * e;
 
     uparams.v_in = m->v_in;
     uparams.io = m->io;
@@ -179,7 +179,7 @@ void fsbuckboostControlBoostNMPCRun2(
     /* Set final state */
     xs[0] = (m->io * x2_ref / m->v_in) / I_NORM;
     xs[1] = x2_ref / V_NORM;
-    us[0] = (x2_ref - m->v_in) / (x2_ref);
+    us[0] = ((x2_ref + ki * e) - m->v_in) / ((x2_ref + ki * e));
     grampc_setparam_real_vector(grampc, "xdes", xs);
     grampc_setparam_real_vector(grampc, "udes", us);
 
@@ -239,16 +239,23 @@ int32_t fsbuckboostControlBoostNMPCFirstEntry(void *meas, int32_t nmeas,
     void *refs, int32_t nrefs,
     void *outputs, int32_t nmaxoutputs){
 
-    (void)meas;
     (void)nmeas;
     (void)refs;
     (void)nrefs;
     (void)outputs;
     (void)nmaxoutputs;
 
+    fsbuckboostConfigMeasurements_t *m = (fsbuckboostConfigMeasurements_t *)meas;
+    fsbuckboostConfigReferences_t *r = (fsbuckboostConfigReferences_t *)refs;
+
+    float x2 = m->v_dc_out;
+    float x2_ref = r->v_out;
+
     n = (uint32_t)params.n;
     k = 0;
-    first_enter = 0;
+
+    duty = (x2 - m->v_in) / x2;
+    e = 0.0f;
 
     return 0;
 }
