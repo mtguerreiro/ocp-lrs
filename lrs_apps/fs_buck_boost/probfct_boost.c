@@ -63,8 +63,8 @@ void ffct(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *u, ctypeRNum *p, 
 {
 	uparams_t *up = (uparams_t *)userparam;
 
-	out[0] = (-(1.0f - u[0]) * (V_NORM * x[1]) + up->v_in) / L / I_NORM;
-	out[1] = ((1.0f - u[0]) * (I_NORM * x[0]) - up->io ) / Co / V_NORM;
+	out[0] = (-(1.0f - u[0]) * (V_NORM * x[1]) + up->v_in + up->d) / L / I_NORM;
+	out[1] = ((1.0f - u[0]) * (I_NORM * x[0]) - up->io) / Co / V_NORM;
 }
 /** Jacobian df/dx multiplied by vector vec, i.e. (df/dx)^T*vec or vec^T*(df/dx) **/
 void dfdx_vec(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *u, ctypeRNum *p, ctypeRNum *vec, const typeGRAMPCparam *param, typeUSERPARAM *userparam)
