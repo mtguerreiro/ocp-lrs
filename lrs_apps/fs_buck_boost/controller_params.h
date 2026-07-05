@@ -22,13 +22,13 @@ typedef struct{
 #define MAX_GRAD_ITER   ((unsigned int)3)
 #define MAX_MULT_ITER   ((unsigned int)2)
 
-#define RW              ((float)2500)
+#define RW              ((float)25)
 
 #define Co              ((float)0.00043)
 #define L               ((float)0.0001)
 
-#define I_NORM          ((float)1)
-#define V_NORM          ((float)1)
+#define I_NORM          ((float)4)
+#define V_NORM          ((float)24)
 
 #define I_ABS           ((float)3.5)
 
