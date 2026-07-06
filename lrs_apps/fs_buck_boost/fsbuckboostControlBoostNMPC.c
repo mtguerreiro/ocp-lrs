@@ -21,6 +21,17 @@
 //=============================================================================
 typedef struct{
     float n;
+    float dt;
+    float rw;
+    float L;
+    float Co;
+    float i_abs;
+    float v_norm;
+    float i_norm;
+    float dt_obs;
+    float k1;
+    float k2;
+
 }ctlparams_t;
 //=============================================================================
 
@@ -32,13 +43,28 @@ static uint32_t n;
 static float duty;
 
 static ctlparams_t params = {
-    .n = 10.0f
+    .n = 10.0f,
+    .dt = 1.0f / 5e3f,
+    .rw = 150.0f,
+    .L = 100e-6f,
+    .Co = 430e-6f,
+    .i_abs = 3.5f,
+    .v_norm = 24.0f,
+    .i_norm = 4.0f,
+    .dt_obs = 1.0f / 50e3f,
+    .k1 = 0.1067f,
+    .k2 = 49.0749f
 };
 
 TYPE_GRAMPC_POINTER(grampc);
 
 uparams_t uparams = {
-    .rw = RW,
+    .rw = 150.0f,
+    .L = 100e-6f,
+    .Co = 430e-6f,
+    .i_abs = 3.5f,
+    .v_norm = 24.0f,
+    .i_norm = 4.0f,
     .io = 0.0f,
     .v_in = 0.0f,
     .d = 0.0f
@@ -49,8 +75,8 @@ typeUSERPARAM *userparam = &uparams;
 static uint32_t isinit = 1;
 static uint32_t first_enter = 1;
 
-static float k1 = 2.0f;
-static float k2 = 0.00001f;
+// static float k1 = 0.1067f;
+// static float k2 = 49.0749f;
 static float x1_hat = 0.0f;
 static float d_hat = 0.0f;
 //=============================================================================
@@ -105,7 +131,7 @@ int32_t fsbuckboostControlBoostNMPCInit(void){
 
     grampc_setopt_real_vector(grampc, "ConstraintsAbsTol", ConstraintsAbsTol);
 
-    grampc_setopt_string(grampc, "Integrator", "erk2");
+    grampc_setopt_string(grampc, "Integrator", "erk1");
     // grampc_setopt_string(grampc, "IntegratorCost", "simpson");
 
     // grampc_setopt_string(grampc, "ConstraintsHandling", "extpen");
@@ -130,6 +156,18 @@ int32_t fsbuckboostControlBoostNMPCRun(void *meas, int32_t nmeas,
     fsbuckboostConfigMeasurements_t *m = (fsbuckboostConfigMeasurements_t *)meas;
     fsbuckboostConfigControl_t *o = (fsbuckboostConfigControl_t *)outputs;
     fsbuckboostConfigReferences_t *r = (fsbuckboostConfigReferences_t *)refs;
+
+    float x1 = m->il;
+    float x2 = m->v_dc_out;
+
+    float x1_hat_1, d_hat_1;
+
+    x1_hat_1 = x1_hat + params.dt_obs / params.L * ( -(1.0 - duty) * x2 + m->v_in + d_hat + params.k1 * (x1 - x1_hat) );
+    d_hat_1 = d_hat + params.dt_obs * params.k2 * ( x1 - x1_hat);
+    // printf("x1_hat: %.4f\td_hat: %.4f\n\r", x1_hat_1, d_hat_1);
+
+    x1_hat = x1_hat_1;
+    d_hat = d_hat_1;
 
     if( n != 0 ){
         if( k == 0 )
@@ -157,38 +195,30 @@ void fsbuckboostControlBoostNMPCRun2(
     typeRNum u0[1], us[1];
     float umax[1], umin[1];
 
-    float x1 = m->il;
-    float x2 = m->v_dc_out;
+    float x1_1 = m->il;
+    float x2_1 = m->v_dc_out;
     float x2_ref = r->v_out;
 
-    // float x1, x2;
-    // x1 = x1_1 + L  / TS * (-(1.0 - duty)*x2_1 + m->v_in + d_hat);
-    // x2 = x2_1 + Co / TS * ( (1.0 - duty)*x1_1 - m->io);
-
-    float x1_hat_1, d_hat_1;
-
-    x1_hat_1 = x1_hat + L/TS * ( -(1.0 - duty) * x2 + m->v_in + d_hat + k1 * (x1 - x1_hat) );
-    d_hat_1 = d_hat + 1.0f/TS * k2 * ( x1 - x1_hat);
-
-    x1_hat = x1_hat_1;
-    d_hat = d_hat_1;
+    float x1, x2;
+    x1 = x1_1 + params.dt / params.L  * (-(1.0 - duty)*x2_1 + m->v_in + d_hat);
+    x2 = x2_1 + params.dt / params.Co * ( (1.0 - duty)*x1_1 - m->io);
 
     uparams.v_in = m->v_in;
     uparams.io = m->io;
-    uparams.d = d_hat_1;
+    uparams.d = d_hat;
 
     /* Initial conditions */
-    x0[0] = x1 / I_NORM;
-    x0[1] = x2 / V_NORM;
+    x0[0] = x1 / params.i_norm;
+    x0[1] = x2 / params.v_norm;
     u0[0] = duty;
     grampc_setparam_real_vector(grampc, "x0", x0);
     grampc_setparam_real_vector(grampc, "u0", u0);
 
     /* Set final state */
-    float uss = 1.0f - (m->v_in + d_hat_1) / x2_ref;
+    float uss = 1.0f - (m->v_in + d_hat) / x2_ref;
     float iss = m->io / (1.0f - uss);
-    xs[0] = iss / I_NORM;
-    xs[1] = x2_ref / V_NORM;
+    xs[0] = iss / params.i_norm;
+    xs[1] = x2_ref / params.v_norm;
     us[0] = uss;
     grampc_setparam_real_vector(grampc, "xdes", xs);
     grampc_setparam_real_vector(grampc, "udes", us);
@@ -198,17 +228,17 @@ void fsbuckboostControlBoostNMPCRun2(
     umax[0] = 1.0f;
     umin[0] = 0.0f;
 #else
-    // umax[0] = 1.0f - (1.0f/x2) * (d_hat_1 + m->v_in - L * ( I_ABS - x1) / TS);
-    // if( umax[0] > 1.0f ) umax[0] = 1.0f;
-    // umin[0] = 1.0f - (1.0f/x2) * (d_hat_1 + m->v_in - L * (-I_ABS - x1) / TS);
-    // if( umin[0] < 0.0f ) umin[0] = 0.0f;
-    float x1_1, x2_1;
-    x1_1 = x1 + L  / TS * (-(1.0 - duty)*x2 + m->v_in + d_hat_1);
-    x2_1 = x2 + Co / TS * ( (1.0 - duty)*x1 - m->io);
-    umax[0] = 1.0f - (1.0f/x2_1) * (m->v_in - L * ( I_ABS - x1_1) / TS + d_hat_1);
+    umax[0] = 1.0f - (1.0f/x2) * (d_hat + m->v_in - params.L * ( params.i_abs - x1) / params.dt);
     if( umax[0] > 1.0f ) umax[0] = 1.0f;
-    umin[0] = 1.0f - (1.0f/x2_1) * (m->v_in - L * (-I_ABS - x1_1) / TS + d_hat_1);
+    umin[0] = 1.0f - (1.0f/x2) * (d_hat + m->v_in - params.L * (-params.i_abs - x1) / params.dt);
     if( umin[0] < 0.0f ) umin[0] = 0.0f;
+    // float x1_1, x2_1;
+    // x1_1 = x1 + params.dt / params.L * (-(1.0 - duty)*x2 + m->v_in + d_hat);
+    // x2_1 = x2 + params.dt / params.Co * ( (1.0 - duty)*x1 - m->io);
+    // umax[0] = 1.0f - (1.0f/x2_1) * (m->v_in - params.L * ( params.i_abs - x1_1) / params.dt + d_hat);
+    // if( umax[0] > 1.0f ) umax[0] = 1.0f;
+    // umin[0] = 1.0f - (1.0f/x2_1) * (m->v_in - params.L * (-params.i_abs - x1_1) / params.dt + d_hat);
+    // if( umin[0] < 0.0f ) umin[0] = 0.0f;
 #endif
 
     grampc_setparam_real_vector(grampc, "umax", umax);
@@ -228,6 +258,13 @@ int32_t fsbuckboostControlBoostNMPCSetParams(void *buffer, uint32_t size){
     memcpy( (void *)&params, buffer, sizeof(ctlparams_t) );
 
     n = (uint32_t) params.n;
+
+    uparams.rw = params.rw;
+    uparams.L = params.L;
+    uparams.Co = params.Co;
+    uparams.i_abs = params.i_abs;
+    uparams.v_norm = params.v_norm;
+    uparams.i_norm = params.i_norm;
 
     return 0;
 }

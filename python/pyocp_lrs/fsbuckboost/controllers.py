@@ -373,10 +373,38 @@ class _BoostNMPC(pyocp.controller.ControllerTemplate):
         super().__init__(ctl_id, ctl_if)
 
         self.keys = (
-            'n'
+            'n', 'dt', 'rw', 'L', 'Co',
+            'i_abs', 'v_norm', 'i_norm',
+            'dt_obs', 'k1', 'k2'
         )
         self._model_params = ModelParams
-        
+
+
+    def get_obs_gains(self, ts, pct_os, L):
+
+        zeta, wn = pyctl.design.pe.design_utils.zeta_wn(ts, pct_os)
+
+        k1 = 2 * L * zeta * wn
+        k2 = L * wn**2
+
+        return (k1, k2)
+
+
+    def _default_params(self):
+        params = {
+            'fs': 5e3,
+            'rw': 150,
+            'L': 100e-6,
+            'Co': 430e-6,
+            'i_abs': 3.5,
+            'v_norm': 24.0,
+            'i_norm': 4,
+            'ts_obs': 7.5e-3,
+            'pct_os_obs': 2.5
+        }
+
+        return params
+
 
     def _decode(self, params_bin):
         

@@ -63,20 +63,21 @@ void ffct(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *u, ctypeRNum *p, 
 {
 	uparams_t *up = (uparams_t *)userparam;
 
-	out[0] = (-(1.0f - u[0]) * (V_NORM * x[1]) + up->v_in + up->d) / L / I_NORM;
-	out[1] = ((1.0f - u[0]) * (I_NORM * x[0]) - up->io) / Co / V_NORM;
+	out[0] = (-(1.0f - u[0]) * (up->v_norm * x[1]) + up->v_in + up->d) / up->L / up->i_norm;
+	out[1] = ((1.0f - u[0]) * (up->i_norm * x[0]) - up->io) / up->Co / up->v_norm;
 }
 /** Jacobian df/dx multiplied by vector vec, i.e. (df/dx)^T*vec or vec^T*(df/dx) **/
 void dfdx_vec(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *u, ctypeRNum *p, ctypeRNum *vec, const typeGRAMPCparam *param, typeUSERPARAM *userparam)
 {
 	uparams_t *up = (uparams_t *)userparam;
-	out[0] = (1.0f - u[0]) * I_NORM / V_NORM / Co * vec[1];
-	out[1] = -(1.0f - u[0]) * V_NORM / I_NORM / L * vec[0];
+	out[0] = (1.0f - u[0]) * up->i_norm / up->v_norm / up->Co * vec[1];
+	out[1] = -(1.0f - u[0]) * up->v_norm / up->i_norm / up->L * vec[0];
 }
 /** Jacobian df/du multiplied by vector vec, i.e. (df/du)^T*vec or vec^T*(df/du) **/
 void dfdu_vec(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *u, ctypeRNum *p, ctypeRNum *vec, const typeGRAMPCparam *param, typeUSERPARAM *userparam)
 {
-	out[0] = x[1] * V_NORM / I_NORM / L * vec[0] - x[0] * I_NORM / V_NORM / Co * vec[1];
+	uparams_t *up = (uparams_t *)userparam;
+	out[0] = x[1] * up->v_norm / up->i_norm / up->L * vec[0] - x[0] * up->i_norm / up->v_norm / up->Co * vec[1];
 }
 /** Jacobian df/dp multiplied by vector vec, i.e. (df/dp)^T*vec or vec^T*(df/dp) **/
 void dfdp_vec(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *u, ctypeRNum *p, ctypeRNum *vec, const typeGRAMPCparam *param, typeUSERPARAM *userparam)
@@ -165,15 +166,15 @@ void dgdp_vec(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *u, ctypeRNum 
 void hfct(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *u, ctypeRNum *p, const typeGRAMPCparam *param, typeUSERPARAM *userparam)
 {
 #ifdef EN_STATE_CNT
-	out[0] =  x[0] * I_NORM / I_ABS - 1.0f;
-	// out[1] = -x[0] * I_NORM / I_ABS - 1.0f;
+	out[0] =  x[0] * up->i_norm / I_ABS - 1.0f;
+	// out[1] = -x[0] * up->i_norm / I_ABS - 1.0f;
 #endif
 }
 /** Jacobian dh/dx multiplied by vector vec, i.e. (dh/dx)^T*vec or vec^T*(dg/dx) **/
 void dhdx_vec(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *u, ctypeRNum *p, ctypeRNum *vec, const typeGRAMPCparam *param, typeUSERPARAM *userparam)
 {
 #ifdef EN_STATE_CNT
-	out[0] = I_NORM / I_ABS * vec[0];
+	out[0] = up->i_norm / I_ABS * vec[0];
 	// out[1] = 0.0f;
 #endif
 }
