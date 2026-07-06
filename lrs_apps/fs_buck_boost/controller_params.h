@@ -20,9 +20,9 @@ typedef struct{
 #define NX              2
 #define NU              1
 
-#define T_HORIZON       ((float)0.0036)
+#define T_HORIZON       ((float)0.0048)
 #define DT_GRAMPC       ((float)1e-05)
-#define N_HORIZON       ((unsigned int)19)
+#define N_HORIZON       ((unsigned int)25)
 
 #define MAX_GRAD_ITER   ((unsigned int)2)
 #define MAX_MULT_ITER   ((unsigned int)2)
