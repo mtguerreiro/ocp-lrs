@@ -93,6 +93,23 @@ class Interface(Controllers, Reference):
         self.boost_NMPC.enable()
 
         return 0
+    
+    def init_boost_plecs_controller_2freq(self, vo_ref=0):
+
+        self.disable()
+        self.hw.clear_status()
+        self.hw.set_load_switch(0)
+        #self.hw.set_input_relay(1)
+        self.hw.set_output_relay(1)
+        self.set_converter_mode('boost')
+
+        if( self._run_enable_procedure() != 0 ): return -1
+        
+        self.set_ref(vo_ref)
+        self.plecs_2freq.reset()
+        self.plecs_2freq.enable()
+
+        return 0
 
 
     def set_output_voltage_trigger(self, voltage, size=1000, pre_trig=100):

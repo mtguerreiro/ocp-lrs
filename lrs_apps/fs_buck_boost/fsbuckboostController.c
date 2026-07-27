@@ -25,6 +25,7 @@
 #include "fsbuckboostControlBoostEnergyMpc.h"
 #include "fsbuckboostControlBoostCascFblin.h"
 #include "fsbuckboostControlBoostNMPC.h"
+#include "fsbuckboostControlPlecs_2Freq.h"
 
 //============================================================================
 
@@ -41,7 +42,9 @@ typedef enum{
     FS_BUCK_BOOST_CONTROLLER_BOOST_ENERGY_MPC,
     FS_BUCK_BOOST_CONTROLLER_BOOST_CASC_FBLIN,
     FS_BUCK_BOOST_CONTROLLER_BOOST_NMPC,
+    FS_BUCK_BOOST_CONTROLLER_PLECS_2FREQ,
     FS_BUCK_BOOST_CONTROLLER_END
+    
 }appControllersEnum_t;
 
 typedef struct{
@@ -81,7 +84,8 @@ int32_t fsbuckboostControllerInit(void){
 
     ctlGetCbs[FS_BUCK_BOOST_CONTROLLER_BOOST_CASC_FBLIN] = fsbuckboostControlBoostCascFblinGetCallbacks;
     ctlGetCbs[FS_BUCK_BOOST_CONTROLLER_BOOST_NMPC] = fsbuckboostControlBoostNMPCGetCallbacks;
-
+    
+    ctlGetCbs[FS_BUCK_BOOST_CONTROLLER_PLECS_2FREQ] = fsbuckboostControlBoost2FREQGetCallbacks;
 
     config.refBuffer = (void *)&xfsbuckboostControler.refs;
     config.refSize = sizeof(xfsbuckboostControler.refs);

@@ -17,16 +17,17 @@ target_sources(fs_buck_boost
     fsbuckboostControlBoostCascFblin.c
     fsbuckboostControlBoostNMPC.c
     fsbuckboostHwIf.c
+    fsbuckboostControlPlecs_2Freq.c
 )
 
 target_sources(fs_buck_boost
     PRIVATE
     plecs/Plecs_controller.c
+    plecs/Plecs_controller_inner_loop.c
+    plecs/Plecs_controller_outer_loop.c
+
 )
-target_sources(fs_buck_boost
-    PRIVATE
-    plecs/Plecs_controller.c
-)
+
 
 target_sources(fs_buck_boost
     PRIVATE

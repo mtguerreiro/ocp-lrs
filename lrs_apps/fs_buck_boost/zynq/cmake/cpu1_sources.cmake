@@ -17,10 +17,14 @@ list(APPEND USER_COMPILE_SOURCES
     "${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/fsbuckboostControlBoostNMPC.c"
     "${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/fsbuckboostHwIf.c"
     "${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/probfct_PMSM.c"
+    "${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/fsbuckboostControlPlecs_2Freq.c"
+   
 )
 
 list(APPEND USER_COMPILE_SOURCES
     "${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/plecs/Plecs_controller.c"
+    "${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/plecs/Plecs_controller_inner_loop.c"
+    "${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/plecs/Plecs_controller_outer_loop.c"
 )
 set(GRAMPC_ROOT "D:/proj/grampc")
 
