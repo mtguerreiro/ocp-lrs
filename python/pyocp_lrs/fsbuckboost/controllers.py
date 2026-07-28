@@ -55,8 +55,7 @@ class Controllers:
         self.boost_energy = _BoostEnergy(5, ctl_if)
         self.boost_energy_mpc = _BoostEnergyMpc(6, ctl_if)
         self.casc_fblin = _CascFblin(7, ctl_if)
-        # self.boost_NMPC = _BoostNMPC(8, ctl_if)
-        self.plecs_2freq = _Plecs2Freq(9, ctl_if)
+        self.plecs_2freq = _Plecs2Freq(8, ctl_if)
 
 
 class _Idle(pyocp.controller.ControllerTemplate):
@@ -369,35 +368,6 @@ class _CascFblin(pyocp.controller.ControllerTemplate):
         return params_bin
     
 
-class _BoostNMPC(pyocp.controller.ControllerTemplate):
-    
-    def __init__(self, ctl_id, ctl_if):
-        super().__init__(ctl_id, ctl_if)
-
-        self.keys = (
-            'n'
-        )
-        self._model_params = ModelParams
-        
-
-    def _decode(self, params_bin):
-        
-        keys = self.keys
-        
-        _params = struct.unpack(f'<{len(keys)}f', params_bin)
-        params = dict(zip(keys, _params))
-
-        return params
-
-
-    def _encode(self, params):
-
-        keys = self.keys
-        
-        _params = [params[key] for key in keys]
-        params_bin = struct.pack(f'<{len(keys)}f', *_params)
-
-        return params_bin
 
    
 

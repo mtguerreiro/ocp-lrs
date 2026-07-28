@@ -1,7 +1,7 @@
 /*
- * Header file for: lrs_fs_buck_boost/Plecs controller
- * Generated with : PLECS 4.8.6
- * Generated on   : 4 Nov 2025 11:27:16
+ * Header file for: lrs_fs_boost_control/Controller/single_block_control/Plecs controller
+ * Generated with : PLECS 4.8.10
+ * Generated on   : 24 Jul 2026 15:42:49
  */
 #ifndef PLECS_HEADER_Plecs_controller_h_
 #define PLECS_HEADER_Plecs_controller_h_
@@ -23,6 +23,21 @@ extern const char * Plecs_controller_errorStatus;
 extern const float Plecs_controller_sampleTime;
 
 
+/*
+ * Model states */
+typedef struct
+{
+   bool Memory;                     /* Plecs controller/SR Flip-flop/Memory */
+   int8_t DiscreteIntegrator1_first; /* Plecs controller/Discrete Integrator1 */
+   float DiscreteIntegrator1_i1_x;  /* Plecs controller/Discrete Integrator1 */
+   float DiscreteIntegrator1_i2_prevU; /* Plecs controller/Discrete Integrator1 */
+   int8_t DiscreteIntegrator_first; /* Plecs controller/Discrete Integrator */
+   float DiscreteIntegrator_i1_x;   /* Plecs controller/Discrete Integrator */
+   float DiscreteIntegrator_i2_prevU; /* Plecs controller/Discrete Integrator */
+} Plecs_controller_ModelStates;
+extern Plecs_controller_ModelStates Plecs_controller_X;
+
+
 /* External inputs */
 typedef struct
 {
@@ -40,6 +55,24 @@ typedef struct
 } Plecs_controller_ExternalOutputs;
 extern Plecs_controller_ExternalOutputs Plecs_controller_Y;
 
+
+/* Block outputs */
+typedef struct
+{
+   bool Comparator;                 /* Plecs controller/Comparator */
+   float DiscreteIntegrator1;       /* Plecs controller/Discrete Integrator1 */
+   float DiscreteIntegrator;        /* Plecs controller/Discrete Integrator */
+   float Saturation1;               /* Plecs controller/FB lin. vo/Saturation1 */
+   float Saturation;                /* Plecs controller/FB lin. vo/Saturation */
+   float Saturation_1;              /* Plecs controller/FB lin io/Saturation */
+   float Saturation_2;              /* Plecs controller/Saturation */
+   float Zero_OrderHold[6];         /* Plecs controller/Zero-Order Hold */
+   bool Memory;                     /* Plecs controller/SR Flip-flop/Memory */
+   bool LogicalOperator;            /* Plecs controller/SR Flip-flop/Logical Operator */
+   bool LogicalOperator4;           /* Plecs controller/SR Flip-flop/Logical Operator4 */
+   float k_p_vo;                    /* Plecs controller/k_p_vo */
+} Plecs_controller_BlockOutputs;
+extern Plecs_controller_BlockOutputs Plecs_controller_B;
 
 /* Entry point functions */
 void Plecs_controller_initialize(float time);
