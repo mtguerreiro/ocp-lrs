@@ -18,6 +18,7 @@ target_sources(fs_buck_boost
 target_sources(fs_buck_boost
     PRIVATE
     plecs/Plecs_controller.c
+    plecs/Plecs_controller_0.c
 )
 
 target_sources(fs_buck_boost
