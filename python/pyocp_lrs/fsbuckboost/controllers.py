@@ -55,7 +55,7 @@ class Controllers:
         self.boost_energy = _BoostEnergy(5, ctl_if)
         self.boost_energy_mpc = _BoostEnergyMpc(6, ctl_if)
         self.casc_fblin = _CascFblin(7, ctl_if)
-        self.plecs_2freq = _Plecs2Freq(8, ctl_if)
+        self.plecs_cascaded = _Plecs2Freq(8, ctl_if)
 
 
 class _Idle(pyocp.controller.ControllerTemplate):

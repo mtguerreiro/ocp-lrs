@@ -1,7 +1,7 @@
 /*
- * Implementation file for: lrs_fs_boost_control/Controller/cascade_block_control/Plecs controller_outer_loop
+ * Implementation file for: lrs_fs_boost_control/Controller/Cascaded/Plecs controller_outer_loop
  * Generated with         : PLECS 4.8.10
- * Generated on           : 24 Jul 2026 15:04:36
+ * Generated on           : 24 Aug 2026 15:10:07
  */
 #include "Plecs_controller_outer_loop.h"
 #ifndef PLECS_HEADER_Plecs_controller_outer_loop_h_
@@ -48,7 +48,7 @@ Plecs_controller_outer_loop_ModelStates Plecs_controller_outer_loop_X _ALIGN;
 const char * Plecs_controller_outer_loop_errorStatus;
 const float Plecs_controller_outer_loop_sampleTime = 0.0001f;
 const char * const Plecs_controller_outer_loop_checksum =
-   "dd3c79bc6e297416856c0379964e15875b12fba9";
+   "607beef70f44cf70bde9cb8effe17d4bf8f56807";
 void Plecs_controller_outer_loop_initialize(float time)
 {
    float remainder;

@@ -44,7 +44,7 @@ class Interface(Controllers, Reference):
         return 0
 
     
-    def init_boost_plecs_controller(self, vo_ref=0):
+    def init_boost_plecs_single_loop_controller(self, vo_ref=0):
 
         self.disable()
         self.hw.clear_status()
@@ -79,7 +79,9 @@ class Interface(Controllers, Reference):
         return 0
  
     
-    def init_boost_plecs_controller_2freq(self, vo_ref=0):
+    def init_boost_plecs_cascaded_controller(self, vo_ref=0
+                                            # ,board = "B1"
+                                             ):
 
         self.disable()
         self.hw.clear_status()
@@ -87,12 +89,13 @@ class Interface(Controllers, Reference):
         #self.hw.set_input_relay(1)
         self.hw.set_output_relay(1)
         self.set_converter_mode('boost')
+        # self.set_board(board)
 
         if( self._run_enable_procedure() != 0 ): return -1
         
         self.set_ref(vo_ref)
-        self.plecs_2freq.reset()
-        self.plecs_2freq.enable()
+        self.plecs_cascaded.reset()
+        self.plecs_cascaded.enable()
 
         return 0
 
@@ -229,5 +232,57 @@ class Interface(Controllers, Reference):
         if status[0] != 0:
             print('Failed to set the pwm mode')
             return (-1, status[0])
+
+        return (0,)
+
+
+    
+    BOARD_CALIBRATION = {
+        'B1': {
+            'ii_gain': 0.011889383351995065,
+            'ii_ofs': -24.494910285072688,
+            'il_gain': 0.012466424860617406,
+            'il_ofs': -25.785729973524884,
+            'io_gain': 0.011656177219843845,
+            'io_ofs': -23.66110641788972,
+            'vi_gain': 0.014749560657980255,
+            'vi_ofs': 0.012700617431617978,
+            'vo_dc_gain': 0.014719571277266107,
+            'vo_dc_ofs': -0.00071571952408019,
+            'vo_gain': 0.014729190464973872,
+            'vo_ofs': -0.007892992612002664,
+        },
+
+        'B2': {
+            'ii_gain': 0.012080511078238487,
+            'ii_ofs': -24.80068588256836,
+            'il_gain': 0.012452883645892143,
+            'il_ofs': -25.4410457611084,
+            'io_gain': 0.011751353740692139,
+            'io_ofs': -23.737125396728516,
+            'vi_gain': 0.014789273031055927,
+            'vi_ofs': -0.008375518023967743,
+            'vo_dc_gain': 0.01464151032269001,
+            'vo_dc_ofs': -0.012438849546015263,
+            'vo_gain': 0.01472469698637724,
+            'vo_ofs': -0.007491753902286291,
+        }
+    }
+    def set_board(self, board):
+
+        if board not in self.BOARD_CALIBRATION:
+            raise ValueError(
+                f"Unknown board '{board}'. "
+                f"Available boards: {list(self.BOARD_CALIBRATION.keys())}"
+            )
+
+        gains = self.BOARD_CALIBRATION[board]
+
+        status = self.hw.set_meas_gains(gains)
+
+        if status[0] != 0:
+            return (-1, status[1])
+
+        self.board = board
 
         return (0,)

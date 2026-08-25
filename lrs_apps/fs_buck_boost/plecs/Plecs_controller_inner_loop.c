@@ -1,7 +1,7 @@
 /*
- * Implementation file for: lrs_fs_boost_control/Controller/cascade_block_control/Plecs controller_inner_loop
+ * Implementation file for: lrs_fs_boost_control/Controller/Cascaded/Plecs controller_inner_loop
  * Generated with         : PLECS 4.8.10
- * Generated on           : 24 Jul 2026 15:04:33
+ * Generated on           : 24 Aug 2026 15:10:03
  */
 #include "Plecs_controller_inner_loop.h"
 #ifndef PLECS_HEADER_Plecs_controller_inner_loop_h_
@@ -106,7 +106,7 @@ void Plecs_controller_inner_loop_step(void)
                                                Saturation1 *
                                                ((Plecs_controller_inner_loop_U
                                                  .hw_inputs[3]) -
-                                                (1.5e-05f*
+                                                (0.0001f*
       (8000.f*
       (Plecs_controller_inner_loop_U.internal_ref -
       (Plecs_controller_inner_loop_U.hw_inputs[1]))))));

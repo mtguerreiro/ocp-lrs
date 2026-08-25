@@ -1,7 +1,7 @@
 /*
- * Implementation file for: lrs_fs_boost_control/Controller/single_block_control/Plecs controller
+ * Implementation file for: lrs_fs_boost_control/Controller/Single loop/Plecs controller
  * Generated with         : PLECS 4.8.10
- * Generated on           : 24 Jul 2026 15:42:49
+ * Generated on           : 24 Aug 2026 14:14:45
  */
 #include "Plecs_controller.h"
 #ifndef PLECS_HEADER_Plecs_controller_h_
@@ -145,7 +145,7 @@ void Plecs_controller_step(void)
    }
 
    /* Gain : 'Plecs\ncontroller/k_p_vo' */
-   Plecs_controller_B.k_p_vo = 0.4f*Plecs_controller_B.Zero_OrderHold[4];
+   Plecs_controller_B.k_p_vo = 1.72f*Plecs_controller_B.Zero_OrderHold[4];
 
    /* Discrete Integrator : 'Plecs\ncontroller/Discrete\nIntegrator' */
    if (Plecs_controller_X.DiscreteIntegrator_first < 0 ||
@@ -214,7 +214,7 @@ void Plecs_controller_step(void)
                                                        Plecs_controller_B.
                                                        DiscreteIntegrator1) : (
                                                                                -((
-   -(0.15f*
+   -(1.f*
                                                                                     (((
                                                                                        Plecs_controller_B
                                                                                        .
@@ -284,7 +284,7 @@ void Plecs_controller_step(void)
    Plecs_controller_X.DiscreteIntegrator_first = 0;
    Plecs_controller_X.DiscreteIntegrator_i1_x =
       Plecs_controller_B.DiscreteIntegrator;
-   Plecs_controller_X.DiscreteIntegrator_i2_prevU = 657.962713f*
+   Plecs_controller_X.DiscreteIntegrator_i2_prevU = 2829.23967f*
                                                     (Plecs_controller_U.ref -
                                                      Plecs_controller_B.
                                                      Zero_OrderHold[4]);

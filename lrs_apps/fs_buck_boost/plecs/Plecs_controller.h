@@ -1,7 +1,7 @@
 /*
- * Header file for: lrs_fs_boost_control/Controller/single_block_control/Plecs controller
+ * Header file for: lrs_fs_boost_control/Controller/Single loop/Plecs controller
  * Generated with : PLECS 4.8.10
- * Generated on   : 24 Jul 2026 15:42:49
+ * Generated on   : 24 Aug 2026 14:14:45
  */
 #ifndef PLECS_HEADER_Plecs_controller_h_
 #define PLECS_HEADER_Plecs_controller_h_

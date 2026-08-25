@@ -40,12 +40,12 @@ static uint32_t k;
 static uint32_t n;
 static float internal_ref = 0;
 static float d;
-static ctlparams_t params = {
+static ctlparams_t params;
 
-    .n = 10.0f,
+//     .n =   (uint32_t)(Plecs_controller_outer_loop_sampleTime / Plecs_controller_inner_loop_sampleTime),
 
 
-};
+// };
 //=============================================================================
 
 
@@ -60,6 +60,7 @@ int32_t fsbuckboostControl2FreqPlecsInit(void){
     k = 0;
     n = (uint32_t)params.n;
     internal_ref = 0.0f;
+    params.n =   roundf(Plecs_controller_outer_loop_sampleTime / Plecs_controller_inner_loop_sampleTime);
 
     return 0;
 }

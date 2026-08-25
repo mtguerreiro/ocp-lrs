@@ -1,7 +1,7 @@
 /*
- * Header file for: lrs_fs_boost_control/Controller/cascade_block_control/Plecs controller_outer_loop
+ * Header file for: lrs_fs_boost_control/Controller/Cascaded/Plecs controller_outer_loop
  * Generated with : PLECS 4.8.10
- * Generated on   : 24 Jul 2026 15:04:36
+ * Generated on   : 24 Aug 2026 15:10:07
  */
 #ifndef PLECS_HEADER_Plecs_controller_outer_loop_h_
 #define PLECS_HEADER_Plecs_controller_outer_loop_h_
