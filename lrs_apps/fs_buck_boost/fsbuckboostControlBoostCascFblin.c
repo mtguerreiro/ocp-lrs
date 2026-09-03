@@ -84,6 +84,7 @@ int32_t fsbuckboostControlBoostCascFblinRun(
     void *outputs, int32_t nmaxoutputs){
 
     (void)nmeas;
+    (void)refs;
     (void)nrefs;
     (void)nmaxoutputs;
 
