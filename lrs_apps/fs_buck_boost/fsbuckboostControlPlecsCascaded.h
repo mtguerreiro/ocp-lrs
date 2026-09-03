@@ -1,6 +1,6 @@
 
-#ifndef FS_BUCK_BOOST_CONTROLLER_PLECS_2FREQ_H
-#define FS_BUCK_BOOST_CONTROLLER_PLECS_2FREQ_H
+#ifndef FS_BUCK_BOOST_CONTROLLER_PLECS_CASCADED_H
+#define FS_BUCK_BOOST_CONTROLLER_PLECS_CASCADED_H
 
 //=============================================================================
 /*-------------------------------- Includes ---------------------------------*/
@@ -20,33 +20,34 @@
 /*-------------------------------- Functions --------------------------------*/
 //=============================================================================
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControl2FreqPlecsInit(void);
+int32_t fsbuckboostControlPlecsCascadedInit(void);
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControlPlecsInnerLoopRun(void *meas, int32_t nmeas,
+int32_t fsbuckboostControlPlecsCascadedInnerLoopRun(void *meas, int32_t nmeas,
     void *refs, int32_t nrefs,
-    void *outputs, int32_t nmaxoutputs);
-
-void fsbuckboostControlPlecsOuterLoopRun(
+    void *outputs, int32_t nmaxoutputs
+);
+//-----------------------------------------------------------------------------
+void fsbuckboostControlPlecsCascadedOuterLoopRun(
     void *meas, int32_t nmeas,
     void *refs, int32_t nrefs
 );
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControl2FreqPlecsSetParams(void *buffer, uint32_t size);
+int32_t fsbuckboostControlPlecsCascadedSetParams(void *buffer, uint32_t size);
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControl2FreqPlecsGetParams(void *buffer, uint32_t size);
+int32_t fsbuckboostControlPlecsCascadedGetParams(void *buffer, uint32_t size);
 //-----------------------------------------------------------------------------
-void fsbuckboostControl2FreqPlecsReset(void);
+void fsbuckboostControlPlecsCascadedReset(void);
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControl2FreqPlecsFirstEntry(void *meas, int32_t nmeas,
+int32_t fsbuckboostControlPlecsCascadedFirstEntry(void *meas, int32_t nmeas,
     void *refs, int32_t nrefs,
     void *outputs, int32_t nmaxoutputs);
 //-----------------------------------------------------------------------------
-int32_t fsbuckboostControl2FreqPlecsLastExit(void *meas, int32_t nmeas,
+int32_t fsbuckboostControlPlecsCascadedLastExit(void *meas, int32_t nmeas,
     void *refs, int32_t nrefs,
     void *outputs, int32_t nmaxoutputs);
 //-----------------------------------------------------------------------------
-void fsbuckboostControlBoost2FREQGetCallbacks(void *callbacksBuffer);
+void fsbuckboostControlPlecsCascadedGetCallbacks(void *callbacksBuffer);
 //-----------------------------------------------------------------------------
 //=============================================================================
 
-#endif /* FS_BUCK_BOOST_CONTROLLER_PLECS_2FREQ_H_ */
+#endif /* FS_BUCK_BOOST_CONTROLLER_PLECS_CASCADED_H_ */

@@ -1,7 +1,7 @@
 /*
- * Header file for: lrs_fs_boost_control/Controller/Cascaded/Plecs controller_inner_loop
- * Generated with : PLECS 4.8.10
- * Generated on   : 24 Aug 2026 15:10:03
+ * Header file for: lrs_fs_boost_control/Plecs controller/Cascaded/Inner loop
+ * Generated with : PLECS 5.0.3
+ * Generated on   : 3 Sep 2026 16:47:45
  */
 #ifndef PLECS_HEADER_Plecs_controller_inner_loop_h_
 #define PLECS_HEADER_Plecs_controller_inner_loop_h_
@@ -23,13 +23,25 @@ extern const char * Plecs_controller_inner_loop_errorStatus;
 extern const float Plecs_controller_inner_loop_sampleTime;
 
 
+/*
+ * Model states */
+typedef struct
+{
+   bool Memory;                     /* Inner loop/SR Flip-flop/Memory */
+   int8_t DiscreteIntegrator1_first; /* Inner loop/Discrete Integrator1 */
+   float DiscreteIntegrator1_i1_x;  /* Inner loop/Discrete Integrator1 */
+   float DiscreteIntegrator1_i2_prevU; /* Inner loop/Discrete Integrator1 */
+} Plecs_controller_inner_loop_ModelStates;
+extern Plecs_controller_inner_loop_ModelStates Plecs_controller_inner_loop_X;
+
+
 /* External inputs */
 typedef struct
 {
-   float hw_inputs[6];              /* Plecs controller_inner_loop/hw_inputs */
-   float ref;                       /* Plecs controller_inner_loop/ref */
-   float load_sw;                   /* Plecs controller_inner_loop/load_sw */
-   float internal_ref;              /* Plecs controller_inner_loop/internal_ref */
+   float hw_inputs[6];              /* Inner loop/hw_inputs */
+   float ref;                       /* Inner loop/ref */
+   float load_sw;                   /* Inner loop/load_sw */
+   float internal_ref;              /* Inner loop/internal_ref */
 } Plecs_controller_inner_loop_ExternalInputs;
 extern Plecs_controller_inner_loop_ExternalInputs
    Plecs_controller_inner_loop_U;
@@ -38,7 +50,7 @@ extern Plecs_controller_inner_loop_ExternalInputs
 /* External outputs */
 typedef struct
 {
-   float hw_outputs[7];             /* Plecs controller_inner_loop/hw_outputs */
+   float hw_outputs[7];             /* Inner loop/hw_outputs */
 } Plecs_controller_inner_loop_ExternalOutputs;
 extern Plecs_controller_inner_loop_ExternalOutputs
    Plecs_controller_inner_loop_Y;
@@ -47,8 +59,13 @@ extern Plecs_controller_inner_loop_ExternalOutputs
 /* Block outputs */
 typedef struct
 {
-   float Saturation1;               /* Plecs controller_inner_loop/FB lin. vo/Saturation1 */
-   float Saturation;                /* Plecs controller_inner_loop/Saturation */
+   bool Comparator;                 /* Inner loop/Comparator */
+   float Saturation;                /* Inner loop/FB lin io/Saturation */
+   float DiscreteIntegrator1;       /* Inner loop/Discrete Integrator1 */
+   float Saturation_1;              /* Inner loop/Saturation */
+   float Zero_OrderHold[6];         /* Inner loop/Zero-Order Hold */
+   bool Memory;                     /* Inner loop/SR Flip-flop/Memory */
+   bool LogicalOperator;            /* Inner loop/SR Flip-flop/Logical Operator */
 } Plecs_controller_inner_loop_BlockOutputs;
 extern Plecs_controller_inner_loop_BlockOutputs Plecs_controller_inner_loop_B;
 

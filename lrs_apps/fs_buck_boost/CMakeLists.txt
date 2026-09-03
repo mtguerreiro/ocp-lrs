@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.18)
 
 add_library(fs_buck_boost)
 
-
-
 target_sources(fs_buck_boost
     PRIVATE
     fsbuckboostController.c
@@ -16,7 +14,7 @@ target_sources(fs_buck_boost
     fsbuckboostControlBoostEnergyMpc.c
     fsbuckboostControlBoostCascFblin.c
     fsbuckboostHwIf.c
-    fsbuckboostControlPlecs_2Freq.c
+    fsbuckboostControlPlecsCascaded.c
 )
 
 target_sources(fs_buck_boost
@@ -24,7 +22,6 @@ target_sources(fs_buck_boost
     plecs/Plecs_controller.c
     plecs/Plecs_controller_inner_loop.c
     plecs/Plecs_controller_outer_loop.c
-
 )
 
 
@@ -48,6 +45,6 @@ target_include_directories(fs_buck_boost
     PRIVATE
     "${PROJECT_SOURCE_DIR}"
     ./
-   
+
 )
 

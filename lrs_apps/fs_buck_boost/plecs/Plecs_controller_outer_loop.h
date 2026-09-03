@@ -1,7 +1,7 @@
 /*
- * Header file for: lrs_fs_boost_control/Controller/Cascaded/Plecs controller_outer_loop
- * Generated with : PLECS 4.8.10
- * Generated on   : 24 Aug 2026 15:10:07
+ * Header file for: lrs_fs_boost_control/Plecs controller/Cascaded/Outer loop
+ * Generated with : PLECS 5.0.3
+ * Generated on   : 3 Sep 2026 16:47:41
  */
 #ifndef PLECS_HEADER_Plecs_controller_outer_loop_h_
 #define PLECS_HEADER_Plecs_controller_outer_loop_h_
@@ -27,9 +27,10 @@ extern const float Plecs_controller_outer_loop_sampleTime;
  * Model states */
 typedef struct
 {
-   int8_t DiscreteIntegrator_first; /* Plecs controller_outer_loop/Discrete Integrator */
-   float DiscreteIntegrator_i1_x;   /* Plecs controller_outer_loop/Discrete Integrator */
-   float DiscreteIntegrator_i2_prevU; /* Plecs controller_outer_loop/Discrete Integrator */
+   bool Memory;                     /* Outer loop/SR Flip-flop/Memory */
+   int8_t DiscreteIntegrator_first; /* Outer loop/Discrete Integrator */
+   float DiscreteIntegrator_i1_x;   /* Outer loop/Discrete Integrator */
+   float DiscreteIntegrator_i2_prevU; /* Outer loop/Discrete Integrator */
 } Plecs_controller_outer_loop_ModelStates;
 extern Plecs_controller_outer_loop_ModelStates Plecs_controller_outer_loop_X;
 
@@ -37,9 +38,9 @@ extern Plecs_controller_outer_loop_ModelStates Plecs_controller_outer_loop_X;
 /* External inputs */
 typedef struct
 {
-   float hw_inputs[6];              /* Plecs controller_outer_loop/hw_inputs */
-   float ref;                       /* Plecs controller_outer_loop/ref */
-   float load_sw;                   /* Plecs controller_outer_loop/load_sw */
+   float hw_inputs[6];              /* Outer loop/hw_inputs */
+   float ref;                       /* Outer loop/ref */
+   float load_sw;                   /* Outer loop/load_sw */
 } Plecs_controller_outer_loop_ExternalInputs;
 extern Plecs_controller_outer_loop_ExternalInputs
    Plecs_controller_outer_loop_U;
@@ -48,7 +49,7 @@ extern Plecs_controller_outer_loop_ExternalInputs
 /* External outputs */
 typedef struct
 {
-   float internal_ref;              /* Plecs controller_outer_loop/internal_ref */
+   float internal_ref;              /* Outer loop/internal_ref */
 } Plecs_controller_outer_loop_ExternalOutputs;
 extern Plecs_controller_outer_loop_ExternalOutputs
    Plecs_controller_outer_loop_Y;
@@ -57,8 +58,14 @@ extern Plecs_controller_outer_loop_ExternalOutputs
 /* Block outputs */
 typedef struct
 {
-   float DiscreteIntegrator;        /* Plecs controller_outer_loop/Discrete Integrator */
-   float Sum;                       /* Plecs controller_outer_loop/Sum */
+   float Saturation1;               /* Outer loop/FB lin. vo/Saturation1 */
+   float Saturation;                /* Outer loop/FB lin. vo/Saturation */
+   bool Comparator;                 /* Outer loop/Comparator */
+   float DiscreteIntegrator;        /* Outer loop/Discrete Integrator */
+   float Zero_OrderHold[6];         /* Outer loop/Zero-Order Hold */
+   float k_p_vo;                    /* Outer loop/k_p_vo */
+   bool Memory;                     /* Outer loop/SR Flip-flop/Memory */
+   bool LogicalOperator;            /* Outer loop/SR Flip-flop/Logical Operator */
 } Plecs_controller_outer_loop_BlockOutputs;
 extern Plecs_controller_outer_loop_BlockOutputs Plecs_controller_outer_loop_B;
 

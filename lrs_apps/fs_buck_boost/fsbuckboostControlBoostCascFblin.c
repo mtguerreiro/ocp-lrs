@@ -46,7 +46,6 @@ typedef struct{
 /*--------------------------------- Globals ---------------------------------*/
 //=============================================================================
 static uint32_t k;
-static uint32_t n;
 static float il_ref = 0.0f;
 static float ev_int = 0.0f;
 
@@ -120,18 +119,17 @@ int32_t fsbuckboostControlBoostCascFblinRun(
     // PWM output
     o->u = u;
 
-    // Trigger slow loop
-    if( n != 0 ){
+    // Trigger outer loop
+    if( ((uint32_t)params.n) != 0 ){
 
         if( k == 0 )
             fsbuckboostTrigSwIrq();
 
         k++;
 
-        if( k >= n )
+        if( k >= ((uint32_t)params.n) )
             k = 0;
     }
-   
 
     return sizeof(fsbuckboostConfigControl_t);
 }
@@ -178,8 +176,6 @@ int32_t fsbuckboostControlBoostCascFblinSetParams(void *buffer, uint32_t size){
     if( size != sizeof(ctlparams_t) ) return -1;
     memcpy( (void *)&params, buffer, sizeof(ctlparams_t) );
 
-    n = (uint32_t) params.n;
-
     return 0;
 }
 //-----------------------------------------------------------------------------
@@ -211,10 +207,7 @@ int32_t fsbuckboostControlBoostCascFblinFirstEntry(void *meas, int32_t nmeas,
     (void)outputs;
     (void)nmaxoutputs;
 
-    n = (uint32_t)params.n;
     k = 0;
-    printf("CASCADE FBLIN CONTROLLER ENABLED");
-
 
     return 0;
 }

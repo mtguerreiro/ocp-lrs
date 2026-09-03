@@ -15,7 +15,7 @@ list(APPEND USER_COMPILE_SOURCES
     "${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/fsbuckboostControlBoostEnergyMpc.c"
     "${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/fsbuckboostControlBoostCascFblin.c"
     "${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/fsbuckboostHwIf.c"
-    "${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/fsbuckboostControlPlecs_2Freq.c"
+    "${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/fsbuckboostControlPlecsCascaded.c"
    
 )
 

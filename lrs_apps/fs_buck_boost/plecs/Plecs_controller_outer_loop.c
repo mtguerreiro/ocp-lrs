@@ -1,7 +1,7 @@
 /*
- * Implementation file for: lrs_fs_boost_control/Controller/Cascaded/Plecs controller_outer_loop
- * Generated with         : PLECS 4.8.10
- * Generated on           : 24 Aug 2026 15:10:07
+ * Implementation file for: lrs_fs_boost_control/Plecs controller/Cascaded/Outer loop
+ * Generated with         : PLECS 5.0.3
+ * Generated on           : 3 Sep 2026 16:47:41
  */
 #include "Plecs_controller_outer_loop.h"
 #ifndef PLECS_HEADER_Plecs_controller_outer_loop_h_
@@ -46,9 +46,9 @@ Plecs_controller_outer_loop_ExternalOutputs Plecs_controller_outer_loop_Y;
 Plecs_controller_outer_loop_BlockOutputs Plecs_controller_outer_loop_B;
 Plecs_controller_outer_loop_ModelStates Plecs_controller_outer_loop_X _ALIGN;
 const char * Plecs_controller_outer_loop_errorStatus;
-const float Plecs_controller_outer_loop_sampleTime = 0.0001f;
+const float Plecs_controller_outer_loop_sampleTime = 5e-05f;
 const char * const Plecs_controller_outer_loop_checksum =
-   "607beef70f44cf70bde9cb8effe17d4bf8f56807";
+   "34f845a9f3a8b61a2815cdfff8a3cd8222365b9d";
 void Plecs_controller_outer_loop_initialize(float time)
 {
    float remainder;
@@ -70,7 +70,10 @@ void Plecs_controller_outer_loop_initialize(float time)
    memset(&Plecs_controller_outer_loop_X, 0,
           sizeof(Plecs_controller_outer_loop_X));
 
-   /* Initialization for Discrete Integrator : 'Plecs\ncontroller_outer_loop/Discrete\nIntegrator' */
+   /* Initialization for Memory : 'Outer loop/SR Flip-flop/Memory' */
+   Plecs_controller_outer_loop_X.Memory = true;
+
+   /* Initialization for Discrete Integrator : 'Outer loop/Discrete\nIntegrator' */
    Plecs_controller_outer_loop_X.DiscreteIntegrator_first = -1;
    Plecs_controller_outer_loop_X.DiscreteIntegrator_i1_x = 0;
    Plecs_controller_outer_loop_X.DiscreteIntegrator_i2_prevU = 0.f;
@@ -83,20 +86,84 @@ void Plecs_controller_outer_loop_step(void)
       return;
    }
 
-   /* Sum : 'Plecs\ncontroller_outer_loop/Sum'
+   /* Zero-Order Hold : 'Outer loop/Zero-Order\nHold'
     * incorporates
-    *  Signal Inport : 'Plecs\ncontroller_outer_loop/ref'
-    *  Zero-Order Hold : 'Plecs\ncontroller_outer_loop/Zero-Order\nHold'
-    *  Signal Inport : 'Plecs\ncontroller_outer_loop/hw_inputs'
+    *  Signal Inport : 'Outer loop/hw_inputs'
     */
-   Plecs_controller_outer_loop_B.Sum = Plecs_controller_outer_loop_U.ref -
-                                       (Plecs_controller_outer_loop_U.
-                                        hw_inputs[4]);
+   Plecs_controller_outer_loop_B.Zero_OrderHold[0] =
+      Plecs_controller_outer_loop_U.hw_inputs[0];
+   Plecs_controller_outer_loop_B.Zero_OrderHold[1] =
+      Plecs_controller_outer_loop_U.hw_inputs[1];
+   Plecs_controller_outer_loop_B.Zero_OrderHold[2] =
+      Plecs_controller_outer_loop_U.hw_inputs[2];
+   Plecs_controller_outer_loop_B.Zero_OrderHold[3] =
+      Plecs_controller_outer_loop_U.hw_inputs[3];
+   Plecs_controller_outer_loop_B.Zero_OrderHold[4] =
+      Plecs_controller_outer_loop_U.hw_inputs[4];
+   Plecs_controller_outer_loop_B.Zero_OrderHold[5] =
+      Plecs_controller_outer_loop_U.hw_inputs[5];
 
-   /* Discrete Integrator : 'Plecs\ncontroller_outer_loop/Discrete\nIntegrator' */
-   if (Plecs_controller_outer_loop_X.DiscreteIntegrator_first < 0)
+   /* Gain : 'Outer loop/k_p_vo' */
+   Plecs_controller_outer_loop_B.k_p_vo = 1.14666667f*
+                                          Plecs_controller_outer_loop_B.
+                                          Zero_OrderHold[4];
+
+   /* Saturation : 'Outer loop/FB lin. vo/Saturation1'
+    * incorporates
+    *  Signal Inport : 'Outer loop/ref'
+    */
+   Plecs_controller_outer_loop_B.Saturation1 =
+      Plecs_controller_outer_loop_U.ref;
+   if (Plecs_controller_outer_loop_B.Saturation1 < 0.0001f)
    {
-      Plecs_controller_outer_loop_B.DiscreteIntegrator = 0.f;
+      Plecs_controller_outer_loop_B.Saturation1 = 0.0001f;
+   }
+
+   /* Saturation : 'Outer loop/FB lin. vo/Saturation'
+    * incorporates
+    *  Sum : 'Outer loop/FB lin. vo/Sum'
+    *  Constant : 'Outer loop/FB lin. vo/Constant'
+    *  Product : 'Outer loop/FB lin. vo/Product3'
+    */
+   Plecs_controller_outer_loop_B.Saturation = 1.f -
+                                              (1.f /
+                                               Plecs_controller_outer_loop_B.
+                                               Saturation1 *
+                                               Plecs_controller_outer_loop_B.
+                                               Zero_OrderHold[3]);
+   if (Plecs_controller_outer_loop_B.Saturation < 0.0001f)
+   {
+      Plecs_controller_outer_loop_B.Saturation = 0.0001f;
+   }
+
+   /* Memory : 'Outer loop/SR Flip-flop/Memory' */
+   Plecs_controller_outer_loop_B.Memory =
+      Plecs_controller_outer_loop_X.Memory;
+
+   /* Comparator : 'Outer loop/Comparator' */
+   if (Plecs_controller_outer_loop_B.Zero_OrderHold[5] >
+       Plecs_controller_outer_loop_U.ref)
+      Plecs_controller_outer_loop_B.Comparator = 1;
+   else if (Plecs_controller_outer_loop_B.Zero_OrderHold[5] <
+            Plecs_controller_outer_loop_U.ref)
+      Plecs_controller_outer_loop_B.Comparator = 0;
+   /* Logical Operator : 'Outer loop/SR Flip-flop/Logical\nOperator'
+    * incorporates
+    *  Logical Operator : 'Outer loop/SR Flip-flop/Logical\nOperator1'
+    *  Logical Operator : 'Outer loop/SR Flip-flop/Logical\nOperator2'
+    *  Subsystem : 'Outer loop'
+    */
+   Plecs_controller_outer_loop_B.LogicalOperator =
+      (!Plecs_controller_outer_loop_B.Comparator) &&
+      (Plecs_controller_outer_loop_UNCONNECTED ||
+       Plecs_controller_outer_loop_B.Memory);
+
+   /* Discrete Integrator : 'Outer loop/Discrete\nIntegrator' */
+   if (Plecs_controller_outer_loop_X.DiscreteIntegrator_first < 0 ||
+       (Plecs_controller_outer_loop_B.LogicalOperator != 0))
+   {
+      Plecs_controller_outer_loop_B.DiscreteIntegrator =
+         Plecs_controller_outer_loop_B.k_p_vo;
    }
    else if (Plecs_controller_outer_loop_X.DiscreteIntegrator_first)
    {
@@ -107,28 +174,41 @@ void Plecs_controller_outer_loop_step(void)
    {
       Plecs_controller_outer_loop_B.DiscreteIntegrator =
          Plecs_controller_outer_loop_X.DiscreteIntegrator_i1_x + 5e-05f*
-         (Plecs_controller_outer_loop_X.DiscreteIntegrator_i2_prevU +
-          Plecs_controller_outer_loop_B.Sum);
+         Plecs_controller_outer_loop_X.DiscreteIntegrator_i2_prevU;
    }
 
    /* Global output signals */
    Plecs_controller_outer_loop_Y.internal_ref =
-      (Plecs_controller_outer_loop_U.hw_inputs[2]) +
-      (200.f*
-       Plecs_controller_outer_loop_B.DiscreteIntegrator) -
-      (0.1f*Plecs_controller_outer_loop_B.Sum);
+      (Plecs_controller_outer_loop_B.Zero_OrderHold[2] +
+       Plecs_controller_outer_loop_B.DiscreteIntegrator -
+       Plecs_controller_outer_loop_B.k_p_vo) /
+      Plecs_controller_outer_loop_B.Saturation;
 
    if (Plecs_controller_outer_loop_errorStatus)
    {
       return;
    }
 
-   /* Update for Discrete Integrator : 'Plecs\ncontroller_outer_loop/Discrete\nIntegrator' */
+   /* Update for Memory : 'Outer loop/SR Flip-flop/Memory' */
+   Plecs_controller_outer_loop_X.Memory =
+      Plecs_controller_outer_loop_B.LogicalOperator;
+
+   /* Update for Discrete Integrator : 'Outer loop/Discrete\nIntegrator'
+    * incorporates
+    *  Gain : 'Outer loop/k_i_vo'
+    *  Sum : 'Outer loop/Sum'
+    *  Signal Inport : 'Outer loop/ref'
+    */
    Plecs_controller_outer_loop_X.DiscreteIntegrator_first = 0;
    Plecs_controller_outer_loop_X.DiscreteIntegrator_i1_x =
       Plecs_controller_outer_loop_B.DiscreteIntegrator;
-   Plecs_controller_outer_loop_X.DiscreteIntegrator_i2_prevU =
-      Plecs_controller_outer_loop_B.Sum;
+   Plecs_controller_outer_loop_X.DiscreteIntegrator_i2_prevU = 1257.43985f*
+                                                               (
+                                                                Plecs_controller_outer_loop_U
+                                                                .ref -
+                                                                Plecs_controller_outer_loop_B
+                                                                .
+   Zero_OrderHold[4]);
 }
 
 void Plecs_controller_outer_loop_terminate(void)

@@ -24,7 +24,7 @@
 #include "fsbuckboostControlBoostEnergy.h"
 #include "fsbuckboostControlBoostEnergyMpc.h"
 #include "fsbuckboostControlBoostCascFblin.h"
-#include "fsbuckboostControlPlecs_2Freq.h"
+#include "fsbuckboostControlPlecsCascaded.h"
 
 //============================================================================
 
@@ -40,7 +40,7 @@ typedef enum{
     FS_BUCK_BOOST_CONTROLLER_BOOST_ENERGY,
     FS_BUCK_BOOST_CONTROLLER_BOOST_ENERGY_MPC,
     FS_BUCK_BOOST_CONTROLLER_BOOST_CASC_FBLIN,
-    FS_BUCK_BOOST_CONTROLLER_PLECS_2FREQ,
+    FS_BUCK_BOOST_CONTROLLER_PLECS_CASCADED,
     FS_BUCK_BOOST_CONTROLLER_END
     
 }appControllersEnum_t;
@@ -83,7 +83,7 @@ int32_t fsbuckboostControllerInit(void){
     ctlGetCbs[FS_BUCK_BOOST_CONTROLLER_BOOST_CASC_FBLIN] = fsbuckboostControlBoostCascFblinGetCallbacks;
    
     
-    ctlGetCbs[FS_BUCK_BOOST_CONTROLLER_PLECS_2FREQ] = fsbuckboostControlBoost2FREQGetCallbacks;
+    ctlGetCbs[FS_BUCK_BOOST_CONTROLLER_PLECS_CASCADED] = fsbuckboostControlPlecsCascadedGetCallbacks;
 
     config.refBuffer = (void *)&xfsbuckboostControler.refs;
     config.refSize = sizeof(xfsbuckboostControler.refs);
@@ -105,7 +105,6 @@ int32_t fsbuckboostControllerInit(void){
             (void *)&xfsbuckboostControler.refs.v_out,
             "Voltage reference"
     );
-
 
     return 0;
 }
