@@ -22,7 +22,9 @@ target_sources(fs_buck_boost
     plecs/Plecs_controller.c
     plecs/Plecs_controller_0.c
     plecs/Plecs_controller_inner_loop.c
+    plecs/Plecs_controller_inner_loop_0.c
     plecs/Plecs_controller_outer_loop.c
+    plecs/Plecs_controller_outer_loop_0.c
 )
 
 target_sources(fs_buck_boost

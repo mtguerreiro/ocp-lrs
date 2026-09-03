@@ -16,13 +16,13 @@ list(APPEND USER_COMPILE_SOURCES
     "${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/fsbuckboostControlBoostCascFblin.c"
     "${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/fsbuckboostHwIf.c"
     "${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/fsbuckboostControlPlecsCascaded.c"
-   
 )
 
 list(APPEND USER_COMPILE_SOURCES
     "${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/plecs/Plecs_controller.c"
     "${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/plecs/Plecs_controller_0.c"
     "${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/plecs/Plecs_controller_inner_loop.c"
+    "${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/plecs/Plecs_controller_inner_loop_0.c"
     "${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/plecs/Plecs_controller_outer_loop.c"
-
+    "${OCP_LRS_PATH}/lrs_apps/fs_buck_boost/plecs/Plecs_controller_outer_loop_0.c"
 )
